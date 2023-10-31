@@ -4,7 +4,7 @@
 
 % This is the folder with the kernels
 % () Replace this string with your [datafolder] path!
-datafolder = 'JUICE/JUICE/kernels';
+datafolder = 'JUICE/JUICE/kernels/';
 
 addpath('mice/mice/lib');
 addpath('mice/mice/src/mice')
