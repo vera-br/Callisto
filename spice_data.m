@@ -121,9 +121,9 @@ rJ = cspice_bodvcd(503, 'RADII', 10);% Radius of Ganymede
 % Choose a date and convert it into ephemeris time
 % () For more info, read the documentation on cspice_str3et
 hour = 3600;
-date0 = '24 Jun 2034 00:45:00 UTC';
+date0 = '2034-06-23 17:16:09.184320 UTC';
 et0 = cspice_str2et(date0);
-et_R = et0:3600/60:(et0 + 9 * hour);
+et_R = et0:3600/60:(et0 + 24 * hour);
 
 % Ephemerides of Callisto w.r.t. Jupiter barycenter
 % on the ecliptic J2000 at the times et_R
