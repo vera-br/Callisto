@@ -4,10 +4,10 @@
 
 % This is the folder with the kernels
 % () Replace this string with your [datafolder] path!
-datafolder = '/Users/mikoo/OneDrive - Imperial College London/Year 4/project/JUICE/kernels/';
+datafolder = 'JUICE/JUICE/kernels/';
 
-% Add All the extra paths that need to be accessed for functions to work
-addpath('/Users/mikoo/OneDrive - Imperial College London/Year 4/project/mice/lib/');
+addpath('mice/mice/lib');
+addpath('mice/mice/src/mice')
 
 % Load leapsecond kernel
 KERNELS_TO_LOAD = ["ck/juice_sc_crema_5_1_150lb_23_1_default_v01.bc"
@@ -139,11 +139,11 @@ callisto_jupiter_mag = cspice_spkezr('504', et_R, 'JUPITER_MAG_VIP4', 'NONE', '5
 et1 = et0+7*86400;
 date1 = cspice_et2utc(et1,'C',6);
 
-writematrix([callisto_data;et_R], '/Users/mikoo/OneDrive - Imperial College London/Year 4/project/spice_data/callisto_wrt_jupiter_C21.csv');
-writematrix([JUICE_pos;et_R], '/Users/mikoo/OneDrive - Imperial College London/Year 4/project/spice_data/juice_wrt_callisto_C21.csv');
-writematrix([juice_jupiter;et_R], '/Users/mikoo/OneDrive - Imperial College London/Year 4/project/spice_data/juice_wrt_jupiter_C21.csv');
-writematrix([juice_jupiter_mag;et_R], '/Users/mikoo/OneDrive - Imperial College London/Year 4/project/spice_data/juice_wrt_jupiter_mag_C21.csv');
-writematrix([callisto_jupiter_mag;et_R], '/Users/mikoo/OneDrive - Imperial College London/Year 4/project/spice_data/callisto_wrt_jupiter_mag_C21.csv');
+writematrix([callisto_data;et_R], 'spice_data/callisto_wrt_jupiter_C21.csv');
+writematrix([JUICE_pos;et_R], 'spice_data/juice_wrt_callisto_C21.csv');
+writematrix([juice_jupiter;et_R], 'spice_data/juice_wrt_jupiter_C21.csv');
+writematrix([juice_jupiter_mag;et_R], 'spice_data/juice_wrt_jupiter_mag_C21.csv');
+writematrix([callisto_jupiter_mag;et_R], 'spice_data/callisto_wrt_jupiter_mag_C21.csv');
 
 % \C’ = ’calendar’, with 6 digits
 % Clear the memory
