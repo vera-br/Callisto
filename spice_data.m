@@ -4,10 +4,10 @@
 
 % This is the folder with the kernels
 % () Replace this string with your [datafolder] path!
-datafolder = 'JUICE/JUICE/kernels/';
+datafolder = 'JUICE/kernels/';
 
-addpath('mice/mice/lib');
-addpath('mice/mice/src/mice')
+addpath('mice/lib');
+addpath('mice/src/mice')
 
 % Load leapsecond kernel
 KERNELS_TO_LOAD = ["ck/juice_sc_crema_5_1_150lb_23_1_default_v01.bc"
