@@ -113,7 +113,7 @@ for i = 1:length(KERNELS_TO_LOAD)
 
 end
 
-closest_approach_times = ["2032-06-21 00:39:09.184390 UTC"
+closest_approach_times = {"2032-06-21 00:39:09.184390 UTC"
 "2032-07-29 01:51:09.183340 UTC"
 "2032-08-14 18:15:09.182950 UTC"
 "2032-09-10 19:26:09.182490 UTC"
@@ -133,7 +133,7 @@ closest_approach_times = ["2032-06-21 00:39:09.184390 UTC"
 "2033-11-01 23:01:09.182530 UTC"
 "2034-02-15 00:09:09.185110 UTC"
 "2034-05-01 22:26:09.185470 UTC"
-"2034-06-24 05:16:09.184320 UTC"];
+"2034-06-24 05:16:09.184320 UTC"};
 
 juice_wrt_callisto_cphio_ = "spice_data/juice_wrt_callisto_cphio_";
 juice_wrt_jupiter_cphio_ = "spice_data/juice_wrt_jupiter_cphio_";
@@ -153,13 +153,13 @@ kJ = cspice_bodvcd(5, 'GM', 10); % GM of Jupiter with 10 significant
 % digits
 rJ = cspice_bodvcd(503, 'RADII', 10);% Radius of Ganymede
 
-hour = 3600;
 
 for i = 1:length(closest_approach_times)
 
-    date_CA = closest_approach_times(i);
-    date_CA_i = convertStringsToChars(date_CA);
-    et_CA = cspice_str2et(date_CA_i);
+    date_CA = closest_approach_times(i)
+    class(date_CA)
+    date_CA_i = convertStringsToChars()
+    et_CA = cspice_str2et(date_CA);
     et_0 = et_CA - 12 * hour;
     et_R = et_0:3600/60:(et_0 + 24 * hour);
 
@@ -167,8 +167,8 @@ for i = 1:length(closest_approach_times)
     
     juice_jupiter_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
     callisto_jupiter_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
-    juice_jupiter_SIII = cspice_spkezr('-28', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
-    callisto_jupiter_SIII = cspice_spkezr('504', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
+    juice_jupiter_SIII = cspice_spkezr('-28', et_R, 'JUICE_SYSTEM3RH_2009', 'NONE', '599');
+    callisto_jupiter_SIII = cspice_spkezr('504', et_R, 'JUICE_SYSTEM3RH_2009', 'NONE', '599');
     
     juice_sun_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
     callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
@@ -192,8 +192,8 @@ for i = 1:length(closest_approach_times)
     writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_J',string(i),'.csv'));
     writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_J',string(i),'.csv'));
 
+    cspice_kclear
 end
     
-cspice_kclear
     
     
