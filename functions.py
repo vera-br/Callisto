@@ -145,7 +145,49 @@ def closest_approach_data(dictionary):
         
     return CA_data_all
 
+def closest_approach_data_4(dictionary, dict2, dict3, dict4):
+    '''
+    Same as closest_approach_data but for 5 dictionaries
+    '''    
+    CA_data = {}
+    CA_data_all = {}
+    i = 0
 
+    indices =[]
+    CA_data_all_2 = {}
+    CA_data_all_3 = {}
+    CA_data_all_4 = {}
+    CA_data_all_5 = {}
+
+    for key, array in dictionary.items():
+        i += 1
+        vector = np.transpose(array)
+        min_index = np.argmin(vector[:, 4])
+        indices.append(min_index)
+        CA_data_all['CA_orbit%s' % (i)] = vector[min_index]
+
+    i = 0
+    for key, array in dict2.items():
+        
+        vector = np.transpose(array)
+        CA_data_all_2['CA_orbit%s' % (i)] = vector[indices[i]]
+        i += 1
+
+    i = 0
+    for key, array in dict3.items():
+        
+        vector = np.transpose(array)
+        CA_data_all_3['CA_orbit%s' % (i)] = vector[indices[i]]
+        i += 1
+
+    i = 0
+    for key, array in dict4.items():
+        
+        vector = np.transpose(array)
+        CA_data_all_4['CA_orbit%s' % (i)] = vector[indices[i]]
+        i += 1
+           
+    return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
 
 # plots
 
