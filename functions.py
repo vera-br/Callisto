@@ -128,7 +128,6 @@ def get_pds_data():
 
     return orbits_all, bfield_all
 
-
 def closest_approach_data(dictionary):
     '''
     Compute CA data for a dictionary of orbits and return in its own dictionary of 7d arrays
@@ -189,6 +188,78 @@ def closest_approach_data_4(dictionary, dict2, dict3, dict4):
            
     return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
 
+def CA_info(orbit):
+    '''
+    takes orbit as a vector
+    '''
+    # finds index of smallest r value
+    min_index = np.argmin(orbit[4])
+
+    # finds full vector at min. index
+    CA_info_vector_i = np.transpose(orbit)[min_index,:] 
+
+    # appends min. index to CA vector for use in other functions
+    CA_info_vector_i = np.append(CA_info_vector_i, min_index)
+
+    return CA_info_vector_i
+
+def get_orbit_data(target, reference_point, frame):
+    '''
+    returns a dictionary of all orbits
+    '''
+    
+    datapath = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_J"
+    data_paths_i = []
+
+    for i in range(1, 22):
+        data_paths_i.append(datapath + str(i) + ".csv")
+
+    orbits_all_i = {}
+
+    for i in range(len(data_paths_i)):
+        t, cart, spher = data_processing(data_paths_i[i])
+        z = np.c_[t, cart]
+        z = np.c_[z, spher]
+        orbits_all_i['orbit%s' % (i+1)] = np.transpose(z)
+    return orbits_all_i
+
+juice_cal_cphio_CA = 0
+
+def get_closest_approach_data(target, reference_point, frame):
+    '''
+    returns dictionary of closest approaches
+    '''
+    global juice_cal_cphio_CA
+
+    orbits_all_i = get_spice_data(target, reference_point, frame)
+    closest_approach_vectors_i = {}
+    
+    # if juice_callisto_cphio closest approach not already calculated
+    if juice_cal_cphio_CA == False:
+        juice_cal_cphio_CA = {}
+
+        # gets full orbit info. for juice_callisto_cphio
+        orbits_all_jcalcphio = get_spice_data('juice', 'callisto', 'cphio')
+
+        i = 1
+        for orbit, vector in orbits_all_jcalcphio.items():
+            # finds closest approaches for juice_callisto_cphio and adds to dictionary
+            CA_info_vector = CA_info(vector)
+            juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
+            i += 1
+
+    i = 1
+    for orbit, vector in orbits_all_i.items():
+        orbit_i = np.transpose(vector)
+
+        # takes min. index included in dictionary of juice_callisto_cphio CA vectors
+        minindex = int(juice_cal_cphio_CA['CA_orbit%s' % (i)][7])
+
+        # finds closest approach vector for respective bodies and frame with min. index
+        closest_approach_vectors_i['CA_orbit%s' % (i)] = orbit_i[minindex]
+        i += 1
+
+    return closest_approach_vectors_i
 # plots
 
 #def plot_trajectories():
