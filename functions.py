@@ -28,6 +28,14 @@ def cartesian_to_spherical(coords):
 
     return np.array([r, theta, phi]).transpose()
 
+def unit_vector(vector):
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
 
 # loading data from spice kernels
 
@@ -202,26 +210,6 @@ def CA_info(orbit):
     CA_info_vector_i = np.append(CA_info_vector_i, min_index)
 
     return CA_info_vector_i
-
-def get_orbit_data(target, reference_point, frame):
-    '''
-    returns a dictionary of all orbits
-    '''
-    
-    datapath = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_J"
-    data_paths_i = []
-
-    for i in range(1, 22):
-        data_paths_i.append(datapath + str(i) + ".csv")
-
-    orbits_all_i = {}
-
-    for i in range(len(data_paths_i)):
-        t, cart, spher = data_processing(data_paths_i[i])
-        z = np.c_[t, cart]
-        z = np.c_[z, spher]
-        orbits_all_i['orbit%s' % (i+1)] = np.transpose(z)
-    return orbits_all_i
 
 juice_cal_cphio_CA = 0
 
