@@ -198,7 +198,8 @@ def closest_approach_data_4(dictionary, dict2, dict3, dict4):
 
 def CA_info(orbit):
     '''
-    takes orbit as a vector
+    input: orbit as a vector array
+    returns: CA vector (t, x, y, z, r, theta, phi, min_index)
     '''
     # finds index of smallest r value
     min_index = np.argmin(orbit[4])
