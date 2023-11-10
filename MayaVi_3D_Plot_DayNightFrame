@@ -51,10 +51,15 @@ axis = mlab.plot3d(axis, axis, axis, opacity=0, line_width=0.01, tube_radius=0.1
 
 # Draws the axes
 axes = mlab.axes(color=(0, 0, 0), ranges=(-common_lim, common_lim, -common_lim, common_lim, -common_lim, common_lim), nb_labels=5)
+
 axes.title_text_property.color = (0.0, 0.0, 0.0)
 axes.title_text_property.font_family = 'times'
+
 axes.label_text_property.color = (0.0, 0.0, 0.0)
 axes.label_text_property.font_family = 'times'
+
+axes.axes.font_factor = 1.0
+
 mlab.outline(color=(0, 0, 0))
 
 # plots sphere of specified radius
