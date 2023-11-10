@@ -1,5 +1,4 @@
 from functions import *
-from itertools import cycle
 from adjustText import adjust_text
 
 
@@ -33,15 +32,22 @@ for orbit, vector in juice_wrt_callisto_cphio_CA.items():
     juice_cphio_vector.append(vector[1:4])
 
 sun_juice_angle = []
-
 for i in range(len(sun_cphio_vector)):
     angle = angle_between_vectors(sun_cphio_vector[i], juice_cphio_vector[i])
     sun_juice_angle.append(angle)
 
 
+# Data for the colour wheel
+xval = np.arange(-np.pi, np.pi, 0.01)
+yval = np.ones_like(xval)
+
+colormap = plt.get_cmap('hsv')
+norm = mpl.colors.Normalize(-np.pi, np.pi)
+
+
 # Plot
-fig = plt.figure()
-ax = fig.add_subplot()
+fig = plt.figure(figsize=(12,6))
+ax1 = plt.subplot(121)
 
 # Defining and applying the common limits
 lim = 28
@@ -49,16 +55,16 @@ lim = 28
 common_xlim = (-lim, lim)  
 common_ylim = (-lim, lim) 
 
-ax.set_xlim(common_xlim)
-ax.set_ylim(common_ylim)
+ax1.set_xlim(common_xlim)
+ax1.set_ylim(common_ylim)
 
 # Set axis labels
-ax.set_xlabel('x [$R_J$]')
-ax.set_ylabel('y [$R_J$]')
+ax1.set_xlabel('x [$R_J$]')
+ax1.set_ylabel('y [$R_J$]')
 
 # plot jupiter
 jup = plt.Circle((0, 0), 1, color='xkcd:dull brown')
-ax.add_patch(jup)
+ax1.add_patch(jup)
 
 dayside_marker = mlines.Line2D([], [], color='black', marker='*', linestyle='None', markersize=10, label='Dayside')
 nightside_marker = mlines.Line2D([], [], color='black', marker='o', linestyle='None', markersize=7, label='Nightside')
@@ -69,20 +75,27 @@ i = 0
 for orbit, vector in callisto_wrt_jupiter_JSO_CA.items():
 
     if sun_juice_angle[i] > 90:
-        s = ax.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=40, cmap='hsv_r', marker='*')
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=40, cmap=colormap, marker='*')
     else:
-        s = ax.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=25, cmap='hsv_r')
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=25, cmap=colormap)
 
     i += 1
-    texts.append(ax.text(vector[1] / R_J, vector[2] / R_J, 'C%s' % i)) # save orbit labels in list
+    texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'C%s' % i)) # save orbit labels in list
 
 # Adjust the positions of annotations so they don't overlap
 adjust_text(texts)
 
-cbar = fig.colorbar(s)
-cbar.set_label('Jupiter-Sun Angle in IAU_SUN [degrees]')
+# colourbar
+#cbar = fig.colorbar(s)
+#cbar.set_title('Jupiter-Sun Angle in IAU_SUN [degrees]')
 
-legend = ax.legend(handles=[dayside_marker, nightside_marker], loc='lower left')
-plt.title('Closest Approaches in JSO')
+legend = ax1.legend(handles=[dayside_marker, nightside_marker], loc='lower left')
+ax1.set_title('Closest Approaches in JSO')
+
+ax2 = plt.subplot(122, projection = 'polar')
+ax2.scatter(xval, yval, c=xval, s=300, cmap=colormap, norm=norm, linewidths=0)
+ax2.set_yticks([])
+ax2.set_title('Jupiter-Sun Angle in IAU_SUN')
+
 plt.tight_layout()
 plt.show()
