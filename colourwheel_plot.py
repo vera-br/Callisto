@@ -46,11 +46,11 @@ norm = mpl.colors.Normalize(-np.pi, np.pi)
 
 
 # Plot
-fig = plt.figure(figsize=(12,6))
+fig = plt.figure(figsize=(10,5))
 ax1 = plt.subplot(121)
 
 # Defining and applying the common limits
-lim = 28
+lim = 30
 
 common_xlim = (-lim, lim)  
 common_ylim = (-lim, lim) 
