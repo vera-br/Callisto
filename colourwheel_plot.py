@@ -41,7 +41,7 @@ for i in range(len(sun_cphio_vector)):
 xval = np.arange(-np.pi, np.pi, 0.01)
 yval = np.ones_like(xval)
 
-colormap = plt.get_cmap('hsv')
+colormap = plt.get_cmap('hsv_r')
 norm = mpl.colors.Normalize(-np.pi, np.pi)
 
 
@@ -65,6 +65,7 @@ ax1.set_ylabel('y [$R_J$]')
 # plot jupiter
 jup = plt.Circle((0, 0), 1, color='xkcd:dull brown')
 ax1.add_patch(jup)
+ax1.annotate('Jupiter', (-2,-3))
 
 dayside_marker = mlines.Line2D([], [], color='black', marker='*', linestyle='None', markersize=10, label='Dayside')
 nightside_marker = mlines.Line2D([], [], color='black', marker='o', linestyle='None', markersize=7, label='Nightside')
@@ -75,9 +76,9 @@ i = 0
 for orbit, vector in callisto_wrt_jupiter_JSO_CA.items():
 
     if sun_juice_angle[i] > 90:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=40, cmap=colormap, marker='*')
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=80, cmap=colormap, marker='*')
     else:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=25, cmap=colormap)
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=40, cmap=colormap)
 
     i += 1
     texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'C%s' % i)) # save orbit labels in list
