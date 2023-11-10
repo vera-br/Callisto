@@ -180,7 +180,7 @@ for i = 1:length(closest_approach_times)
     % position relative to Jupiter - Magnetosphere
     juice_jupiter_jupsunorb = cspice_spkezr('-28', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
     callisto_jupiter_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
-    callisto_sun_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '10');
+    sun_callisto_jupsunorb = cpsicespkezr('10', et_R, 'JUPITER_SUN_ORB', 'NONE', '504');
 
     
     % position relative to Sun
