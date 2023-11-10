@@ -8,35 +8,10 @@ Juice = get_spice_data('juice', 'callisto', 'cphio')
 callisto_jupiter_jupsunorb = get_spice_data('callisto', 'jupiter', 'jupsunorb')
 callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb')
 
-'''
-caljup1 = callisto_jupiter_jupsunorb['orbit1']
-calsun1 = callisto_sun_jupsunorb['orbit1']
-caljup1_xy = caljup1[1:3]
-calsun1_xy = calsun1[1:3]
-caljup1_xy = np.transpose(caljup1_xy)
-calsun1_xy = np.transpose(calsun1_xy)
-psis = []
-Is = []
-for i in range(len(caljup1_xy)):
-    caljup1_xy_i = caljup1_xy[i]
-    calsun1_xy_i = calsun1_xy[i]
-    psi = angle_between(caljup1_xy_i, calsun1_xy_i)
-    psis.append(psi)
-    Is.append(i)
-
-juice1 = Juice['orbit1']
-juice_xy = juice1[1:3]
-juice_x = juice_xy[0]
-juice_y = juice_xy[1]
-'''
 def rotate_xy_axis(x, y, psi):
     x_rot = x * np.cos(psi) - y * np.sin(psi) * y/abs(y)
     y_rot = x * np.sin(psi) * y/abs(y) + y * np.cos(psi)
     return x_rot, y_rot
-'''
-juice_x_rot, juice_y_rot = rotate_xy_axis(juice_x, juice_y, psis)
-juice1[1:3] = [juice_x_rot, juice_y_rot]
-'''
 
 # 3D plotting section
 
