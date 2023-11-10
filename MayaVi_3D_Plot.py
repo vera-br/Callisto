@@ -7,7 +7,7 @@ Juice = get_spice_data('juice', 'callisto', 'cphio')
 
 # 3D plotting section
 
-common_lim = 22
+common_lim = 10
 
 # Make background white.
 mlab.figure(bgcolor=(1, 1, 1))  
@@ -50,10 +50,12 @@ for orbit, vector in Juice.items():
     while abs(x[j]) > common_lim or abs(y[j]) > common_lim or abs(z[j]) > common_lim:
         j += 1
 
-    k = j
-    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim:
-        if k < 1439:
+    k = j ; end_loop = False
+    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim and end_loop == False:
+        if k < len(r) - 1:
             k += 1
+        else:
+            end_loop = True
 
     x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
