@@ -2,6 +2,7 @@
 
 # load modules
 import numpy as np
+import math
 from datetime import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -27,6 +28,24 @@ def cartesian_to_spherical(coords):
     theta = np.arccos(coords[:,2]/r)
 
     return np.array([r, theta, phi]).transpose()
+
+def angle_between_vectors(v1, v2, degrees=True):
+    # Calculate the dot product of the vectors
+    dot_product = np.dot(v1, v2)
+    
+    # Calculate the magnitude of each vector
+    magnitude_v1 = np.linalg.norm(v1)
+    magnitude_v2 = np.linalg.norm(v2)
+    
+    # Calculate the angle using the dot product method
+    angle_rad = np.arccos(dot_product / (magnitude_v1 * magnitude_v2))
+  
+    if degrees:
+        # Convert the angle to degrees
+        angle_deg = np.degrees(angle_rad)
+        return angle_deg
+    else:
+        return angle_rad
 
 
 # loading data from spice kernels
