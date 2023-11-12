@@ -78,7 +78,7 @@ for orbit, vector in callisto_wrt_jupiter_JSO_CA.items():
     if sun_juice_angle[i] > 90:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=80, cmap=colormap, marker='*')
     else:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=40, cmap=colormap)
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=30, cmap=colormap)
 
     i += 1
     texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'C%s' % i)) # save orbit labels in list
@@ -95,6 +95,17 @@ ax1.set_title('Closest Approaches in JSO')
 
 ax2 = plt.subplot(122, projection = 'polar')
 ax2.scatter(xval, yval, c=xval, s=300, cmap=colormap, norm=norm, linewidths=0)
+ax2.scatter(0,0, color='gold')
+
+labels =[]
+for i in range(len(azimuthal)):
+    if sun_juice_angle[i] > 90:
+        ax2.scatter(azimuthal[i], 1, color='black', marker='*')
+    else:
+        ax2.scatter(azimuthal[i], 1, color='black', s=10)
+    labels.append(ax2.text(azimuthal[i], 1, 'C%s' % (i+1)))
+
+adjust_text(labels)
 ax2.set_yticks([])
 ax2.set_title('Jupiter-Sun Angle in IAU_SUN')
 
