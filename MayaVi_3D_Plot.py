@@ -28,6 +28,8 @@ axes.label_text_property.font_family = 'times'
 
 axes.axes.font_factor = 1.0
 
+axes.axes.label_format = '%-6.3g'
+
 mlab.outline(color=(0, 0, 0))
 
 # plots sphere of specified radius
