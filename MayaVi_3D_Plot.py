@@ -11,6 +11,7 @@ common_lim = 10
 
 # Make background white.
 mlab.figure(bgcolor=(1, 1, 1))  
+mlab.view(azimuth=45, elevation=135)    
 
 # Draws transparent pipe spanning the desired size for the axes because otherwise axes only stretch to span the last plotted thing
 axis = [-common_lim, common_lim]
