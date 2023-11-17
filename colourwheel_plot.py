@@ -1,37 +1,61 @@
 from functions import *
 from adjustText import adjust_text
 
-# ------------------- JUICE -------------------
-# load orbit data
-juice_wrt_callisto_cphio = get_spice_data('juice', 'callisto', 'cphio', 'J')
-callisto_wrt_jupiter_cphio = get_spice_data("callisto", "jupiter", "cphio", "J")
-callisto_wrt_jupiter_JSO = get_spice_data("callisto", "jupiter", "jupsunorb", "J")
-sun_wrt_callisto_cphio = get_spice_data("sun", "callisto", "cphio", "J")
-callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "J")
-jupiter_wrt_sun_IAU = get_spice_data('jupiter', 'sun', 'IAU_SUN', 'J')
+# ----------- GALILEO ------------
 
-# save CA data
-juice_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, callisto_wrt_jupiter_SIII_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_5(juice_wrt_callisto_cphio, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, callisto_wrt_jupiter_SIII, jupiter_wrt_sun_IAU)
-
+galileo_wrt_callisto_cphio_CA = closest_approach_data_G("galileo", "callisto", "cphio", "G")
+callisto_wrt_jupiter_cphio_CA = closest_approach_data_G("callisto", "jupiter", "cphio", "G")
+G_callisto_wrt_jupiter_JSO_CA = closest_approach_data_G("callisto", "jupiter", "jupsunorb", "G")
+sun_wrt_callisto_cphio_CA = closest_approach_data_G("sun", "callisto", "cphio", "G")
+callisto_wrt_jupiter_SIII_mag_CA = closest_approach_data_G("callisto", "jupiter", "SIII_mag", "G")
+jupiter_wrt_sun_IAU_CA = closest_approach_data_G('jupiter', 'sun', 'IAU_SUN', 'G')
 
 # get jupiter-sun angles
-azimuthal = []
+G_zenith = []
 for orbit, vector in jupiter_wrt_sun_IAU_CA.items():
-    azimuthal.append(np.degrees(vector[6]))
+    G_zenith.append(np.degrees(vector[6]))
 
 # get sun-juice angle
-sun_cphio_vector = []
+G_sun_cphio_vector = []
 for orbit, vector in sun_wrt_callisto_cphio_CA.items():
-    sun_cphio_vector.append(vector[1:4])
+    G_sun_cphio_vector.append(vector[1:4])
+
+galileo_cphio_vector = []
+for orbit, vector in galileo_wrt_callisto_cphio_CA.items():
+    galileo_cphio_vector.append(vector[1:4])
+
+sun_galileo_angle = []
+for i in range(len(G_sun_cphio_vector)):
+    angle = angle_between(G_sun_cphio_vector[i], galileo_cphio_vector[i])
+    sun_galileo_angle.append(np.degrees(angle))
+
+# ----------- JUICE ------------
+
+juice_wrt_callisto_cphio_CA = get_closest_approach_data("juice", "callisto", "cphio", "J")
+callisto_wrt_jupiter_cphio_CA = get_closest_approach_data("callisto", "jupiter", "cphio", "J")
+J_callisto_wrt_jupiter_JSO_CA = get_closest_approach_data("callisto", "jupiter", "jupsunorb", "J")
+sun_wrt_callisto_cphio_CA = get_closest_approach_data("sun", "callisto", "cphio", "J")
+callisto_wrt_jupiter_SIII_mag_CA = get_closest_approach_data("callisto", "jupiter", "SIII_mag", "J")
+jupiter_wrt_sun_IAU_CA = get_closest_approach_data('jupiter', 'sun', 'IAU_SUN', 'J')
+
+# get jupiter-sun angles
+J_zenith = []
+for orbit, vector in jupiter_wrt_sun_IAU_CA.items():
+    J_zenith.append(np.degrees(vector[6]))
+
+# get sun-juice angle
+J_sun_cphio_vector = []
+for orbit, vector in sun_wrt_callisto_cphio_CA.items():
+    J_sun_cphio_vector.append(vector[1:4])
 
 juice_cphio_vector = []
 for orbit, vector in juice_wrt_callisto_cphio_CA.items():
     juice_cphio_vector.append(vector[1:4])
 
 sun_juice_angle = []
-for i in range(len(sun_cphio_vector)):
-    angle = angle_between(sun_cphio_vector[i], juice_cphio_vector[i])
-    sun_juice_angle.append(angle)
+for i in range(len(J_sun_cphio_vector)):
+    angle = angle_between(J_sun_cphio_vector[i], juice_cphio_vector[i])
+    sun_juice_angle.append(np.degrees(angle))
 
 
 # Data for the colour wheel
@@ -68,39 +92,59 @@ dayside_marker = mlines.Line2D([], [], color='black', marker='*', linestyle='Non
 nightside_marker = mlines.Line2D([], [], color='black', marker='o', linestyle='None', markersize=7, label='Nightside')
 
 texts = []
-i = 0
 
-for orbit, vector in callisto_wrt_jupiter_JSO_CA.items():
+i = 0
+for orbit, vector in J_callisto_wrt_jupiter_JSO_CA.items():
 
     if sun_juice_angle[i] > 90:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=80, cmap=colormap, marker='*')
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=min(J_zenith), vmax=max(J_zenith), s=80, cmap=colormap, marker='*')
     else:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=30, cmap=colormap)
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=min(J_zenith), vmax=max(J_zenith), s=30, cmap=colormap)
 
     i += 1
-    texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'C%s' % i)) # save orbit labels in list
+    texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'J%s' % i)) # save orbit labels in list
+
+i=0
+for orbit, vector in G_callisto_wrt_jupiter_JSO_CA.items():
+
+    if sun_galileo_angle[i] > 90:
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=min(G_zenith), vmax=max(G_zenith), cmap=colormap, s=80, marker='*', edgecolors=colormap(G_zenith[i]), linewidths=1.0)
+    else:
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=min(G_zenith), vmax=max(G_zenith), cmap=colormap, s=30, marker='o')
+
+    i += 1
+    texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'G%s' % i)) # save orbit labels in list
 
 # Adjust the positions of annotations so they don't overlap
 adjust_text(texts)
 
 # colourbar
-#cbar = fig.colorbar(s)
+cbar = fig.colorbar(s)
 #cbar.set_title('Jupiter-Sun Angle in IAU_SUN [degrees]')
 
 legend = ax1.legend(handles=[dayside_marker, nightside_marker], loc='lower left')
 ax1.set_title('Closest Approaches in JSO')
+
+# ------------ COLOUR WHEEL --------------
 
 ax2 = plt.subplot(122, projection = 'polar')
 ax2.scatter(xval, yval, c=xval, s=300, cmap=colormap, norm=norm, linewidths=0)
 ax2.scatter(0,0, color='gold')
 
 labels =[]
-for i in range(len(azimuthal)):
+for i in range(len(J_zenith)):
     if sun_juice_angle[i] > 90:
-        ax2.scatter(azimuthal[i], 1, color='black', marker='*')
+        ax2.scatter(J_zenith[i], 1, color='black', marker='*')
     else:
-        ax2.scatter(azimuthal[i], 1, color='black', s=10)
-    labels.append(ax2.text(azimuthal[i], 1, 'C%s' % (i+1)))
+        ax2.scatter(J_zenith[i], 1, color='black', s=10)
+    labels.append(ax2.text(J_zenith[i], 1, 'J%s' % (i+1)))
+
+for i in range(len(G_zenith)):
+    if sun_galileo_angle[i] > 90:
+        ax2.scatter(G_zenith[i], 1, color='black', marker='*', facecolors='none')
+    else:
+        ax2.scatter(G_zenith[i], 1, color='black', marker='o')
+    labels.append(ax2.text(G_zenith[i], 1, 'G%s' % (i+1)))
 
 adjust_text(labels)
 ax2.set_yticks([])
