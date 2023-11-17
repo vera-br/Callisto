@@ -152,19 +152,38 @@ def get_pds_data():
 
     return orbits_all, bfield_all
 
-def closest_approach_data(dictionary):
+def closest_approach_data_G(target, reference_point, frame, mission):
     '''
     Compute CA data for a dictionary of orbits and return in its own dictionary of 7d arrays
     '''    
-    CA_data = {}
-    CA_data_all = {}
-    i = 0
+    CA_time_all =[]
 
-    for key, array in dictionary.items():
+    galileo_CA_data = {}
+    CA_data_all = {}
+    
+    Galileo, Galileo_meas = get_pds_data()
+
+    if target == "galileo":
+        dictionary, _ = get_pds_data()
+    else:
+        dictionary = get_spice_data(target, reference_point, frame, mission)
+
+    i = 0
+    for key, array in Galileo.items():
         i += 1
         vector = np.transpose(array)
         min_index = np.argmin(vector[:, 4])
-        CA_data_all['CA_orbit%s' % (i)] = vector[min_index]
+        CA_time_all.append(vector[min_index, 0])
+        galileo_CA_data['CA_orbit%s' % (i)] = vector[min_index]
+
+    i = 0
+    for key, array in dictionary.items():
+        vector = np.transpose(array)
+        time = vector[:, 0]
+        CA = find_nearest(time, CA_time_all[i])
+        index = int(np.where(time == CA)[0])
+        i += 1
+        CA_data_all['CA_orbit%s' % (i)] = vector[index]        
         
     return CA_data_all
 
@@ -237,8 +256,9 @@ def closest_approach_data_5(dictionary, dict2, dict3, dict4, dict5):
         time = vector[:, 0]
         CA = find_nearest(time, CA_time_all[i])
         index = int(np.where(time == CA)[0])
-        CA_data_all_2['CA_orbit%s' % (i)] = vector[index]
         i += 1
+        CA_data_all_2['CA_orbit%s' % (i)] = vector[index]
+
 
     i = 0
     for key, array in dict3.items():
@@ -247,9 +267,9 @@ def closest_approach_data_5(dictionary, dict2, dict3, dict4, dict5):
         time = vector[:, 0]
         CA = find_nearest(time, CA_time_all[i])
         index = int(np.where(time == CA)[0])
-        CA_data_all_3['CA_orbit%s' % (i)] = vector[index]
         i += 1
-
+        CA_data_all_3['CA_orbit%s' % (i)] = vector[index]
+    
     i = 0
     for key, array in dict4.items():
         
@@ -257,9 +277,9 @@ def closest_approach_data_5(dictionary, dict2, dict3, dict4, dict5):
         time = vector[:, 0]
         CA = find_nearest(time, CA_time_all[i])
         index = int(np.where(time == CA)[0])
-        CA_data_all_4['CA_orbit%s' % (i)] = vector[index]
         i += 1
-           
+        CA_data_all_4['CA_orbit%s' % (i)] = vector[index]
+                 
     i = 0
     for key, array in dict5.items():
         
@@ -267,8 +287,8 @@ def closest_approach_data_5(dictionary, dict2, dict3, dict4, dict5):
         time = vector[:, 0]
         CA = find_nearest(time, CA_time_all[i])
         index = int(np.where(time == CA)[0])
-        CA_data_all_5['CA_orbit%s' % (i)] = vector[index]
         i += 1
+        CA_data_all_5['CA_orbit%s' % (i)] = vector[index]
 
     return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4, CA_data_all_5
 
@@ -291,13 +311,13 @@ def CA_info(orbit):
 
 juice_cal_cphio_CA = 0
 
-def get_closest_approach_data(target, reference_point, frame):
+def get_closest_approach_data(target, reference_point, frame, mission):
     '''
     returns dictionary of closest approaches
     '''
     global juice_cal_cphio_CA
 
-    orbits_all_i = get_spice_data(target, reference_point, frame)
+    orbits_all_i = get_spice_data(target, reference_point, frame, mission)
     closest_approach_vectors_i = {}
     
     # if juice_callisto_cphio closest approach not already calculated
@@ -305,7 +325,7 @@ def get_closest_approach_data(target, reference_point, frame):
         juice_cal_cphio_CA = {}
 
         # gets full orbit info. for juice_callisto_cphio
-        orbits_all_jcalcphio = get_spice_data('juice', 'callisto', 'cphio')
+        orbits_all_jcalcphio = get_spice_data('juice', 'callisto', 'cphio', 'J')
 
         i = 1
         for orbit, vector in orbits_all_jcalcphio.items():
@@ -326,6 +346,8 @@ def get_closest_approach_data(target, reference_point, frame):
         i += 1
 
     return closest_approach_vectors_i
+
+
 # plots
 
 #def plot_trajectories():
