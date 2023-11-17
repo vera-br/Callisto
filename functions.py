@@ -2,6 +2,7 @@
 
 # load modules
 import numpy as np
+import math as math
 from datetime import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -36,20 +37,32 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
+def find_nearest(array,value):
+    idx = np.searchsorted(array, value, side="left")
+    if idx > 0 and (idx == len(array) or math.fabs(value - array[idx-1]) < math.fabs(value - array[idx])):
+        return array[idx-1]
+    else:
+        return array[idx]
+
 
 # loading data from spice kernels
 
-def get_spice_data(target, reference_point, frame):
+def get_spice_data(target, reference_point, frame, mission):
     '''
     Load spice data and return dictionary of 7d arrays storing values for t, x, y, z, r, theta, phi
+    mission = "J" (juice) or "G" (galileo)
     '''
     # define file names
-    data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_J"
+    data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
     data_path_all = []
 
     #create array with all file names
-    for i in range(1, 22):
-        data_path_all.append(data_path + str(i) + ".csv")
+    if mission == "J":
+        for i in range(1, 22):
+            data_path_all.append(data_path + str(i) + ".csv")
+    else:
+        for i in range(1, 8):
+            data_path_all.append(data_path + str(i) + ".csv")
 
     # create dictionary for orbit data
     orbits_all = {}
@@ -94,7 +107,7 @@ def get_pds_data():
     for i in range(len(data_path_all)):
 
         t=[]
-        
+
         # open data file
         data = np.loadtxt(data_path_all[i], usecols=(1, 2, 3, 4, 5, 6, 7))
         time_str = np.loadtxt(data_path_all[i], usecols=0, dtype=str)
@@ -115,10 +128,13 @@ def get_pds_data():
         # convert to spherical coords
         spher = cartesian_to_spherical(cart)
 
-        # convert string to utc
-        for i in range(len(time_str)):
-            time = datetime.fromisoformat(time_str[i]).timestamp()
-            t.append(time)
+        # convert string to unix
+        for x in range(len(time_str)):
+            time = datetime.strptime(time_str[x], "%Y-%m-%dT%H:%M:%S.%f")        
+            # Calculate the difference in seconds from a reference point
+            timestamp_difference = time - datetime(2000, 1, 1, 12, 00)
+            # Store the difference as a floating-point number
+            t.append(timestamp_difference.total_seconds())
 
         # combine t, cart, spher arrays
         u = np.c_[t, cart]
@@ -195,6 +211,60 @@ def closest_approach_data_4(dictionary, dict2, dict3, dict4):
         i += 1
            
     return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
+
+
+def closest_approach_data_test(dictionary, dict2, dict3, dict4):
+    '''
+    Same as closest_approach_data but for 5 dictionaries
+    '''    
+    CA_data = {}
+    CA_data_all = {}
+    i = 0
+
+    CA_time_all =[]
+    CA_data_all_2 = {}
+    CA_data_all_3 = {}
+    CA_data_all_4 = {}
+    CA_data_all_5 = {}
+
+    for key, array in dictionary.items():
+        i += 1
+        vector = np.transpose(array)
+        min_index = np.argmin(vector[:, 4])
+        CA_time_all.append(vector[min_index, 0])
+        CA_data_all['CA_orbit%s' % (i)] = vector[min_index]
+
+    i = 0
+    for key, array in dict2.items():
+        vector = np.transpose(array)
+        time = vector[:, 0]
+        CA = find_nearest(time, CA_time_all[i])
+        index = int(np.where(time == CA)[0])
+        CA_data_all_2['CA_orbit%s' % (i)] = vector[index]
+        i += 1
+
+    i = 0
+    for key, array in dict3.items():
+        
+        vector = np.transpose(array)
+        time = vector[:, 0]
+        CA = find_nearest(time, CA_time_all[i])
+        index = int(np.where(time == CA)[0])
+        CA_data_all_3['CA_orbit%s' % (i)] = vector[index]
+        i += 1
+
+    i = 0
+    for key, array in dict4.items():
+        
+        vector = np.transpose(array)
+        time = vector[:, 0]
+        CA = find_nearest(time, CA_time_all[i])
+        index = int(np.where(time == CA)[0])
+        CA_data_all_4['CA_orbit%s' % (i)] = vector[index]
+        i += 1
+           
+    return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
+
 
 def CA_info(orbit):
     '''

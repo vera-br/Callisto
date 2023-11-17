@@ -1,17 +1,18 @@
 from functions import *
 from adjustText import adjust_text
 
-# ------------------- JUICE -------------------
+# ------------------- GALILEO -------------------
 # load orbit data
-juice_wrt_callisto_cphio = get_spice_data('juice', 'callisto', 'cphio', 'J')
-callisto_wrt_jupiter_cphio = get_spice_data("callisto", "jupiter", "cphio", "J")
-callisto_wrt_jupiter_JSO = get_spice_data("callisto", "jupiter", "jupsunorb", "J")
-sun_wrt_callisto_cphio = get_spice_data("sun", "callisto", "cphio", "J")
-callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "J")
-jupiter_wrt_sun_IAU = get_spice_data('jupiter', 'sun', 'IAU_SUN', 'J')
+Galileo, Galileo_meas = get_pds_data()
+callisto_wrt_jupiter_cphio = get_spice_data("callisto", "jupiter", "cphio", "G")
+callisto_wrt_jupiter_JSO = get_spice_data("callisto", "jupiter", "jupsunorb", "G")
+sun_wrt_callisto_cphio = get_spice_data("sun", "callisto", "cphio", "G")
+callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "G")
+jupiter_wrt_sun_IAU = get_spice_data('jupiter', 'sun', 'IAU_SUN', 'G')
 
-# save CA data
-juice_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_4(juice_wrt_callisto_cphio, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, jupiter_wrt_sun_IAU)
+
+Galileo_CA = closest_approach_data(Galileo)
+galileo_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_test(Galileo, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, jupiter_wrt_sun_IAU)
 
 
 # get jupiter-sun angles
@@ -19,19 +20,19 @@ azimuthal = []
 for orbit, vector in jupiter_wrt_sun_IAU_CA.items():
     azimuthal.append(np.degrees(vector[6]))
 
-# get sun-juice angle
+# get sun-galileo angle
 sun_cphio_vector = []
 for orbit, vector in sun_wrt_callisto_cphio_CA.items():
     sun_cphio_vector.append(vector[1:4])
 
-juice_cphio_vector = []
-for orbit, vector in juice_wrt_callisto_cphio_CA.items():
-    juice_cphio_vector.append(vector[1:4])
+galileo_cphio_vector = []
+for orbit, vector in Galileo_CA.items():
+    galileo_cphio_vector.append(vector[1:4])
 
-sun_juice_angle = []
+sun_galileo_angle = []
 for i in range(len(sun_cphio_vector)):
-    angle = angle_between(sun_cphio_vector[i], juice_cphio_vector[i])
-    sun_juice_angle.append(angle)
+    angle = angle_between(sun_cphio_vector[i], galileo_cphio_vector[i])
+    sun_galileo_angle.append(angle)
 
 
 # Data for the colour wheel
@@ -72,7 +73,7 @@ i = 0
 
 for orbit, vector in callisto_wrt_jupiter_JSO_CA.items():
 
-    if sun_juice_angle[i] > 90:
+    if sun_galileo_angle[i] > 90:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=80, cmap=colormap, marker='*')
     else:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=azimuthal[i], vmin=min(azimuthal), vmax=max(azimuthal), s=30, cmap=colormap)
@@ -96,7 +97,7 @@ ax2.scatter(0,0, color='gold')
 
 labels =[]
 for i in range(len(azimuthal)):
-    if sun_juice_angle[i] > 90:
+    if sun_galileo_angle[i] > 90:
         ax2.scatter(azimuthal[i], 1, color='black', marker='*')
     else:
         ax2.scatter(azimuthal[i], 1, color='black', s=10)

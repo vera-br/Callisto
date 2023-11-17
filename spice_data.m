@@ -113,37 +113,23 @@ for i = 1:length(KERNELS_TO_LOAD)
 
 end
 
-closest_approach_times = ["2032-06-21 00:39:09.184390 UTC"
-"2032-07-29 01:51:09.183340 UTC"
-"2032-08-14 18:15:09.182950 UTC"
-"2032-09-10 19:26:09.182490 UTC"
-"2032-09-27 12:01:09.182360 UTC"
-"2032-10-14 04:30:09.182360 UTC"
-"2032-10-30 20:54:09.182500 UTC"
-"2032-11-16 13:17:09.182770 UTC"
-"2032-12-03 05:38:09.183140 UTC"
-"2033-02-24 16:09:09.185310 UTC"
-"2033-03-13 08:32:09.185540 UTC"
-"2033-05-10 16:10:09.185340 UTC"
-"2033-06-04 18:39:09.184820 UTC"
-"2033-06-21 11:02:09.184380 UTC"
-"2033-07-08 03:25:09.183920 UTC"
-"2033-07-24 19:47:09.183460 UTC"
-"2033-08-10 12:15:09.183050 UTC"
-"2033-11-01 23:01:09.182530 UTC"
-"2034-02-15 00:09:09.185110 UTC"
-"2034-05-01 22:26:09.185470 UTC"
-"2034-06-24 05:16:09.184320 UTC"];
+closest_approach_times = ["1996-11-04 13:34:28 UTC"
+"1997-06-25 13:47:50.279000 UTC"
+"1997-09-17 00:18:55.312000 UTC"
+"1999-06-30 07:46:35.131000 UTC"
+"1999-08-14 08:31:00.874000 UTC"
+"1999-09-16 17:26:53.202000 UTC"
+"2001-05-25 11:23:57.499000 UTC"];
 
-juice_wrt_callisto_cphio_ = "spice_data/juice_wrt_callisto_cphio_";
-juice_wrt_jupiter_cphio_ = "spice_data/juice_wrt_jupiter_cphio_";
-callisto_wrt_jupiter_cphio_ = "spice_data/callisto_wrt_jupiter_cphio_";
-juice_wrt_jupiter_SIII_ = "spice_data/juice_wrt_jupiter_SIII_";
+%galileo_wrt_callisto_cphio_ = "spice_data/galileo_wrt_callisto_cphio_";
+%galileo_wrt_jupiter_cphio_ = "spice_data/galileo_wrt_jupiter_cphio_";
+callisto_wrt_jupiter_cphio_ = "spice_data/callisto_wrt_jupiter_cphio_ ";
+%galileo_wrt_jupiter_SIII_ = "spice_data/galileo_wrt_jupiter_SIII_";
 callisto_wrt_jupiter_SIII_ = "spice_data/callisto_wrt_jupiter_SIII_";
-juice_wrt_sun_cphio_ = "spice_data/juice_wrt_sun_cphio_";
+%galileo_wrt_sun_cphio_ = "spice_data/galileo_wrt_sun_cphio_";
 callisto_wrt_sun_cphio_ = "spice_data/callisto_wrt_sun_cphio_";
 jupiter_wrt_sun_cphio_ = "spice_data/jupiter_wrt_sun_cphio_";
-juice_wrt_sun_IAU_SUN_ = "spice_data/juice_wrt_sun_IAU_SUN_";
+%galileo_wrt_sun_IAU_SUN_ = "spice_data/galileo_wrt_sun_IAU_SUN_";
 callisto_wrt_sun_IAU_SUN_ = "spice_data/callisto_wrt_sun_IAU_SUN_";
 jupiter_wrt_sun_IAU_SUN_ = "spice_data/jupiter_wrt_sun_IAU_SUN_";
 
@@ -164,60 +150,60 @@ for i = 1:length(closest_approach_times)
     et_R = et_0:3600/60:(et_0 + 24 * hour);
     
     % position relative to Callisto
-    juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
+    %juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
     sun_callisto_cphio = cspice_spkezr('10', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
     
     % position relative to Jupiter
-    juice_jupiter_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
+    %juice_jupiter_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
     callisto_jupiter_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
-    juice_jupiter_SIII = cspice_spkezr('-28', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
+    %juice_jupiter_SIII = cspice_spkezr('-28', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
     callisto_jupiter_SIII = cspice_spkezr('504', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
 
     % position relative to Jupiter - Magnetodisc
-    juice_jupiter_SIII_mag = cspice_spkezr('-28', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '599');
+    %juice_jupiter_SIII_mag = cspice_spkezr('-28', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '599');
     callisto_jupiter_SIII_mag = cspice_spkezr('504', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '599');
     
     % position relative to Jupiter - Magnetosphere
-    juice_jupiter_jupsunorb = cspice_spkezr('-28', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
+    %juice_jupiter_jupsunorb = cspice_spkezr('-28', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
     callisto_jupiter_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
     callisto_sun_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '10');
 
     
     % position relative to Sun
-    juice_sun_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
+    %juice_sun_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
     callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
     jupiter_sun_cphio = cspice_spkezr('599', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
 
-    juice_sun_IAU_SUN = cspice_spkezr('-28', et_R, 'IAU_SUN', 'NONE', '10');
+    %juice_sun_IAU_SUN = cspice_spkezr('-28', et_R, 'IAU_SUN', 'NONE', '10');
     callisto_sun_IAU_SUN = cspice_spkezr('504', et_R, 'IAU_SUN', 'NONE', '10');
     jupiter_sun_IAU_SUN = cspice_spkezr('599', et_R, 'IAU_SUN', 'NONE', '10');
 
     % position relative to Callisto
-    writematrix([juice_callisto_cphio;et_R], append('spice_data/juice_wrt_callisto_cphio_J',string(i),'.csv'));
-    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_J',string(i),'.csv'));
+    %writematrix([juice_callisto_cphio;et_R], append('spice_data/juice_wrt_callisto_cphio_G',string(i),'.csv'));
+    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G',string(i),'.csv'));
     
     % position relative to Jupiter
-    writematrix([juice_jupiter_cphio;et_R], append('spice_data/juice_wrt_jupiter_cphio_J',string(i),'.csv'));
-    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_J',string(i),'.csv'));
-    writematrix([juice_jupiter_SIII;et_R], append('spice_data/juice_wrt_jupiter_SIII_J',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_J',string(i),'.csv'));
+    %writematrix([juice_jupiter_cphio;et_R], append('spice_data/juice_wrt_jupiter_cphio_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G',string(i),'.csv'));
+    %writematrix([juice_jupiter_SIII;et_R], append('spice_data/juice_wrt_jupiter_SIII_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_G',string(i),'.csv'));
 
     % position relative to Jupiter - Magnetodisc
-    writematrix([juice_jupiter_SIII_mag;et_R], append('spice_data/juice_wrt_jupiter_SIII_mag_J',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_J',string(i),'.csv'));
+    %writematrix([juice_jupiter_SIII_mag;et_R], append('spice_data/juice_wrt_jupiter_SIII_mag_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_G',string(i),'.csv'));
 
     % position relative to Jupiter - magnetosphere
-    writematrix([juice_jupiter_jupsunorb;et_R], append('spice_data/juice_wrt_jupiter_jupsunorb_J',string(i),'.csv'));
-    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_J',string(i),'.csv'));
-    writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_J',string(i),'.csv'));
+    %writematrix([juice_jupiter_jupsunorb;et_R], append('spice_data/juice_wrt_jupiter_jupsunorb_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_G',string(i),'.csv'));
+    writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_G',string(i),'.csv'));
 
     % position relative to Sun
-    writematrix([juice_sun_cphio;et_R], append('spice_data/juice_wrt_sun_cphio_J',string(i),'.csv'));
-    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_J',string(i),'.csv'));
-    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_J',string(i),'.csv'));
-    writematrix([juice_sun_IAU_SUN;et_R], append('spice_data/juice_wrt_sun_IAU_SUN_J',string(i),'.csv'));
-    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_J',string(i),'.csv'));
-    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_J',string(i),'.csv'));
+    %writematrix([juice_sun_cphio;et_R], append('spice_data/juice_wrt_sun_cphio_G',string(i),'.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'.csv'));
+    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G',string(i),'.csv'));
+    %writematrix([juice_sun_IAU_SUN;et_R], append('spice_data/juice_wrt_sun_IAU_SUN_G',string(i),'.csv'));
+    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_G',string(i),'.csv'));
+    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_G',string(i),'.csv'));
 
 
 end
