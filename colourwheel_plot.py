@@ -11,7 +11,7 @@ callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "J")
 jupiter_wrt_sun_IAU = get_spice_data('jupiter', 'sun', 'IAU_SUN', 'J')
 
 # save CA data
-juice_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_4(juice_wrt_callisto_cphio, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, jupiter_wrt_sun_IAU)
+juice_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, callisto_wrt_jupiter_SIII_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_5(juice_wrt_callisto_cphio, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, callisto_wrt_jupiter_SIII, jupiter_wrt_sun_IAU)
 
 
 # get jupiter-sun angles

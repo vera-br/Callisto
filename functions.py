@@ -172,7 +172,6 @@ def closest_approach_data_4(dictionary, dict2, dict3, dict4):
     '''
     Same as closest_approach_data but for 5 dictionaries
     '''    
-    CA_data = {}
     CA_data_all = {}
     i = 0
 
@@ -180,7 +179,6 @@ def closest_approach_data_4(dictionary, dict2, dict3, dict4):
     CA_data_all_2 = {}
     CA_data_all_3 = {}
     CA_data_all_4 = {}
-    CA_data_all_5 = {}
 
     for key, array in dictionary.items():
         i += 1
@@ -213,11 +211,10 @@ def closest_approach_data_4(dictionary, dict2, dict3, dict4):
     return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
 
 
-def closest_approach_data_test(dictionary, dict2, dict3, dict4):
+def closest_approach_data_5(dictionary, dict2, dict3, dict4, dict5):
     '''
     Same as closest_approach_data but for 5 dictionaries
     '''    
-    CA_data = {}
     CA_data_all = {}
     i = 0
 
@@ -263,7 +260,17 @@ def closest_approach_data_test(dictionary, dict2, dict3, dict4):
         CA_data_all_4['CA_orbit%s' % (i)] = vector[index]
         i += 1
            
-    return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
+    i = 0
+    for key, array in dict5.items():
+        
+        vector = np.transpose(array)
+        time = vector[:, 0]
+        CA = find_nearest(time, CA_time_all[i])
+        index = int(np.where(time == CA)[0])
+        CA_data_all_5['CA_orbit%s' % (i)] = vector[index]
+        i += 1
+
+    return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4, CA_data_all_5
 
 
 def CA_info(orbit):

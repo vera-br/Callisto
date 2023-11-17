@@ -7,12 +7,12 @@ Galileo, Galileo_meas = get_pds_data()
 callisto_wrt_jupiter_cphio = get_spice_data("callisto", "jupiter", "cphio", "G")
 callisto_wrt_jupiter_JSO = get_spice_data("callisto", "jupiter", "jupsunorb", "G")
 sun_wrt_callisto_cphio = get_spice_data("sun", "callisto", "cphio", "G")
-callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "G")
+callisto_wrt_jupiter_SIII_mag = get_spice_data("callisto", "jupiter", "SIII_mag", "G")
 jupiter_wrt_sun_IAU = get_spice_data('jupiter', 'sun', 'IAU_SUN', 'G')
 
 
 Galileo_CA = closest_approach_data(Galileo)
-galileo_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_test(Galileo, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, jupiter_wrt_sun_IAU)
+galileo_wrt_callisto_cphio_CA, sun_wrt_callisto_cphio_CA, callisto_wrt_jupiter_JSO_CA, callisto_wrt_jupiter_SIII_mag_CA, jupiter_wrt_sun_IAU_CA = closest_approach_data_5(Galileo, sun_wrt_callisto_cphio, callisto_wrt_jupiter_JSO, callisto_wrt_jupiter_SIII_mag, jupiter_wrt_sun_IAU)
 
 
 # get jupiter-sun angles
