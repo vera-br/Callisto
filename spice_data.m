@@ -113,60 +113,115 @@ for i = 1:length(KERNELS_TO_LOAD)
 
 end
 
+closest_approach_times = ["2032-06-21 00:39:09.184390 UTC"
+"2032-07-29 01:51:09.183340 UTC"
+"2032-08-14 18:15:09.182950 UTC"
+"2032-09-10 19:26:09.182490 UTC"
+"2032-09-27 12:01:09.182360 UTC"
+"2032-10-14 04:30:09.182360 UTC"
+"2032-10-30 20:54:09.182500 UTC"
+"2032-11-16 13:17:09.182770 UTC"
+"2032-12-03 05:38:09.183140 UTC"
+"2033-02-24 16:09:09.185310 UTC"
+"2033-03-13 08:32:09.185540 UTC"
+"2033-05-10 16:10:09.185340 UTC"
+"2033-06-04 18:39:09.184820 UTC"
+"2033-06-21 11:02:09.184380 UTC"
+"2033-07-08 03:25:09.183920 UTC"
+"2033-07-24 19:47:09.183460 UTC"
+"2033-08-10 12:15:09.183050 UTC"
+"2033-11-01 23:01:09.182530 UTC"
+"2034-02-15 00:09:09.185110 UTC"
+"2034-05-01 22:26:09.185470 UTC"
+"2034-06-24 05:16:09.184320 UTC"];
+
+juice_wrt_callisto_cphio_ = "spice_data/juice_wrt_callisto_cphio_";
+juice_wrt_jupiter_cphio_ = "spice_data/juice_wrt_jupiter_cphio_";
+callisto_wrt_jupiter_cphio_ = "spice_data/callisto_wrt_jupiter_cphio_";
+juice_wrt_jupiter_SIII_ = "spice_data/juice_wrt_jupiter_SIII_";
+callisto_wrt_jupiter_SIII_ = "spice_data/callisto_wrt_jupiter_SIII_";
+juice_wrt_sun_cphio_ = "spice_data/juice_wrt_sun_cphio_";
+callisto_wrt_sun_cphio_ = "spice_data/callisto_wrt_sun_cphio_";
+jupiter_wrt_sun_cphio_ = "spice_data/jupiter_wrt_sun_cphio_";
+juice_wrt_sun_IAU_SUN_ = "spice_data/juice_wrt_sun_IAU_SUN_";
+callisto_wrt_sun_IAU_SUN_ = "spice_data/callisto_wrt_sun_IAU_SUN_";
+jupiter_wrt_sun_IAU_SUN_ = "spice_data/jupiter_wrt_sun_IAU_SUN_";
+
 % Retrieve some constants:
 % () For more info, read the documentation on cspice_bodvcd
 kJ = cspice_bodvcd(5, 'GM', 10); % GM of Jupiter with 10 significant
 % digits
 rJ = cspice_bodvcd(503, 'RADII', 10);% Radius of Ganymede
-% Choose a date and convert it into ephemeris time
-% () For more info, read the documentation on cspice_str3et
+
 hour = 3600;
-date0 = '2034-06-23 17:16:09.184320 UTC';
-et0 = cspice_str2et(date0);
-et_R = et0:3600/60:(et0 + 24 * hour);
 
-% Ephemerides of Callisto w.r.t. Jupiter barycenter
-% on the ecliptic J2000 at the times et_R
-% () For more info, read the documentation on cspice_spkezr
+for i = 1:length(closest_approach_times)
 
-% '504' = Callisto,  '599' = Jupiter,  '10' = Sun
-% '-28' = JUICE,     '-77' = Galileo Orbiter
-% https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/FORTRAN/req/naif_ids.html
+    date_CA = closest_approach_times(i);
+    date_CA_i = convertStringsToChars(date_CA);
+    et_CA = cspice_str2et(date_CA_i);
+    et_0 = et_CA - 12 * hour;
+    et_R = et_0:3600/60:(et_0 + 24 * hour);
+    
+    % position relative to Callisto
+    juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
+    sun_callisto_cphio = cspice_spkezr('10', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
+    
+    % position relative to Jupiter
+    juice_jupiter_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
+    callisto_jupiter_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
+    juice_jupiter_SIII = cspice_spkezr('-28', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
+    callisto_jupiter_SIII = cspice_spkezr('504', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
 
-% cspice_spkezr( target, time, coordinate system, abberation, observer)
-% var. names = target_observer_(mag: optional for magnetic field)
+    % position relative to Jupiter - Magnetodisc
+    juice_jupiter_SIII_mag = cspice_spkezr('-28', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '599');
+    callisto_jupiter_SIII_mag = cspice_spkezr('504', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '599');
+    
+    % position relative to Jupiter - Magnetosphere
+    juice_jupiter_jupsunorb = cspice_spkezr('-28', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
+    callisto_jupiter_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
+    callisto_sun_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '10');
 
-juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
+    
+    % position relative to Sun
+    juice_sun_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
+    callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
+    jupiter_sun_cphio = cspice_spkezr('599', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
 
-callisto_jupiter_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
-juice_jupiter_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
+    juice_sun_IAU_SUN = cspice_spkezr('-28', et_R, 'IAU_SUN', 'NONE', '10');
+    callisto_sun_IAU_SUN = cspice_spkezr('504', et_R, 'IAU_SUN', 'NONE', '10');
+    jupiter_sun_IAU_SUN = cspice_spkezr('599', et_R, 'IAU_SUN', 'NONE', '10');
 
-jupiter_sun_cphio = cspice_spkezr('599', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
-callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
-juice_sun_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
+    % position relative to Callisto
+    writematrix([juice_callisto_cphio;et_R], append('spice_data/juice_wrt_callisto_cphio_J',string(i),'.csv'));
+    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_J',string(i),'.csv'));
+    
+    % position relative to Jupiter
+    writematrix([juice_jupiter_cphio;et_R], append('spice_data/juice_wrt_jupiter_cphio_J',string(i),'.csv'));
+    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_J',string(i),'.csv'));
+    writematrix([juice_jupiter_SIII;et_R], append('spice_data/juice_wrt_jupiter_SIII_J',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_J',string(i),'.csv'));
 
-% juice_jupiter_mag = cspice_spkezr('-28', et_R, 'JUPITER_MAG_VIP4', 'NONE', '599');
-% callisto_jupiter_mag = cspice_spkezr('504', et_R, 'JUPITER_MAG_VIP4', 'NONE', '599');
+    % position relative to Jupiter - Magnetodisc
+    writematrix([juice_jupiter_SIII_mag;et_R], append('spice_data/juice_wrt_jupiter_SIII_mag_J',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_J',string(i),'.csv'));
 
-% to find JUICE wrt Jupiter: 
-% Jupiter -> Juice = Jupiter -> Callisto + Callisto -> JUICE
+    % position relative to Jupiter - magnetosphere
+    writematrix([juice_jupiter_jupsunorb;et_R], append('spice_data/juice_wrt_jupiter_jupsunorb_J',string(i),'.csv'));
+    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_J',string(i),'.csv'));
+    writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_J',string(i),'.csv'));
 
-% Convert an ephemeris time back into calendar format% () For more info, read the documentation on cspice_et2utc
-et1 = et0+7*86400;
-date1 = cspice_et2utc(et1,'C',6);
+    % position relative to Sun
+    writematrix([juice_sun_cphio;et_R], append('spice_data/juice_wrt_sun_cphio_J',string(i),'.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_J',string(i),'.csv'));
+    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_J',string(i),'.csv'));
+    writematrix([juice_sun_IAU_SUN;et_R], append('spice_data/juice_wrt_sun_IAU_SUN_J',string(i),'.csv'));
+    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_J',string(i),'.csv'));
+    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_J',string(i),'.csv'));
 
-writematrix([juice_callisto_cphio;et_R], 'spice_data/juice_wrt_callisto_C21.csv');
 
-writematrix([callisto_jupiter_cphio;et_R], 'spice_data/callisto_wrt_jupiter_C21.csv');
-writematrix([juice_jupiter_cphio;et_R], 'spice_data/juice_wrt_jupiter_C21.csv');
-
-writematrix([jupiter_sun_cphio;et_R], 'spice_data/jupiter_wrt_sun_C21.csv');
-writematrix([callisto_sun_cphio;et_R], 'spice_data/callisto_wrt_sun_C21.csv');
-writematrix([juice_sun_cphio;et_R], 'spice_data/juice_wrt_sun_C21.csv');
-
-% writematrix([juice_jupiter_mag;et_R], 'spice_data/juice_wrt_jupiter_mag_C21.csv');
-% writematrix([callisto_jupiter_mag;et_R], 'spice_data/callisto_wrt_jupiter_mag_C21.csv');
-
-% \C’ = ’calendar’, with 6 digits
-% Clear the memory
+end
+    
 cspice_kclear
+    
+    
