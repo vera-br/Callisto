@@ -10,6 +10,15 @@ callisto_jupiter_jupsunorb = get_spice_data('callisto', 'jupiter', 'jupsunorb')
 callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb')
 juice_callisto_jupsunorb = get_spice_data('juice', 'callisto', 'jupsunorb')
 
+juice_cal_cphio_CA = {}
+
+i = 1
+for orbit, vector in Juice.items():
+    # finds closest approaches for juice_callisto_cphio and adds to dictionary
+    CA_info_vector = CA_info(vector)
+    juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
+    i += 1
+
 def rotate_xy_axis(x, y, psi):
     x_rot = x * np.cos(psi) - y * np.sin(psi) * y/abs(y)
     y_rot = x * np.sin(psi) * y/abs(y) + y * np.cos(psi)
@@ -65,6 +74,8 @@ for i in range(13,18):
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = juice_callisto_jupsunorb['orbit%s' % (i)]
     calsun_i = callisto_sun_jupsunorb['orbit%s' % (i)]
+    juice_cal_cphio_CA_i = juice_cal_cphio_CA['CA_orbit%s' % (i+1)]
+    min_index = int(juice_cal_cphio_CA_i[7])
     thetas = calsun_i[5]
     phis = calsun_i[6]
     x_new = [] ; y_new = [] ; z_new = []
@@ -88,10 +99,14 @@ for i in range(13,18):
         else:
             end_loop = True
 
+    arrow_pos = [x[min_index], y[min_index], z[min_index]]
+    arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
+    arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
     x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
     # plotting the trajectories as tubes
     trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
+    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
     i += 1
 
 # makes size of objects independent from distance from the camera position
