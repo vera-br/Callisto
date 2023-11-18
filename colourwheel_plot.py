@@ -13,7 +13,7 @@ jupiter_wrt_sun_IAU_CA = closest_approach_data_G('jupiter', 'sun', 'IAU_SUN', 'G
 # get jupiter-sun angles
 G_zenith = []
 for orbit, vector in jupiter_wrt_sun_IAU_CA.items():
-    G_zenith.append(np.degrees(vector[6]))
+    G_zenith.append(vector[6])
 
 # get sun-juice angle
 G_sun_cphio_vector = []
@@ -41,7 +41,7 @@ jupiter_wrt_sun_IAU_CA = get_closest_approach_data('jupiter', 'sun', 'IAU_SUN', 
 # get jupiter-sun angles
 J_zenith = []
 for orbit, vector in jupiter_wrt_sun_IAU_CA.items():
-    J_zenith.append(np.degrees(vector[6]))
+    J_zenith.append(vector[6])
 
 # get sun-juice angle
 J_sun_cphio_vector = []
@@ -96,10 +96,10 @@ texts = []
 i = 0
 for orbit, vector in J_callisto_wrt_jupiter_JSO_CA.items():
 
-    if sun_juice_angle[i] > 90:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=min(J_zenith), vmax=max(J_zenith), s=80, cmap=colormap, marker='*')
+    if abs(sun_juice_angle[i]) > 90:
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=-np.pi, vmax=np.pi, s=80, cmap=colormap, marker='*')
     else:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=min(J_zenith), vmax=max(J_zenith), s=30, cmap=colormap)
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=-np.pi, vmax=np.pi, s=30, cmap=colormap)
 
     i += 1
     texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'J%s' % i)) # save orbit labels in list
@@ -107,10 +107,10 @@ for orbit, vector in J_callisto_wrt_jupiter_JSO_CA.items():
 i=0
 for orbit, vector in G_callisto_wrt_jupiter_JSO_CA.items():
 
-    if sun_galileo_angle[i] > 90:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=min(G_zenith), vmax=max(G_zenith), cmap=colormap, s=80, marker='*', edgecolors=colormap(G_zenith[i]), linewidths=1.0)
+    if abs(sun_galileo_angle[i]) > 90:
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=-np.pi, vmax=np.pi, cmap=colormap, s=80, marker='*', facecolor='none')
     else:
-        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=min(G_zenith), vmax=max(G_zenith), cmap=colormap, s=30, marker='o')
+        s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=-np.pi, vmax=np.pi, cmap=colormap, s=30, marker='o')
 
     i += 1
     texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'G%s' % i)) # save orbit labels in list
@@ -119,7 +119,7 @@ for orbit, vector in G_callisto_wrt_jupiter_JSO_CA.items():
 adjust_text(texts)
 
 # colourbar
-cbar = fig.colorbar(s)
+#cbar = fig.colorbar(s)
 #cbar.set_title('Jupiter-Sun Angle in IAU_SUN [degrees]')
 
 legend = ax1.legend(handles=[dayside_marker, nightside_marker], loc='lower left')
