@@ -61,8 +61,10 @@ colors = np.transpose(colors)
 # plots all 21 orbits
 i = 0
 
-for orbit, vector in juice_callisto_jupsunorb.items():
-    calsun_i = callisto_sun_jupsunorb['orbit%s' % (i+1)]
+for i in range(13,18): 
+    # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
+    vector = juice_callisto_jupsunorb['orbit%s' % (i)]
+    calsun_i = callisto_sun_jupsunorb['orbit%s' % (i)]
     thetas = calsun_i[5]
     phis = calsun_i[6]
     x_new = [] ; y_new = [] ; z_new = []
