@@ -25,7 +25,7 @@ def rotate_xy_axis(x, y, psi):
     return x_rot, y_rot
 
 def CSunO_find_axis_unit_vectors(theta, phi):
-    x_hat = np.sin(phi) # np.array([np.sin(phi), -np.cos(phi), 0])
+    x_hat = -np.sin(phi) # np.array([np.sin(phi), -np.cos(phi), 0])
     y_hat = -np.sin(theta) * np.sin(phi) # np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
     z_hat = np.sin(theta) # np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
     return (x_hat, y_hat, z_hat)
