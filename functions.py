@@ -44,6 +44,26 @@ def find_nearest(array,value):
     else:
         return array[idx]
 
+def find_nearest_index(array, value):
+    idx = np.searchsorted(array, value, side="left")
+    return idx
+    
+# finds trajectory from spice data with timestamps closest to those of the Galileo pds data
+
+def find_nearest_trajectories_G(target, reference_point, frame):
+    Galileo, _ = get_pds_data()
+    trajectories = get_spice_data(target, reference_point, frame, 'G')
+    closest_trajectories = {}
+    for i in range(0,7):
+        G_vector = Galileo['orbit%s' % (i+1)]
+        vector = trajectories['orbit%s' % (i+1)]
+        trajectory = []
+        for j in range(len(G_vector[0])):
+            index = find_nearest_index(vector[0], G_vector[0][j])
+            point = vector[:,int(index)]
+            trajectory.append(point)
+        closest_trajectories['orbit%s' % (i+1)] = trajectory
+    return closest_trajectories
 
 # loading data from spice kernels
 
@@ -163,29 +183,32 @@ def closest_approach_data_G(target, reference_point, frame, mission):
     
     Galileo, Galileo_meas = get_pds_data()
 
-    if target == "galileo":
-        dictionary, _ = get_pds_data()
-    else:
-        dictionary = get_spice_data(target, reference_point, frame, mission)
-
     i = 0
     for key, array in Galileo.items():
         i += 1
         vector = np.transpose(array)
         min_index = np.argmin(vector[:, 4])
         CA_time_all.append(vector[min_index, 0])
-        galileo_CA_data['CA_orbit%s' % (i)] = vector[min_index]
+        vector_CA = vector[min_index]
+        vector_CA = np.append(vector_CA, min_index)
+        galileo_CA_data['CA_orbit%s' % (i)] = vector_CA
 
-    i = 0
-    for key, array in dictionary.items():
-        vector = np.transpose(array)
-        time = vector[:, 0]
-        CA = find_nearest(time, CA_time_all[i])
-        index = int(np.where(time == CA)[0])
-        i += 1
-        CA_data_all['CA_orbit%s' % (i)] = vector[index]        
+    if target == "galileo":
+        return galileo_CA_data
         
-    return CA_data_all
+    else:
+        dictionary = get_spice_data(target, reference_point, frame, mission)
+
+        i = 0
+        for key, array in dictionary.items():
+            vector = np.transpose(array)
+            time = vector[:, 0]
+            CA = find_nearest(time, CA_time_all[i])
+            index = int(np.where(time == CA)[0])
+            i += 1
+            CA_data_all['CA_orbit%s' % (i)] = vector[index]        
+            
+        return CA_data_all
 
 def closest_approach_data_4(dictionary, dict2, dict3, dict4):
     '''
