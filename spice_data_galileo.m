@@ -152,6 +152,7 @@ for i = 1:length(closest_approach_times)
     % position relative to Callisto
     %juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
     sun_callisto_cphio = cspice_spkezr('10', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
+    callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
     
     % position relative to Jupiter
     %juice_jupiter_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
@@ -181,6 +182,7 @@ for i = 1:length(closest_approach_times)
     % position relative to Callisto
     %writematrix([juice_callisto_cphio;et_R], append('spice_data/juice_wrt_callisto_cphio_G',string(i),'.csv'));
     writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G',string(i),'.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'.csv'));
     
     % position relative to Jupiter
     %writematrix([juice_jupiter_cphio;et_R], append('spice_data/juice_wrt_jupiter_cphio_G',string(i),'.csv'));

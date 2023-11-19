@@ -5,11 +5,11 @@ from mayavi import mlab
 from functions import *
 
 # load orbit data
-Juice = get_spice_data('juice', 'callisto', 'cphio')
-callisto_jupiter_jupsunorb = get_spice_data('callisto', 'jupiter', 'jupsunorb')
+Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
+callisto_jupiter_jupsunorb = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
 
-callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb')
-juice_callisto_jupsunorb = get_spice_data('juice', 'callisto', 'jupsunorb')
+callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb', 'J')
+juice_callisto_jupsunorb = get_spice_data('juice', 'callisto', 'jupsunorb', 'J')
 
 juice_cal_cphio_CA = {}
 

@@ -3,7 +3,7 @@ from mayavi import mlab
 from functions import *
 
 # load orbit data
-Juice = get_spice_data('juice', 'callisto', 'cphio')
+Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
 
 # 3D plotting section
 
