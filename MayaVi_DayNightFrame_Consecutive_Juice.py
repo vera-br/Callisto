@@ -11,6 +11,7 @@ callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb', 'J')
 juice_callisto_jupsunorb = get_spice_data('juice', 'callisto', 'jupsunorb', 'J')
 
 juice_cal_cphio_CA = {}
+sun_wrt_callisto_cphio_CA = get_closest_approach_data("sun", "callisto", "cphio", "J")
 
 i = 1
 for orbit, vector in Juice.items():
@@ -18,6 +19,12 @@ for orbit, vector in Juice.items():
     CA_info_vector = CA_info(vector)
     juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
     i += 1
+
+# get sun-cal angle
+J_sun_cphio_vector = []
+for orbit, vector in sun_wrt_callisto_cphio_CA.items():
+    J_sun_cphio_vector.append(vector[1:4])
+J_sun_cphio_vector = np.array(J_sun_cphio_vector)
 
 def rotate_xy_axis(x, y, psi):
     x_rot = x * np.cos(psi) - y * np.sin(psi) * y/abs(y)
@@ -70,7 +77,12 @@ colors = np.transpose(colors)
 # plots all 21 orbits
 i = 0
 
-for i in range(13,18): 
+# arrays for plotting day/night boundary
+#mlab.clf()
+#xx = np.arange(-10, 10, 1)
+#yy = np.arange(-10, 10, 1)
+
+for i in range(2,3): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = juice_callisto_jupsunorb['orbit%s' % (i)]
     calsun_i = callisto_sun_jupsunorb['orbit%s' % (i)]
@@ -107,6 +119,14 @@ for i in range(13,18):
     # plotting the trajectories as tubes
     trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
     arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+
+    # arrays for plotting day/night boundary
+    #mlab.clf()
+    #xx, yy = np.mgrid[-10:10:20j, -10:10:20j]
+
+    #plotting day/night boundary plane
+    #zz = (-J_sun_cphio_vector[i, 0] * xx - J_sun_cphio_vector[i, 1] * yy) * 1. /J_sun_cphio_vector[i, 2]
+    #plane = mlab.surf(zz, warp_scale='auto', color=(.5, .5, 0.5))
     i += 1
 
 # makes size of objects independent from distance from the camera position

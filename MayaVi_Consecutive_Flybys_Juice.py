@@ -3,7 +3,7 @@ from mayavi import mlab
 from functions import *
 
 # load orbit data
-Juice = get_spice_data('juice', 'callisto', 'cphio')
+Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
 
 # 3D plotting section
 
@@ -45,7 +45,7 @@ colors = np.transpose(colors)
 
 # plots all 21 orbits
 
-for i in range(13,18): 
+for i in range(2,3): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = Juice['orbit%s'%(i)]
 
