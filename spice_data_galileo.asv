@@ -146,8 +146,8 @@ for i = 1:length(closest_approach_times)
     date_CA = closest_approach_times(i);
     date_CA_i = convertStringsToChars(date_CA);
     et_CA = cspice_str2et(date_CA_i);
-    et_0 = et_CA - 1 * hour;
-    et_R = et_0:3600/12000:(et_0 + 2 * hour);
+    et_0 = et_CA - 4 * hour;
+    et_R = et_0:3600/600:(et_0 + 24 * hour);
     
     % position relative to Callisto
     %juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');

@@ -20,16 +20,10 @@ for orbit, vector in Juice.items():
     juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
     i += 1
 
-
-def rotate_xy_axis(x, y, psi):
-    x_rot = x * np.cos(psi) - y * np.sin(psi) * y/abs(y)
-    y_rot = x * np.sin(psi) * y/abs(y) + y * np.cos(psi)
-    return x_rot, y_rot
-
 def CSunO_find_axis_unit_vectors(theta, phi):
-    x_hat = -np.sin(phi) # np.array([np.sin(phi), -np.cos(phi), 0])
-    y_hat = -np.sin(theta) * np.sin(phi) # np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
-    z_hat = np.sin(theta) # np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
+    x_hat = np.array([-np.sin(phi), np.cos(phi), 0])
+    y_hat = np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
+    z_hat = np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
     return (x_hat, y_hat, z_hat)
 
 # 3D plotting section
@@ -81,9 +75,9 @@ for orbit, vector in juice_callisto_jupsunorb.items():
     x_new = [] ; y_new = [] ; z_new = []
     for m in range(len(vector[1])):
         x_hat, y_hat, z_hat = CSunO_find_axis_unit_vectors(thetas[m], phis[m])
-        new_x = x_hat * vector[1][m] ; x_new.append(new_x)
-        new_y = y_hat * vector[2][m] ; y_new.append(new_y)
-        new_z = z_hat * vector[3][m] ; z_new.append(new_z)
+        new_x = np.dot(x_hat, np.transpose(vector[1:4, :])[m]) ; x_new.append(new_x)
+        new_y = np.dot(y_hat, np.transpose(vector[1:4, :])[m]) ; y_new.append(new_y)
+        new_z = np.dot(z_hat, np.transpose(vector[1:4, :])[m]) ; z_new.append(new_z)
 
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
     

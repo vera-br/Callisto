@@ -37,9 +37,9 @@ radius = 1
 sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
 
 # defines 21 equally spaced colours around edge of colour wheel
-colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
-colors_y = [0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0]
-colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7]
+colors_x = [1, 1, 2/7, 0, 0, 2/7, 1]
+colors_y = [0, 6/7, 1, 1, 4/7, 0, 0]
+colors_z = [0, 0, 0, 4/7, 1, 1, 6/7]
 colors = np.array([colors_x, colors_y, colors_z])
 colors = np.transpose(colors)
 

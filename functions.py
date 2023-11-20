@@ -62,7 +62,7 @@ def find_nearest_trajectories_G(target, reference_point, frame):
             index = find_nearest_index(vector[0], G_vector[0][j])
             point = vector[:,int(index)]
             trajectory.append(point)
-        closest_trajectories['orbit%s' % (i+1)] = trajectory
+        closest_trajectories['orbit%s' % (i+1)] = np.transpose(trajectory)
     return closest_trajectories
 
 # loading data from spice kernels
