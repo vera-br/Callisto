@@ -23,7 +23,7 @@ def cartesian_to_spherical(coords):
     Changes 3d array of Cartesian coordinates (x,y,z) into Spherical coords (r,theta,phi)
     '''
     r = np.sqrt(coords[:,0]**2 + coords[:,1]**2 + coords[:,2]**2)
-    phi = np.sign(coords[:,0]) * np.arccos(coords[:,1] / (np.sqrt(coords[:,0]**2 + coords[:,1]**2)))
+    phi = np.sign(coords[:,1]) * np.arccos(coords[:,0] / (np.sqrt(coords[:,0]**2 + coords[:,1]**2)))
     # theta = np.nan_to_num(x=theta)    - can use this for nan error if necessary
     theta = np.arccos(coords[:,2]/r)
 
