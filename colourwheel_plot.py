@@ -96,7 +96,7 @@ texts = []
 i = 0
 for orbit, vector in J_callisto_wrt_jupiter_JSO_CA.items():
 
-    if abs(sun_juice_angle[i]) > 90:
+    if abs(sun_juice_angle[i]) < 90:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=-np.pi, vmax=np.pi, s=80, cmap=colormap, marker='*')
     else:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=-np.pi, vmax=np.pi, s=30, cmap=colormap)
@@ -107,7 +107,7 @@ for orbit, vector in J_callisto_wrt_jupiter_JSO_CA.items():
 i=0
 for orbit, vector in G_callisto_wrt_jupiter_JSO_CA.items():
 
-    if abs(sun_galileo_angle[i]) > 90:
+    if abs(sun_galileo_angle[i]) < 90:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=-np.pi, vmax=np.pi, cmap=colormap, s=80, marker='*', facecolor='none')
     else:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=G_zenith[i], vmin=-np.pi, vmax=np.pi, cmap=colormap, s=30, marker='o')
