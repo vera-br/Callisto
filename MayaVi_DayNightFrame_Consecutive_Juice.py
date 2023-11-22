@@ -19,20 +19,15 @@ for orbit, vector in Juice.items():
     juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
     i += 1
 
-def rotate_xy_axis(x, y, psi):
-    x_rot = x * np.cos(psi) - y * np.sin(psi) * y/abs(y)
-    y_rot = x * np.sin(psi) * y/abs(y) + y * np.cos(psi)
-    return x_rot, y_rot
-
 def CSunO_find_axis_unit_vectors(theta, phi):
-    x_hat = -np.sin(phi) # np.array([np.sin(phi), -np.cos(phi), 0])
-    y_hat = -np.sin(theta) * np.sin(phi) # np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
-    z_hat = np.sin(theta) # np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
+    x_hat = np.array([-np.sin(phi), np.cos(phi), 0])
+    y_hat = np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
+    z_hat = np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
     return (x_hat, y_hat, z_hat)
 
 # 3D plotting section
 
-common_lim = 1.25
+common_lim = 1.5
 
 # Make background white.
 mlab.figure(bgcolor=(1, 1, 1))  
@@ -70,7 +65,7 @@ colors = np.transpose(colors)
 # plots all 21 orbits
 i = 0
 
-for i in range(4,10): 
+for i in range(1,10): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = juice_callisto_jupsunorb['orbit%s' % (i)]
     calsun_i = callisto_sun_jupsunorb['orbit%s' % (i)]
@@ -81,32 +76,37 @@ for i in range(4,10):
     x_new = [] ; y_new = [] ; z_new = []
     for m in range(len(vector[1])):
         x_hat, y_hat, z_hat = CSunO_find_axis_unit_vectors(thetas[m], phis[m])
-        new_x = x_hat * vector[1][m] ; x_new.append(new_x)
-        new_y = y_hat * vector[2][m] ; y_new.append(new_y)
-        new_z = z_hat * vector[3][m] ; z_new.append(new_z)
+        new_x = np.dot(x_hat, np.transpose(vector[1:4, :])[m]) ; x_new.append(new_x)
+        new_y = np.dot(y_hat, np.transpose(vector[1:4, :])[m]) ; y_new.append(new_y)
+        new_z = np.dot(z_hat, np.transpose(vector[1:4, :])[m]) ; z_new.append(new_z)
 
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
     
     # limiting coordinates to be inside the axes
-    j = 0
+    j = 0 ; j_out_of_bounds = False
     while abs(x[j]) > common_lim or abs(y[j]) > common_lim or abs(z[j]) > common_lim:
-        j += 1
+        if j < len(x) - 1:
+            j += 1
+        else:
+            j_out_of_bounds = True
+            break
 
-    k = j ; end_loop = False
-    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim and end_loop == False:
+    k = j ; end_loop2 = False
+    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim and j_out_of_bounds == False and end_loop2 == False:
         if k < len(x) - 1:
             k += 1
         else:
-            end_loop = True
+            end_loop2 = True
 
-    arrow_pos = [x[min_index], y[min_index], z[min_index]]
-    arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
-    arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
-    x = x[j:k] ; y = y[j:k] ; z = z[j:k]
+    if j_out_of_bounds == False:
+        arrow_pos = [x[min_index], y[min_index], z[min_index]]
+        arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
+        arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
+        x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
-    # plotting the trajectories as tubes
-    trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
-    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+        # plotting the trajectories as tubes
+        trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
+        arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
     i += 1
 
 # makes size of objects independent from distance from the camera position
