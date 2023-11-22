@@ -100,7 +100,7 @@ for orbit, vector in J_callisto_wrt_jupiter_JSO_CA.items():
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=-np.pi, vmax=np.pi, s=80, cmap=colormap, marker='*')
     else:
         s = ax1.scatter(vector[1] / R_J, vector[2] / R_J, c=J_zenith[i], vmin=-np.pi, vmax=np.pi, s=30, cmap=colormap)
-    print(sun_juice_angle[i])
+
     i += 1
     texts.append(ax1.text(vector[1] / R_J, vector[2] / R_J, 'J%s' % i)) # save orbit labels in list
 
@@ -133,14 +133,14 @@ ax2.scatter(0,0, color='gold')
 
 labels =[]
 for i in range(len(J_zenith)):
-    if sun_juice_angle[i] > 90:
+    if sun_juice_angle[i] < 90:
         ax2.scatter(J_zenith[i], 1, color='black', marker='*')
     else:
         ax2.scatter(J_zenith[i], 1, color='black', s=10)
     labels.append(ax2.text(J_zenith[i], 1, 'J%s' % (i+1)))
 
 for i in range(len(G_zenith)):
-    if sun_galileo_angle[i] > 90:
+    if sun_galileo_angle[i] < 90:
         ax2.scatter(G_zenith[i], 1, color='black', marker='*', facecolors='none')
     else:
         ax2.scatter(G_zenith[i], 1, color='black', marker='o')
