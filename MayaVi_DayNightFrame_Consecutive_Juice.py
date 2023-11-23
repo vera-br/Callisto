@@ -27,7 +27,7 @@ def CSunO_find_axis_unit_vectors(theta, phi):
 
 # 3D plotting section
 
-common_lim = 1.5
+common_lim = 1.1
 
 # Make background white.
 mlab.figure(bgcolor=(1, 1, 1))  
@@ -54,6 +54,17 @@ mlab.outline(color=(0, 0, 0))
 # plots sphere of specified radius
 radius = 1
 sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
+ionosphere = mlab.points3d(0,0,0, resolution=256, opacity=0.2, color=(0,0,1))
+ionosphere.glyph.glyph_source.glyph_source.radius = 1.2
+night_cylinder = mlab.quiver3d(0,0,0, 0, -1, 0, color=(0,0,0), mode='cylinder')
+night_cylinder.glyph.glyph_source.glyph_source.radius = 1.0
+night_cylinder.glyph.glyph_source.glyph_source.resolution = 256
+night_cylinder.glyph.glyph_source.glyph_source.height = 1.5
+night_cylinder.glyph.glyph_source.glyph_source.center = np.array([ 0.  , -0.75,  0.  ])
+night_cylinder.actor.property.edge_tint = np.array([1., 1., 1.])
+night_cylinder.actor.property.emissive_factor = np.array([1., 1., 1.])
+night_cylinder.actor.property.selection_color = np.array([1., 0., 0., 1.])
+night_cylinder.actor.property.opacity = 0.1
 
 # defines 21 equally spaced colours around edge of colour wheel
 colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
@@ -65,7 +76,7 @@ colors = np.transpose(colors)
 # plots all 21 orbits
 i = 0
 
-for i in range(1,10): 
+for i in range(13,17): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = juice_callisto_jupsunorb['orbit%s' % (i)]
     calsun_i = callisto_sun_jupsunorb['orbit%s' % (i)]

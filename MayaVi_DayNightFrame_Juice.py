@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mayavi.api import Engine
+import mayavi
 from mayavi import mlab
 from functions import *
 
@@ -28,7 +29,7 @@ def CSunO_find_axis_unit_vectors(theta, phi):
 
 # 3D plotting section
 
-common_lim = 10
+common_lim = 1.5
 
 # Make background white.
 scene = mlab.figure(bgcolor=(1, 1, 1))  
@@ -55,6 +56,8 @@ mlab.outline(color=(0, 0, 0))
 # plots sphere of specified radius
 radius = 1
 sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
+ionosphere = mlab.points3d(0,0,0, resolution=256, opacity=0.2, color=(0,0,1))
+ionosphere.glyph.glyph_source.glyph_source.radius = 1.2
 
 # defines 21 equally spaced colours around edge of colour wheel
 colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
@@ -82,27 +85,42 @@ for orbit, vector in juice_callisto_jupsunorb.items():
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
     
     # limiting coordinates to be inside the axes
-    j = 0
+    j = 0 ; j_out_of_bounds = False
     while abs(x[j]) > common_lim or abs(y[j]) > common_lim or abs(z[j]) > common_lim:
-        j += 1
+        if j < len(x) - 1:
+            j += 1
+        else:
+            j_out_of_bounds = True
+            break
 
-    k = j ; end_loop = False
-    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim and end_loop == False:
+    k = j ; end_loop2 = False
+    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim and j_out_of_bounds == False and end_loop2 == False:
         if k < len(x) - 1:
             k += 1
         else:
-            end_loop = True
+            end_loop2 = True
 
-    arrow_pos = [x[min_index], y[min_index], z[min_index]]
-    arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
-    arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
+    if j_out_of_bounds == False:
+        arrow_pos = [x[min_index], y[min_index], z[min_index]]
+        arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
+        arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
 
-    x = x[j:k] ; y = y[j:k] ; z = z[j:k]
+        x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
-    # plotting the trajectories as tubes
-    trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
-    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+        # plotting the trajectories as tubes
+        trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
+        arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
     i += 1
+
+night_cone = mlab.quiver3d(0,0,0, 0, -1, 0, color=(0,0,0), mode='cylinder')
+night_cone.glyph.glyph_source.glyph_source.radius = 1.0
+night_cone.glyph.glyph_source.glyph_source.resolution = 256
+night_cone.glyph.glyph_source.glyph_source.height = 1.5
+night_cone.glyph.glyph_source.glyph_source.center = np.array([ 0.  , -0.75,  0.  ])
+night_cone.actor.property.edge_tint = np.array([1., 1., 1.])
+night_cone.actor.property.emissive_factor = np.array([1., 1., 1.])
+night_cone.actor.property.selection_color = np.array([1., 0., 0., 1.])
+night_cone.actor.property.opacity = 0.1
 
 # makes size of objects independent from distance from the camera position
 mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.com/a/32531283/2729627>>.

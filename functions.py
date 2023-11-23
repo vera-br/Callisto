@@ -46,10 +46,11 @@ def find_nearest(array,value):
 def find_nearest_index(array, value):
     idx = np.searchsorted(array, value, side="left")
     return idx
-    
-# finds trajectory from spice data with timestamps closest to those of the Galileo pds data
 
 def find_nearest_trajectories_G(target, reference_point, frame):
+    '''
+    finds trajectory from spice data with timestamps closest to those of the Galileo pds data
+    '''
     Galileo, _ = get_pds_data()
     trajectories = get_spice_data(target, reference_point, frame, 'G')
     closest_trajectories = {}
@@ -209,112 +210,6 @@ def closest_approach_data_G(target, reference_point, frame, mission):
             
         return CA_data_all
 
-def closest_approach_data_4(dictionary, dict2, dict3, dict4):
-    '''
-    Same as closest_approach_data but for 5 dictionaries
-    '''    
-    CA_data_all = {}
-    i = 0
-
-    indices =[]
-    CA_data_all_2 = {}
-    CA_data_all_3 = {}
-    CA_data_all_4 = {}
-
-    for key, array in dictionary.items():
-        i += 1
-        vector = np.transpose(array)
-        min_index = np.argmin(vector[:, 4])
-        indices.append(min_index)
-        CA_data_all['CA_orbit%s' % (i)] = vector[min_index]
-
-    i = 0
-    for key, array in dict2.items():
-        
-        vector = np.transpose(array)
-        CA_data_all_2['CA_orbit%s' % (i)] = vector[indices[i]]
-        i += 1
-
-    i = 0
-    for key, array in dict3.items():
-        
-        vector = np.transpose(array)
-        CA_data_all_3['CA_orbit%s' % (i)] = vector[indices[i]]
-        i += 1
-
-    i = 0
-    for key, array in dict4.items():
-        
-        vector = np.transpose(array)
-        CA_data_all_4['CA_orbit%s' % (i)] = vector[indices[i]]
-        i += 1
-           
-    return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4
-
-
-def closest_approach_data_5(dictionary, dict2, dict3, dict4, dict5):
-    '''
-    Same as closest_approach_data but for 5 dictionaries
-    '''    
-    CA_data_all = {}
-    i = 0
-
-    CA_time_all =[]
-    CA_data_all_2 = {}
-    CA_data_all_3 = {}
-    CA_data_all_4 = {}
-    CA_data_all_5 = {}
-
-    for key, array in dictionary.items():
-        i += 1
-        vector = np.transpose(array)
-        min_index = np.argmin(vector[:, 4])
-        CA_time_all.append(vector[min_index, 0])
-        CA_data_all['CA_orbit%s' % (i)] = vector[min_index]
-
-    i = 0
-    for key, array in dict2.items():
-        vector = np.transpose(array)
-        time = vector[:, 0]
-        CA = find_nearest(time, CA_time_all[i])
-        index = int(np.where(time == CA)[0])
-        i += 1
-        CA_data_all_2['CA_orbit%s' % (i)] = vector[index]
-
-
-    i = 0
-    for key, array in dict3.items():
-        
-        vector = np.transpose(array)
-        time = vector[:, 0]
-        CA = find_nearest(time, CA_time_all[i])
-        index = int(np.where(time == CA)[0])
-        i += 1
-        CA_data_all_3['CA_orbit%s' % (i)] = vector[index]
-    
-    i = 0
-    for key, array in dict4.items():
-        
-        vector = np.transpose(array)
-        time = vector[:, 0]
-        CA = find_nearest(time, CA_time_all[i])
-        index = int(np.where(time == CA)[0])
-        i += 1
-        CA_data_all_4['CA_orbit%s' % (i)] = vector[index]
-                 
-    i = 0
-    for key, array in dict5.items():
-        
-        vector = np.transpose(array)
-        time = vector[:, 0]
-        CA = find_nearest(time, CA_time_all[i])
-        index = int(np.where(time == CA)[0])
-        i += 1
-        CA_data_all_5['CA_orbit%s' % (i)] = vector[index]
-
-    return CA_data_all, CA_data_all_2, CA_data_all_3, CA_data_all_4, CA_data_all_5
-
-
 def CA_info(orbit):
     '''
     input: orbit as a vector array
@@ -368,8 +263,3 @@ def get_closest_approach_data(target, reference_point, frame, mission):
         i += 1
 
     return closest_approach_vectors_i
-
-
-# plots
-
-#def plot_trajectories():
