@@ -25,15 +25,15 @@ def CSunO_find_axis_unit_vectors(theta, phi):
     z_hat = np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
     return (x_hat, y_hat, z_hat)
 
-# 3D plotting section
+def cylindrical_coords(x, y, z):
+    rho = np.sqrt(x**2 + y**2)
+    phi = phi = np.sign(y) * np.arccos(x / (np.sqrt(x**2 + y**2)))
+    return rho, phi, z
 
 common_lim = 2
-
-# Make background white.
-mlab.figure(bgcolor=(1, 1, 1))  
-
-# Draws transparent pipe spanning the desired size for the axes because otherwise axes only stretch to span the last plotted thing
 axis = [-common_lim, common_lim]
+
+scene = mlab.figure(bgcolor=(1, 1, 1))  
 axis = mlab.plot3d(axis, axis, axis, opacity=0, line_width=0.01, tube_radius=0.1, color=(1,1,1))
 
 # Draws the axes
@@ -73,10 +73,13 @@ colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7
 colors = np.array([colors_x, colors_y, colors_z])
 colors = np.transpose(colors)
 
-# plots all 21 orbits
-i = 0
+ionosphere_radius = 1.2
+callisto_radius = 1.0
 
-for i in range(4, 5): 
+times = {}
+indices = {}
+# plots all 21 orbits
+for i in range(1,22): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = juice_callisto_jupsunorb['orbit%s' % (i)]
     calsun_i = callisto_sun_jupsunorb['orbit%s' % (i)]
@@ -92,33 +95,36 @@ for i in range(4, 5):
         new_z = np.dot(z_hat, np.transpose(vector[1:4, :])[m]) ; z_new.append(new_z)
 
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
+    r = vector[4] / R_C ; t = vector[0]
+    rho, _phi, y = cylindrical_coords(x, z, y)
     
-    # limiting coordinates to be inside the axes
-    j = 0 ; j_out_of_bounds = False
-    while abs(x[j]) > common_lim or abs(y[j]) > common_lim or abs(z[j]) > common_lim:
-        if j < len(x) - 1:
-            j += 1
-        else:
-            j_out_of_bounds = True
-            break
-
-    k = j ; end_loop2 = False
-    while abs(x[k]) < common_lim and abs(y[k]) < common_lim and abs(z[k]) < common_lim and j_out_of_bounds == False and end_loop2 == False:
-        if k < len(x) - 1:
-            k += 1
-        else:
-            end_loop2 = True
-
-    if j_out_of_bounds == False:
+    indexs = []
+    ts = []
+    vec_x = []
+    vec_y = []
+    vec_z = []
+    for h in range(len(y)):
+        #print(h)
+        if r[h] < ionosphere_radius:
+            if np.sign(y[h]) * rho[h] > 0 or np.sign(y[h]) * rho[h] < -callisto_radius:
+                #print(h)
+                ts.append(t[h])
+                vec_x.append(x[h])
+                vec_y.append(y[h])
+                vec_z.append(z[h])
+                indexs.append(h)
+    #print(vec_x)
+    times['orbit%s' % (i)] = ts
+    indices['orbit%s' % (i)] = indexs
+    if len(vec_x) > 0:
         arrow_pos = [x[min_index], y[min_index], z[min_index]]
         arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
         arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
-        x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
         # plotting the trajectories as tubes
-        trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
-        arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
-    i += 1
+        trajectory = mlab.plot3d(vec_x, vec_y, vec_z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
+        #arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+
 
 # makes size of objects independent from distance from the camera position
 mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.com/a/32531283/2729627>>.
@@ -126,3 +132,11 @@ mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.c
 mlab.orientation_axes()  # Source: <<https://stackoverflow.com/a/26036154/2729627>>.
 # shows plot
 mlab.show()
+
+times2 = {}
+for orbit, time in times.items():
+    if len(time) > 0:
+        t = max(time) - min(time)
+        times2[str(orbit)] = t
+print(times2)
+
