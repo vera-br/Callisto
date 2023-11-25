@@ -135,18 +135,6 @@ closest_approach_times = ["2032-06-21 00:39:09.184390 UTC"
 "2034-05-01 22:26:09.185470 UTC"
 "2034-06-24 05:16:09.184320 UTC"];
 
-juice_wrt_callisto_cphio_ = "spice_data/juice_wrt_callisto_cphio_";
-juice_wrt_jupiter_cphio_ = "spice_data/juice_wrt_jupiter_cphio_";
-callisto_wrt_jupiter_cphio_ = "spice_data/callisto_wrt_jupiter_cphio_";
-juice_wrt_jupiter_SIII_ = "spice_data/juice_wrt_jupiter_SIII_";
-callisto_wrt_jupiter_SIII_ = "spice_data/callisto_wrt_jupiter_SIII_";
-juice_wrt_sun_cphio_ = "spice_data/juice_wrt_sun_cphio_";
-callisto_wrt_sun_cphio_ = "spice_data/callisto_wrt_sun_cphio_";
-jupiter_wrt_sun_cphio_ = "spice_data/jupiter_wrt_sun_cphio_";
-juice_wrt_sun_IAU_SUN_ = "spice_data/juice_wrt_sun_IAU_SUN_";
-callisto_wrt_sun_IAU_SUN_ = "spice_data/callisto_wrt_sun_IAU_SUN_";
-jupiter_wrt_sun_IAU_SUN_ = "spice_data/jupiter_wrt_sun_IAU_SUN_";
-
 % Retrieve some constants:
 % () For more info, read the documentation on cspice_bodvcd
 kJ = cspice_bodvcd(5, 'GM', 10); % GM of Jupiter with 10 significant
@@ -156,12 +144,12 @@ rJ = cspice_bodvcd(503, 'RADII', 10);% Radius of Ganymede
 hour = 3600;
 
 for i = 1:length(closest_approach_times)
-
+    measurement_interval = 5; % seconds
     date_CA = closest_approach_times(i);
     date_CA_i = convertStringsToChars(date_CA);
     et_CA = cspice_str2et(date_CA_i);
     et_0 = et_CA - 12 * hour;
-    et_R = et_0:3600/60:(et_0 + 24 * hour);
+    et_R = et_0:measurement_interval:(et_0 + 24 * hour);
     
     % position relative to Callisto
     juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
