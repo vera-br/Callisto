@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mayavi import mlab
 from functions import *
+import sympy
+
 
 # load orbit data
 Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
@@ -30,7 +32,7 @@ def cylindrical_coords(x, y, z):
     phi = phi = np.sign(y) * np.arccos(x / (np.sqrt(x**2 + y**2)))
     return rho, phi, z
 
-common_lim = 2
+common_lim = 1.1
 axis = [-common_lim, common_lim]
 
 scene = mlab.figure(bgcolor=(1, 1, 1))  
@@ -55,7 +57,7 @@ mlab.outline(color=(0, 0, 0))
 radius = 1
 sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
 ionosphere = mlab.points3d(0,0,0, resolution=256, opacity=0.2, color=(0,0,1))
-ionosphere.glyph.glyph_source.glyph_source.radius = 1.2
+ionosphere.glyph.glyph_source.glyph_source.radius = 1.1
 night_cylinder = mlab.quiver3d(0,0,0, 0, -1, 0, color=(0,0,0), mode='cylinder')
 night_cylinder.glyph.glyph_source.glyph_source.radius = 1.0
 night_cylinder.glyph.glyph_source.glyph_source.resolution = 256
@@ -73,7 +75,7 @@ colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7
 colors = np.array([colors_x, colors_y, colors_z])
 colors = np.transpose(colors)
 
-ionosphere_radius = 1.2
+ionosphere_radius = 1.1
 callisto_radius = 1.0
 
 times = {}
@@ -122,7 +124,7 @@ for i in range(1,22):
         arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
 
         # plotting the trajectories as tubes
-        trajectory = mlab.plot3d(vec_x, vec_y, vec_z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
+        trajectory = mlab.plot3d(vec_x, vec_y, vec_z,line_width=0.01, tube_radius=0.025, color=(colors[i][0], colors[i][1], colors[i][2]))
         #arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
 
 
