@@ -28,6 +28,16 @@ def cartesian_to_spherical(coords):
 
     return np.array([r, theta, phi]).transpose()
 
+def cartesian_to_spherical_single(coords): 
+    '''
+    Changes 3d array of Cartesian coordinates (x,y,z) into Spherical coords (r,theta,phi)
+    '''
+    r = np.sqrt(coords[0]**2 + coords[1]**2 + coords[2]**2)
+    phi = np.sign(coords[1]) * np.arccos(coords[0] / (np.sqrt(coords[0]**2 + coords[1]**2)))
+    theta = np.arccos(coords[2]/r)
+
+    return np.array([r, theta, phi]).transpose()
+
 def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 

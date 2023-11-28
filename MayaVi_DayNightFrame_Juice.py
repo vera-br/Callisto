@@ -4,6 +4,7 @@ from mayavi.api import Engine
 import mayavi
 from mayavi import mlab
 from functions import *
+import pandas as pd
 
 # load orbit data
 Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
@@ -69,6 +70,8 @@ colors = np.transpose(colors)
 # plots all 21 orbits
 i = 0
 
+juice_cal_CSO_CA = {}
+
 for orbit, vector in juice_callisto_jupsunorb.items():
     calsun_i = callisto_sun_jupsunorb['orbit%s' % (i+1)]
     juice_cal_cphio_CA_i = juice_cal_cphio_CA['CA_orbit%s' % (i+1)]
@@ -84,6 +87,17 @@ for orbit, vector in juice_callisto_jupsunorb.items():
 
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
     
+    t_CA = juice_cal_cphio_CA_i[0]
+    x_CA = np.dot(x_hat, np.transpose(vector[1:4, :])[min_index])
+    y_CA = np.dot(y_hat, np.transpose(vector[1:4, :])[min_index]) 
+    z_CA = np.dot(z_hat, np.transpose(vector[1:4, :])[min_index])
+    spher_coords_CA = cartesian_to_spherical_single([x_CA, y_CA, z_CA])
+    CA_array = [t_CA, x_CA, y_CA, z_CA]
+    CA_array.append(spher_coords_CA[0])
+    CA_array.append(spher_coords_CA[1])
+    CA_array.append(spher_coords_CA[2])
+    juice_cal_CSO_CA['CA_orbit%s' % (i+1)] = CA_array
+
     # limiting coordinates to be inside the axes
     j = 0 ; j_out_of_bounds = False
     while abs(x[j]) > common_lim or abs(y[j]) > common_lim or abs(z[j]) > common_lim:
@@ -111,6 +125,8 @@ for orbit, vector in juice_callisto_jupsunorb.items():
         trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
         arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
     i += 1
+
+pd.DataFrame(juice_cal_CSO_CA).to_csv('juice_cal_CSO.csv', index=False)
 
 night_cone = mlab.quiver3d(0,0,0, 0, -1, 0, color=(0,0,0), mode='cylinder')
 night_cone.glyph.glyph_source.glyph_source.radius = 1.0
