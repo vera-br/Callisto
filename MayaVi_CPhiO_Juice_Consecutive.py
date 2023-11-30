@@ -11,7 +11,7 @@ create_callisto_plot(common_lim)
 colors = colors_21()
 # plots all 21 orbits
 
-for i in range(13,18): 
+for i in range(1,22): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = Juice['orbit%s'%(i)]
     juice_cal_cphio_CA_i = juice_cal_cphio_CA['CA_orbit%s' % (i)]
@@ -39,12 +39,13 @@ for i in range(13,18):
     arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
 
     tube_radius = 0.1
-    trajectory = mlab.plot3d(x, y, z, line_width=0.01, tube_radius=tube_radius, color=(colors[i][0], colors[i][1], colors[i][2]))
-    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=0.1, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+    trajectory = mlab.plot3d(x, y, z, line_width=0.01, tube_radius=tube_radius, color=(colors[i-1][0], colors[i-1][1], colors[i-1][2]))
+    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=0.1, color=(colors[i-1][0], colors[i-1][1], colors[i-1][2]), mode='cone')
     arrow_height = tube_radius * 10
     arrow.glyph.glyph_source.glyph_source.height = arrow_height
     arrow.glyph.glyph_source.glyph_source.center = np.array([arrow_height / 2, 0.  , 0.  ])
     arrow.glyph.glyph_source.glyph_source.radius = tube_radius * 2
+    print(i)
     i += 1
 
 # shows plot
