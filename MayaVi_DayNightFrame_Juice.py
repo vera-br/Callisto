@@ -8,64 +8,17 @@ import pandas as pd
 
 # load orbit data
 Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
-callisto_jupiter_jupsunorb = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
-
 callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb', 'J')
 juice_callisto_jupsunorb = get_spice_data('juice', 'callisto', 'jupsunorb', 'J')
 
-juice_cal_cphio_CA = {}
-
-i = 1
-for orbit, vector in Juice.items():
-    # finds closest approaches for juice_callisto_cphio and adds to dictionary
-    CA_info_vector = CA_info(vector)
-    juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
-    i += 1
-
-def CSunO_find_axis_unit_vectors(theta, phi):
-    x_hat = np.array([-np.sin(phi), np.cos(phi), 0])
-    y_hat = np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
-    z_hat = np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
-    return (x_hat, y_hat, z_hat)
+juice_cal_cphio_CA = get_closest_approach_data('juice', 'callisto', 'cphio', 'J')
 
 # 3D plotting section
 
-common_lim = 1.5
+common_lim = 1.1
 
-# Make background white.
-scene = mlab.figure(bgcolor=(1, 1, 1))  
-
-# Draws transparent pipe spanning the desired size for the axes because otherwise axes only stretch to span the last plotted thing
-axis = [-common_lim, common_lim]
-axis = mlab.plot3d(axis, axis, axis, opacity=0, line_width=0.01, tube_radius=0.1, color=(1,1,1))
-
-# Draws the axes
-axes = mlab.axes(color=(0, 0, 0), ranges=(-common_lim, common_lim, -common_lim, common_lim, -common_lim, common_lim), nb_labels=5)
-
-axes.title_text_property.color = (0.0, 0.0, 0.0)
-axes.title_text_property.font_family = 'times'
-
-axes.label_text_property.color = (0.0, 0.0, 0.0)
-axes.label_text_property.font_family = 'times'
-
-axes.axes.font_factor = 1.0
-
-axes.axes.label_format = '%-6.3g'
-
-mlab.outline(color=(0, 0, 0))
-
-# plots sphere of specified radius
-radius = 1
-sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
-ionosphere = mlab.points3d(0,0,0, resolution=256, opacity=0.2, color=(0,0,1))
-ionosphere.glyph.glyph_source.glyph_source.radius = 1.2
-
-# defines 21 equally spaced colours around edge of colour wheel
-colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
-colors_y = [0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0]
-colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7]
-colors = np.array([colors_x, colors_y, colors_z])
-colors = np.transpose(colors)
+create_callisto_plot(common_lim, ionosphere_CSO=True, night_cone_CSO=True)
+colors = colors_21()
 
 # plots all 21 orbits
 i = 0
@@ -86,7 +39,8 @@ for orbit, vector in juice_callisto_jupsunorb.items():
         new_z = np.dot(z_hat, np.transpose(vector[1:4, :])[m]) ; z_new.append(new_z)
 
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
-    
+    '''
+    # collects CSO CA vector to save into pd array
     t_CA = juice_cal_cphio_CA_i[0]
     x_CA = np.dot(x_hat, np.transpose(vector[1:4, :])[min_index])
     y_CA = np.dot(y_hat, np.transpose(vector[1:4, :])[min_index]) 
@@ -97,7 +51,7 @@ for orbit, vector in juice_callisto_jupsunorb.items():
     CA_array.append(spher_coords_CA[1])
     CA_array.append(spher_coords_CA[2])
     juice_cal_CSO_CA['CA_orbit%s' % (i+1)] = CA_array
-
+    '''
     # limiting coordinates to be inside the axes
     j = 0 ; j_out_of_bounds = False
     while abs(x[j]) > common_lim or abs(y[j]) > common_lim or abs(z[j]) > common_lim:
@@ -122,25 +76,13 @@ for orbit, vector in juice_callisto_jupsunorb.items():
         x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
         # plotting the trajectories as tubes
-        trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
-        arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+        trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.025, tube_sides=12, color=(colors[i][0], colors[i][1], colors[i][2]))
+        #arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
     i += 1
 
-pd.DataFrame(juice_cal_CSO_CA).to_csv('juice_cal_CSO.csv', index=False)
+# saves the CSO CA vector to .csv
+# pd.DataFrame(juice_cal_CSO_CA).to_csv('juice_cal_CSO.csv', index=False)
 
-night_cone = mlab.quiver3d(0,0,0, 0, -1, 0, color=(0,0,0), mode='cylinder')
-night_cone.glyph.glyph_source.glyph_source.radius = 1.0
-night_cone.glyph.glyph_source.glyph_source.resolution = 256
-night_cone.glyph.glyph_source.glyph_source.height = 1.5
-night_cone.glyph.glyph_source.glyph_source.center = np.array([ 0.  , -0.75,  0.  ])
-night_cone.actor.property.edge_tint = np.array([1., 1., 1.])
-night_cone.actor.property.emissive_factor = np.array([1., 1., 1.])
-night_cone.actor.property.selection_color = np.array([1., 0., 0., 1.])
-night_cone.actor.property.opacity = 0.1
 
-# makes size of objects independent from distance from the camera position
-mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.com/a/32531283/2729627>>.
-# switches on axes orientation indicator
-mlab.orientation_axes()  # Source: <<https://stackoverflow.com/a/26036154/2729627>>.
 # shows plot
 mlab.show()

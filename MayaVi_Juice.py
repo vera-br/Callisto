@@ -9,39 +9,8 @@ Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
 
 common_lim = 10
 
-# Make background white.
-mlab.figure(bgcolor=(1, 1, 1))  
-mlab.view(azimuth=45, elevation=135)    
-
-# Draws transparent pipe spanning the desired size for the axes because otherwise axes only stretch to span the last plotted thing
-axis = [-common_lim, common_lim]
-axis = mlab.plot3d(axis, axis, axis, opacity=0, line_width=0.01, tube_radius=0.1, color=(1,1,1))
-
-# Draws the axes
-axes = mlab.axes(color=(0, 0, 0), ranges=(-common_lim, common_lim, -common_lim, common_lim, -common_lim, common_lim), nb_labels=5)
-
-axes.title_text_property.color = (0.0, 0.0, 0.0)
-axes.title_text_property.font_family = 'times'
-
-axes.label_text_property.color = (0.0, 0.0, 0.0)
-axes.label_text_property.font_family = 'times'
-
-axes.axes.font_factor = 1.0
-
-axes.axes.label_format = '%-6.3g'
-
-mlab.outline(color=(0, 0, 0))
-
-# plots sphere of specified radius
-radius = 1
-sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
-
-# defines 21 equally spaced colours around edge of colour wheel
-colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
-colors_y = [0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0]
-colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7]
-colors = np.array([colors_x, colors_y, colors_z])
-colors = np.transpose(colors)
+create_callisto_plot(common_lim)
+colors = colors_21()
 
 # plots all 21 orbits
 i = 0
@@ -66,9 +35,5 @@ for orbit, vector in Juice.items():
     trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
     i += 1
 
-# makes size of objects independent from distance from the camera position
-mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.com/a/32531283/2729627>>.
-# switches on axes orientation indicator
-mlab.orientation_axes()  # Source: <<https://stackoverflow.com/a/26036154/2729627>>.
 # shows plot
 mlab.show()

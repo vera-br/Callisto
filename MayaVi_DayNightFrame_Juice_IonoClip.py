@@ -7,76 +7,13 @@ import sympy
 
 # load orbit data
 Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
-callisto_jupiter_jupsunorb = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
-
 callisto_sun_jupsunorb = get_spice_data('callisto', 'sun', 'jupsunorb', 'J')
 juice_callisto_jupsunorb = get_spice_data('juice', 'callisto', 'jupsunorb', 'J')
-
-juice_cal_cphio_CA = {}
-
-i = 1
-for orbit, vector in Juice.items():
-    # finds closest approaches for juice_callisto_cphio and adds to dictionary
-    CA_info_vector = CA_info(vector)
-    juice_cal_cphio_CA['CA_orbit%s' %(i)] = CA_info_vector
-    i += 1
-
-def CSunO_find_axis_unit_vectors(theta, phi):
-    x_hat = np.array([-np.sin(phi), np.cos(phi), 0])
-    y_hat = np.array([-np.sin(theta) * np.cos(phi), -np.sin(theta) * np.sin(phi), -np.cos(theta)])
-    z_hat = np.array([-np.cos(theta) * np.cos(phi), -np.cos(theta) * np.sin(phi), np.sin(theta)])
-    return (x_hat, y_hat, z_hat)
-
-def cylindrical_coords(x, y, z):
-    rho = np.sqrt(x**2 + y**2)
-    phi = phi = np.sign(y) * np.arccos(x / (np.sqrt(x**2 + y**2)))
-    return rho, phi, z
+juice_cal_cphio_CA = get_closest_approach_data('juice', 'callisto', 'cphio', 'J')
 
 common_lim = 1.1
-axis = [-common_lim, common_lim]
-
-scene = mlab.figure(bgcolor=(1, 1, 1))  
-axis = mlab.plot3d(axis, axis, axis, opacity=0, line_width=0.01, tube_radius=0.1, color=(1,1,1))
-
-# Draws the axes
-axes = mlab.axes(color=(0, 0, 0), ranges=(-common_lim, common_lim, -common_lim, common_lim, -common_lim, common_lim), nb_labels=5)
-
-axes.title_text_property.color = (0.0, 0.0, 0.0)
-axes.title_text_property.font_family = 'times'
-
-axes.label_text_property.color = (0.0, 0.0, 0.0)
-axes.label_text_property.font_family = 'times'
-
-axes.axes.font_factor = 1.0
-
-axes.axes.label_format = '%-6.3g'
-
-mlab.outline(color=(0, 0, 0))
-
-# plots sphere of specified radius
-radius = 1
-sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
-ionosphere = mlab.points3d(0,0,0, resolution=256, opacity=0.2, color=(0,0,1))
-ionosphere.glyph.glyph_source.glyph_source.radius = 1.1
-night_cylinder = mlab.quiver3d(0,0,0, 0, -1, 0, color=(0,0,0), mode='cylinder')
-night_cylinder.glyph.glyph_source.glyph_source.radius = 1.0
-night_cylinder.glyph.glyph_source.glyph_source.resolution = 256
-night_cylinder.glyph.glyph_source.glyph_source.height = common_lim
-night_cylinder.glyph.glyph_source.glyph_source.center = np.array([ 0.  , -common_lim/2,  0.  ])
-night_cylinder.actor.property.edge_tint = np.array([1., 1., 1.])
-night_cylinder.actor.property.emissive_factor = np.array([1., 1., 1.])
-night_cylinder.actor.property.selection_color = np.array([1., 0., 0., 1.])
-night_cylinder.actor.property.opacity = 0.1
-
-# defines 21 equally spaced colours around edge of colour wheel
-colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
-colors_y = [0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0]
-colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7]
-colors = np.array([colors_x, colors_y, colors_z])
-colors = np.transpose(colors)
-
-ionosphere_radius = 1.1
-callisto_radius = 1.0
+create_callisto_plot(common_lim, ionosphere_CSO=True)
+colors = colors_21()
 
 times = {}
 indices = {}
@@ -98,24 +35,15 @@ for i in range(1,22):
 
     x = np.array(x_new) / R_C ; y = np.array(y_new) / R_C ; z = np.array(z_new) / R_C
     r = vector[4] / R_C ; t = vector[0]
-    rho, _phi, y = cylindrical_coords(x, z, y)
+    spher_coords = cartesian_to_spherical(np.transpose([x,y,z])).transpose()
+    theta = spher_coords[1] ; phi = spher_coords[2]
     
-    indexs = []
-    ts = []
-    vec_x = []
-    vec_y = []
-    vec_z = []
+    indexs = [] ; ts = [] ; vec_x = [] ; vec_y = [] ; vec_z = []
     for h in range(len(y)):
-        #print(h)
+        ionosphere_radius = 1.05 + (1 - 2 * np.arccos(np.sin(phi[h]) * np.sin(theta[h])) / np.pi) * 0.05
         if r[h] < ionosphere_radius:
-            if np.sign(y[h]) * rho[h] > 0 or np.sign(y[h]) * rho[h] < -callisto_radius:
-                #print(h)
-                ts.append(t[h])
-                vec_x.append(x[h])
-                vec_y.append(y[h])
-                vec_z.append(z[h])
-                indexs.append(h)
-    #print(vec_x)
+                ts.append(t[h]) ; vec_x.append(x[h]) ; vec_y.append(y[h]) ; vec_z.append(z[h]) ; indexs.append(h)
+
     times['orbit%s' % (i)] = ts
     indices['orbit%s' % (i)] = indexs
     if len(vec_x) > 0:
@@ -127,11 +55,6 @@ for i in range(1,22):
         trajectory = mlab.plot3d(vec_x, vec_y, vec_z,line_width=0.01, tube_radius=0.025, color=(colors[i][0], colors[i][1], colors[i][2]))
         #arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
 
-
-# makes size of objects independent from distance from the camera position
-mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.com/a/32531283/2729627>>.
-# switches on axes orientation indicator
-mlab.orientation_axes()  # Source: <<https://stackoverflow.com/a/26036154/2729627>>.
 # shows plot
 mlab.show()
 
