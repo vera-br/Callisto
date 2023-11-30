@@ -1,7 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from mayavi.api import Engine
-from mayavi import mlab
 from functions import *
 
 # load orbit data
@@ -53,8 +49,14 @@ for orbit, vector in Galileo.items():
     x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
     # plotting the trajectories as tubes
-    trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
-    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=2, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+    tube_radius = 0.1
+    trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=tube_radius, color=(colors[i][0], colors[i][1], colors[i][2]))
+    if min_index > j and min_index < k:
+        arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=0.1, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+        arrow_height = tube_radius * 10
+        arrow.glyph.glyph_source.glyph_source.height = arrow_height
+        arrow.glyph.glyph_source.glyph_source.center = np.array([arrow_height / 2, 0.  , 0.  ])
+        arrow.glyph.glyph_source.glyph_source.radius = tube_radius * 2
     i += 1
 
 # shows plot

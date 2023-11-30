@@ -1,55 +1,25 @@
-import numpy as np
-from mayavi import mlab
 from functions import *
 
 # load orbit data
-Juice = get_spice_data('juice', 'callisto', 'cphio')
+Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
+juice_cal_cphio_CA = get_closest_approach_data('juice', 'callisto', 'cphio', 'J')
 
 # 3D plotting section
 
 common_lim = 10
-
-# Make background white.
-mlab.figure(bgcolor=(1, 1, 1))  
-mlab.view(azimuth=45, elevation=135)    
-
-# Draws transparent pipe spanning the desired size for the axes because otherwise axes only stretch to span the last plotted thing
-axis = [-common_lim, common_lim]
-axis = mlab.plot3d(axis, axis, axis, opacity=0, line_width=0.01, tube_radius=0.1, color=(1,1,1))
-
-# Draws the axes
-axes = mlab.axes(color=(0, 0, 0), ranges=(-common_lim, common_lim, -common_lim, common_lim, -common_lim, common_lim), nb_labels=5)
-
-axes.title_text_property.color = (0.0, 0.0, 0.0)
-axes.title_text_property.font_family = 'times'
-
-axes.label_text_property.color = (0.0, 0.0, 0.0)
-axes.label_text_property.font_family = 'times'
-
-axes.axes.font_factor = 1.0
-
-axes.axes.label_format = '%-6.3g'
-
-mlab.outline(color=(0, 0, 0))
-
-# plots sphere of specified radius
-radius = 1
-sphere = mlab.points3d(0,0,0, color=(0,0,0), resolution=256, scale_factor=2*radius)
-
-# defines 21 equally spaced colours around edge of colour wheel
-colors_x = [1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1]
-colors_y = [0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7, 0, 0, 0, 0, 0, 0, 0]
-colors_z = [0, 0, 0, 0, 0, 0, 0, 0, 2/7, 4/7, 6/7, 1, 1, 1, 1, 1, 1, 1, 6/7, 4/7, 2/7]
-colors = np.array([colors_x, colors_y, colors_z])
-colors = np.transpose(colors)
-
+create_callisto_plot(common_lim)
+colors = colors_21()
 # plots all 21 orbits
 
 for i in range(13,18): 
     # dayside group = C4-9 requires range(4,10), nightside group = C13-17 requires range(13,18)
     vector = Juice['orbit%s'%(i)]
+    juice_cal_cphio_CA_i = juice_cal_cphio_CA['CA_orbit%s' % (i)]
+    min_index = int(juice_cal_cphio_CA_i[7])
 
     x = vector[1] / R_C ; y = vector[2] / R_C ; z = vector[3] / R_C ; r = vector[4] / R_C
+    arrow_pos = [x[min_index], y[min_index], z[min_index]]
+    arrow_vector = np.array([x[min_index+1]-x[min_index], y[min_index+1]-y[min_index], z[min_index+1]-z[min_index]])
     
     # limiting coordinates to be inside the axes
     j = 0
@@ -66,12 +36,16 @@ for i in range(13,18):
     x = x[j:k] ; y = y[j:k] ; z = z[j:k]
 
     # plotting the trajectories as tubes
-    trajectory = mlab.plot3d(x, y, z,line_width=0.01, tube_radius=0.1, color=(colors[i][0], colors[i][1], colors[i][2]))
+    arrow_unit_vector = arrow_vector / np.linalg.norm(arrow_vector)
+
+    tube_radius = 0.1
+    trajectory = mlab.plot3d(x, y, z, line_width=0.01, tube_radius=tube_radius, color=(colors[i][0], colors[i][1], colors[i][2]))
+    arrow = mlab.quiver3d(arrow_pos[0], arrow_pos[1], arrow_pos[2], arrow_unit_vector[0], arrow_unit_vector[1], arrow_unit_vector[2], line_width=0.1, color=(colors[i][0], colors[i][1], colors[i][2]), mode='cone')
+    arrow_height = tube_radius * 10
+    arrow.glyph.glyph_source.glyph_source.height = arrow_height
+    arrow.glyph.glyph_source.glyph_source.center = np.array([arrow_height / 2, 0.  , 0.  ])
+    arrow.glyph.glyph_source.glyph_source.radius = tube_radius * 2
     i += 1
 
-# makes size of objects independent from distance from the camera position
-mlab.gcf().scene.parallel_projection = True  # Source: <<https://stackoverflow.com/a/32531283/2729627>>.
-# switches on axes orientation indicator
-mlab.orientation_axes()  # Source: <<https://stackoverflow.com/a/26036154/2729627>>.
 # shows plot
 mlab.show()

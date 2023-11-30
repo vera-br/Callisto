@@ -3,6 +3,7 @@
 # load modules
 import numpy as np
 import math as math
+import pandas as pd
 from datetime import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
