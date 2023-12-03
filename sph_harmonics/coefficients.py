@@ -1,4 +1,4 @@
-def callisto_quad_coeffs_2001():
+def ganymede_quad_coeffs_2001():
     """
     coefficients dictionary
     :return:
@@ -18,7 +18,7 @@ def callisto_quad_coeffs_2001():
     return coeff_dict
 
 
-def callisto_dip_coeffs_2022():
+def ganymede_dip_coeffs_2022():
 
     coeff_dict = {
         "g10": -716.4,
@@ -29,7 +29,7 @@ def callisto_dip_coeffs_2022():
     return coeff_dict
 
 
-def callisto_quad_coeffs_2022():
+def ganymede_quad_coeffs_2022():
 
     coeff_dict = {
         "g10": -748.3,
