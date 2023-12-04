@@ -163,7 +163,7 @@ def plot_B_evolution_poster_ind(
 
     if filename is not None:
         plt.savefig(
-            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.pdf"
+            f"./plots/{filename}.pdf"
         )
     else:
         pass
@@ -330,7 +330,7 @@ def plot_B_evolution_box(
 
     if filename is not None:
         plt.savefig(
-            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.pdf"
+            f"./plots/{filename}.pdf"
         )
     else:
         pass
@@ -512,7 +512,7 @@ def plot_B_evolution_column_3(
 
     if filename is not None:
         plt.savefig(
-            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.pdf"
+            f"./plots/{filename}.pdf"
         )
     else:
         pass

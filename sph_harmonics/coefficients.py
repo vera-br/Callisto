@@ -1,3 +1,5 @@
+# coefficients of spherical harmonics for the intrinsic magnetic field for Jupiter
+
 def ganymede_quad_coeffs_2001():
     """
     coefficients dictionary

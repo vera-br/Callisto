@@ -1,6 +1,9 @@
 import numpy as np
 n = 1
 
+# returns the first order magnetic field components due to an intrinsic magnetic field 
+# based on the dictionary of coefficients provided by coefficients.py 
+# and the Schmidt quasi-normalised Legendre functions provided by legendre.py 
 
 def B_sph_components(r,
                      theta,

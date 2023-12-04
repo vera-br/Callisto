@@ -1,5 +1,8 @@
 import numpy as np
 
+# returns the magnetic field components due to an intrinsic magnetic field 
+# based on the dictionary of coefficients provided by coefficients.py 
+# and the Schmidt quasi-normalised Legendre functions provided by legendre.py 
 
 def B_sph_components(r,
                      a,

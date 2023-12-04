@@ -1,5 +1,7 @@
 import numpy as np
 
+# calculates the Schmidt quasi-normalised Legendre functions for a given theta and returns results in a dictionary
+
 """
 The Schmidt quasi-normalised Legendre functions
 See Connerney (1993) - Magnetic Fields of the Outer Planets
