@@ -28,7 +28,7 @@ def ae_iphi(sigma, omega, rm, r0, r1):
     J_12 = sps.jv(1 / 2, z)
     J_min_12 = sps.jv(-1 / 2, z)
 
-    return amp * (R * J_52 - J_min_52) / (R * J_12 - J_min_12)
+    return np.real(amp * (R * J_52 - J_min_52) / (R * J_12 - J_min_12))
 
 
 def B_induced_finite_conductivity(pos_vectors, Bext_vectors, sigma, omega, rm, r0, r1):

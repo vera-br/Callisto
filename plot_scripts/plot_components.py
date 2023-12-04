@@ -163,7 +163,7 @@ def plot_B_evolution_poster_ind(
 
     if filename is not None:
         plt.savefig(
-            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.pdf"
+            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.png"
         )
     else:
         pass
@@ -330,7 +330,7 @@ def plot_B_evolution_box(
 
     if filename is not None:
         plt.savefig(
-            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.pdf"
+            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.png"
         )
     else:
         pass
@@ -497,7 +497,7 @@ def plot_B_evolution_column_3(
         )
     else:
         pass
-    
+
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
     fig.legend(
@@ -512,7 +512,7 @@ def plot_B_evolution_column_3(
 
     if filename is not None:
         plt.savefig(
-            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.pdf"
+            f"/Users/mikoo/OneDrive - Imperial College London/Year 4/project/plots/{filename}.png"
         )
     else:
         pass
