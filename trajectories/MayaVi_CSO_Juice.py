@@ -24,6 +24,7 @@ for orbit, vector in juice_callisto_jupsunorb.items():
     juice_cal_cphio_CA_i = juice_cal_cphio_CA['CA_orbit%s' % (i+1)]
     min_index = int(juice_cal_cphio_CA_i[7])
     thetas = calsun_i[5]
+    print(len(thetas))
     phis = calsun_i[6]
     x_new = [] ; y_new = [] ; z_new = []
     for m in range(len(vector[1])):
