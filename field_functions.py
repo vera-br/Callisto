@@ -38,7 +38,7 @@ def Galileo_trajectories_SIII_from_CPhiO():
         gal_cal_SIII_cart = np.array([x_new, y_new, z_new])
         gal_jup_SIII_cart = gal_cal_SIII_cart + cal_jup_vector[1:4]
         gal_jup_SIII_spher = cartesian_to_spherical(gal_jup_SIII_cart.transpose())
-        gal_jup_SIII_vector = np.c_[gal_cal_vector[0], gal_jup_SIII_cart.transpose()]
+        gal_jup_SIII_vector = np.c_[cal_jup_vector[0], gal_jup_SIII_cart.transpose()]
         gal_jup_SIII_vector = np.c_[gal_jup_SIII_vector, gal_jup_SIII_spher]
         galileo_jupiter_SIII['orbit%s' % (i)] = gal_jup_SIII_vector.transpose()
         i += 1
@@ -51,6 +51,14 @@ galileo_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
 callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
 
 colors = ['r', 'y', 'g']
+
+plt.figure()
+for i in range(3):
+    plt.plot(galileo_jupiter_SIII['orbit%s' % (i+1)][0] - callisto_jupiter_SIII['orbit%s' % (i+1)][0], color=colors[i])
+plt.show()
+
+time_diffs = galileo_jupiter_SIII['orbit%s' % (1)][0] - callisto_jupiter_SIII['orbit%s' % (1)][0]
+print(np.linalg.norm(time_diffs))
 
 fig, ax = plt.subplots(2, 3)
 for i in range(3):
