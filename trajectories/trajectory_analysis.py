@@ -142,7 +142,7 @@ def get_pds_data():
     orbits_all = {}
     bfield_all = {}
 
-    data_path = "../galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
+    data_path = "./galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
     data_path_all = []
 
     #create array with all file names

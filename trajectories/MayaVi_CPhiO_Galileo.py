@@ -1,4 +1,4 @@
-from trajectories.trajectory_analysis import *
+from trajectory_analysis import *
 
 # load orbit data
 Galileo, _B = get_pds_data()
