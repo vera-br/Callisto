@@ -73,7 +73,7 @@ def get_spice_data(target, reference_point, frame, mission):
     mission = "J" (juice) or "G" (galileo)
     '''
     # define file names
-    data_path = "../spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
+    data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
     data_path_all = []
 
     #create array with all file names
@@ -117,7 +117,7 @@ def get_pds_data():
     orbits_all = {}
     bfield_all = {}
 
-    data_path = "../galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
+    data_path = "./galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
     data_path_all = []
 
     #create array with all file names
