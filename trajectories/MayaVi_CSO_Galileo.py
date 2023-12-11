@@ -1,4 +1,4 @@
-from trajectories.trajectory_analysis import *
+from trajectory_analysis import *
 
 # load orbit data
 Galileo, _ = get_pds_data()
@@ -9,7 +9,7 @@ galileo_cal_cphio_CA  = get_closest_approach_data('galileo', 'callisto', 'cphio'
 
 common_lim = 10
 
-create_callisto_plot(common_lim)
+create_callisto_plot(common_lim, ionosphere_CSO=True)
 colors = colors_7()
 
 # plots all 21 orbits

@@ -1,4 +1,4 @@
-from trajectories.trajectory_analysis import *
+from trajectory_analysis import *
 
 # load orbit data
 Juice = get_spice_data('juice', 'callisto', 'cphio', 'J')
