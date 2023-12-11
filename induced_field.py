@@ -83,7 +83,7 @@ def B_induced_infinite(orbit, B_external, Rm, R0):
 
         pos = vector[1:4] 
 
-        M = -(2 * pi / mu0) * A * B_ext * (Rm**3)
+        M = -(2 * pi / mu0) * A * 2 * B_ext * (Rm**3)
 
         rmag = np.linalg.norm(pos)
         rdotM_r = np.dot(pos, M) * pos

@@ -10,7 +10,7 @@ from sph_harmonics.magf_higher_order import *
 # constants
 R_J = 71492e3
 J_spin_period = 10.1 * 3600
-C_spin_period = 17 * 24 * 3600
+C_spin_period = 16.689 * 24 * 3600
 C_omega = 2 * np.pi / C_spin_period
 J_omega = 2 * np.pi / J_spin_period
 
