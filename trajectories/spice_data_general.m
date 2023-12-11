@@ -4,12 +4,13 @@
 
 % This is the folder with the kernels
 % () Replace this string with your [datafolder] path!
-datafolder = 'JUICE/kernels/';
+datafolder = './JUICE/kernels/';
 
 addpath('mice/lib');
 addpath('mice/src/mice')
 
 % Load leapsecond kernel
+% ck - fk - dsk -ik - lsk - pck - sclk - spk
 KERNELS_TO_LOAD = ["ck/juice_sc_crema_5_1_150lb_23_1_default_v01.bc"
 "ck/juice_sc_crema_5_1_150lb_23_1_comms_v01.bc"
 "ck/juice_sc_crema_5_1_150lb_23_1_conjctn_v01.bc"
@@ -129,8 +130,8 @@ for i = 1:length(closest_approach_times)
     date_CA = closest_approach_times(i);
     date_CA_i = convertStringsToChars(date_CA);
     et_CA = cspice_str2et(date_CA_i);
-    et_0 = et_CA - 100 * day;
-    et_R = et_0:3600/900:(et_0 + 500 * day);
+    et_0 = et_CA - 0.5 * day;
+    et_R = et_0:3600/60:(et_0 + 1 * day);
     
     
 %{

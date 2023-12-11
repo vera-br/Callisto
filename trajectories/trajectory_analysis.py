@@ -105,8 +105,11 @@ def get_spice_data(target, reference_point, frame, mission):
     if mission == "J":
         for i in range(1, 22):
             data_path_all.append(data_path + str(i) + ".csv")
-    else:
+    elif mission == "G":
         for i in range(1, 8):
+            data_path_all.append(data_path + str(i) + ".csv")
+    elif mission == "GK":
+        for i in range(1, 3):
             data_path_all.append(data_path + str(i) + ".csv")
 
     # create dictionary for orbit data

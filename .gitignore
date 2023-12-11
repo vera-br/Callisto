@@ -1,3 +1,5 @@
 /JUICE/**
 /mice/**
 /.venv/**
+/GLL/**
+/generic_kernels/**
