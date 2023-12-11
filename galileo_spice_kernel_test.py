@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 _, B_gal = get_pds_data()
 t_G = _['orbit1'][0]
-x_G = _['orbit1'][1] * 100 / R_J
-y_G = _['orbit1'][2] * 100 / R_J
-z_G = _['orbit1'][3] * 100 / R_J
+x_G = _['orbit1'][1] / R_C
+y_G = _['orbit1'][2] / R_C
+z_G = _['orbit1'][3] / R_C
 
 B_gal_1 = B_gal['bfield1']
 
@@ -17,6 +17,13 @@ t = galileo_jup_SIII_1[0]
 x = galileo_jup_SIII_1[1] / R_J
 y = galileo_jup_SIII_1[2] / R_J
 z = galileo_jup_SIII_1[3] / R_J
+
+galileo_callisto_cphio_GK = get_spice_data('galileo', 'callisto', 'cphio', 'GK')
+gal_cal_cphio_1 = galileo_callisto_cphio_GK['orbit1']
+t_c = gal_cal_cphio_1[0]
+x_c = gal_cal_cphio_1[1] / R_C
+y_c = gal_cal_cphio_1[2] / R_C
+z_c = gal_cal_cphio_1[3] / R_C
 
 Bx, By, Bz = jm.Internal.Field(x, y, z)
 B_mag = np.sqrt(Bx**2 + By**2 + Bz**2)
@@ -62,11 +69,11 @@ plt.show()
 
 fig, ax = plt.subplots(1, 3)
 
-ax[0].plot(t, x)
+ax[0].plot(t_c, x_c)
 
-ax[1].plot(t, y)
+ax[1].plot(t_c, y_c)
 
-ax[2].plot(t, z)
+ax[2].plot(t_c, z_c)
 
 ax[0].plot(t_G, x_G)
 
