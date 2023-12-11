@@ -1,3 +1,5 @@
+# jovian field
+
 from sph_harmonics.coefficients import *
 import sph_harmonics.legendre as legendre
 from scipy.spatial.transform import Rotation as ROT
