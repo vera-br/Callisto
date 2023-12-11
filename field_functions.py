@@ -45,53 +45,55 @@ def Galileo_trajectories_SIII_from_CPhiO():
 
     return galileo_jupiter_SIII
 
-galileo_callisto_cphio, _ = get_pds_data()
-galileo_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
+# testing graphs
 
-callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
+# galileo_callisto_cphio, _ = get_pds_data()
+# galileo_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
 
-colors = ['r', 'y', 'g']
+# callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
 
-plt.figure()
-for i in range(3):
-    plt.plot(galileo_jupiter_SIII['orbit%s' % (i+1)][0] - callisto_jupiter_SIII['orbit%s' % (i+1)][0], color=colors[i])
-plt.show()
+# colors = ['r', 'y', 'g']
 
-time_diffs = galileo_jupiter_SIII['orbit%s' % (1)][0] - callisto_jupiter_SIII['orbit%s' % (1)][0]
-print(np.linalg.norm(time_diffs))
+# plt.figure()
+# for i in range(3):
+#     plt.plot(galileo_jupiter_SIII['orbit%s' % (i+1)][0] - callisto_jupiter_SIII['orbit%s' % (i+1)][0], color=colors[i])
+# plt.show()
 
-fig, ax = plt.subplots(2, 3)
-for i in range(3):
-    ax[0,0].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][1] / R_J, color=colors[i])
-    ax[0,0].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][1] / R_J, '--', color=colors[i])
-ax[0,0].set_title('x')
+# time_diffs = galileo_jupiter_SIII['orbit%s' % (1)][0] - callisto_jupiter_SIII['orbit%s' % (1)][0]
+# print(np.linalg.norm(time_diffs))
 
-for i in range(3):
-    ax[0,1].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][2] / R_J, color=colors[i])
-    ax[0,1].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][2] / R_J, '--', color=colors[i])
-ax[0,1].set_title('y')
+# fig, ax = plt.subplots(2, 3)
+# for i in range(3):
+#     ax[0,0].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][1] / R_J, color=colors[i])
+#     ax[0,0].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][1] / R_J, '--', color=colors[i])
+# ax[0,0].set_title('x')
 
-for i in range(3):
-    ax[0,2].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][3] / R_J, color=colors[i])
-    ax[0,2].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][3] / R_J, '--', color=colors[i])
-ax[0,2].set_title('z')
+# for i in range(3):
+#     ax[0,1].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][2] / R_J, color=colors[i])
+#     ax[0,1].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][2] / R_J, '--', color=colors[i])
+# ax[0,1].set_title('y')
 
-for i in range(3):
-    ax[1,0].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][4] / R_J, color=colors[i])
-    ax[1,0].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][4] / R_J, '--', color=colors[i])
-ax[1,0].set_title('r')
+# for i in range(3):
+#     ax[0,2].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][3] / R_J, color=colors[i])
+#     ax[0,2].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][3] / R_J, '--', color=colors[i])
+# ax[0,2].set_title('z')
 
-for i in range(3):
-    ax[1,1].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][5], color=colors[i])
-    ax[1,1].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][5], '--', color=colors[i])
-ax[1,1].set_title('theta')
+# for i in range(3):
+#     ax[1,0].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][4] / R_J, color=colors[i])
+#     ax[1,0].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][4] / R_J, '--', color=colors[i])
+# ax[1,0].set_title('r')
 
-for i in range(3):
-    ax[1,2].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][6], color=colors[i])
-    ax[1,2].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][6], '--', color=colors[i])
-ax[1,2].set_title('phi')
+# for i in range(3):
+#     ax[1,1].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][5], color=colors[i])
+#     ax[1,1].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][5], '--', color=colors[i])
+# ax[1,1].set_title('theta')
 
-plt.show()
+# for i in range(3):
+#     ax[1,2].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][6], color=colors[i])
+#     ax[1,2].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][6], '--', color=colors[i])
+# ax[1,2].set_title('phi')
+
+# plt.show()
         
 
         
