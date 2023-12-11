@@ -5,7 +5,7 @@ from MC_jupiter_external import *
 from MC_induced_field import *
 from plot_scripts.plot_components import *
 from plot_scripts.spatial_variations import position_evolution_column
-from current_sheet import B_sheet_mag
+from MC_current_sheet import B_sheet_mag
 
 
 

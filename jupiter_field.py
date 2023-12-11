@@ -23,9 +23,9 @@ n = np.arange(1, 3, 1)
 
 def Bext_full(orbit):
     """
-    Calculates the external field vectors due to both eccentric orbit and synodic rotation of Jupiter.
-    :param orbit:
-    :return:
+    Calculates the external field vectors due to the eccentric orbit and synodic rotation of Jupiter.
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :return: time evolution array of Bx, By, Bz in nT
     """
     # time intervals and angles
     rot_theta = J_omega * orbit[0]

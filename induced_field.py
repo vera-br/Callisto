@@ -35,14 +35,14 @@ def ae_iphi(sigma, omega, rm, r0, r1):
 def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
     """
     Calculate the induced magnetic field with finite conductivity
-    :param orbit: dictionary element for specific orbit (7D array)
-    :param Bext_vectors: external field vectors
-    :param sigma: conductivity
-    :param omega: angular frequency of inducing field
-    :param rm: object radius
-    :param r0: conducting layer outer radius
-    :param r1: conducting layer inner radius
-    :return: array of induced magnetic field vectors
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
+    :param sigma: conductivity in S
+    :param omega: angular frequency of inducing field in
+    :param rm: object radius in m
+    :param r0: conducting layer outer radius in m
+    :param r1: conducting layer inner radius in m
+    :return: time evolution array of Bx, By, Bz in nT
     for more info see (Zimmer et al) https://www.sciencedirect.com/science/article/pii/S001910350096456X
     """
     orbit = orbit.transpose()
@@ -68,11 +68,11 @@ def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
 def B_induced_infinite(orbit, B_external, Rm, R0):
     """
     Induced magnetic field for infinite conductivity (superconductor)
-    :param orbit: dictionary element for specific orbit
-    :param B_external: external field vectors
-    :param Rm: object radius
-    :param R0: conducting layer outer radius
-    :return:
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param B_external: array of external field vectors Bx, By, Bz in nT
+    :param Rm: object radius in m
+    :param R0: conducting layer outer radius in m
+    :return: time evolution array of Bx, By, Bz in nT
     """
     orbit = orbit.transpose()
 
