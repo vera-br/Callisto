@@ -12,11 +12,12 @@ from current_sheet import *
 # load data
 juice_wrt_callisto_cphio = get_spice_data("juice", "callisto", "cphio", "J")
 juice_wrt_callisto_cphio_CA = closest_approach_data_J("juice", "callisto", "cphio", "J")
-callisto_wrt_jupiter_SIII = get_spice_data("juice", "jupiter", "SIII", "J")
+juice_wrt_jupiter_SIII = get_spice_data("juice", "jupiter", "SIII", "J")
+#callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "J")
 
 # specify orbit
 orbit_cphio = juice_wrt_callisto_cphio["orbit5"]
-orbit_SIII = callisto_wrt_jupiter_SIII["orbit5"]
+orbit_SIII = juice_wrt_jupiter_SIII["orbit5"]
 orbit_CA = juice_wrt_callisto_cphio_CA["CA_orbit5"]
 
 # convert time into Timestamp format
