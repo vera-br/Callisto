@@ -76,7 +76,7 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
 
     return Brho, Bz
 
-def B_sheet_mag(orbit, R0, R1, D, I_constant):
+def B_disk(orbit, R0, R1, D, I_constant):
     """
     :param orbit: juice wrt jupiter in SIII
     :param R0: inner disk radius in RJ
@@ -96,7 +96,11 @@ def B_sheet_mag(orbit, R0, R1, D, I_constant):
         X.append(vector[1] / RJ)
         Y.append(vector[2] / RJ)
         Z.append(vector[3] / RJ)
-
+        
+    X = np.array(X)
+    Y = np.array(Y)
+    Z = np.array(Z)
+    
     rho = np.sqrt(X**2 + Y**2)
 
     Brho_inner, Bz_inner = B_currents_interior(
