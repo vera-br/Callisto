@@ -497,7 +497,7 @@ def plot_B_evolution_column_3(
         )
     else:
         pass
-    
+
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
     fig.legend(

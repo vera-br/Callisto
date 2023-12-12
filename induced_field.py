@@ -1,3 +1,5 @@
+# induced field
+
 import numpy as np
 from scipy import constants
 import scipy.special as sps
@@ -5,7 +7,6 @@ from maths import *
 
 mu0 = constants.mu_0
 pi = constants.pi
-
 
 def R_bessel(r1, k):
     z = r1 * k
@@ -28,31 +29,34 @@ def ae_iphi(sigma, omega, rm, r0, r1):
     J_12 = sps.jv(1 / 2, z)
     J_min_12 = sps.jv(-1 / 2, z)
 
-    return amp * (R * J_52 - J_min_52) / (R * J_12 - J_min_12)
+    return np.real(amp * (R * J_52 - J_min_52) / (R * J_12 - J_min_12))
 
 
-def B_induced_finite_conductivity(pos_vectors, Bext_vectors, sigma, omega, rm, r0, r1):
+def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
     """
     Calculate the induced magnetic field with finite conductivity
-    :param pos_vectors: positions
-    :param Bext_vectors: external field vectors
-    :param sigma: conductivity
-    :param omega: angular frequency of inducing field
-    :param rm: object radius
-    :param r0: conducting layer outer radius
-    :param r1: conducting layer inner radius
-    :return: array of induced magnetic field vectors
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
+    :param sigma: conductivity in S
+    :param omega: angular frequency of inducing field in
+    :param rm: object radius in m
+    :param r0: conducting layer outer radius in m
+    :param r1: conducting layer inner radius in m
+    :return: time evolution array of Bx, By, Bz in nT
     for more info see (Zimmer et al) https://www.sciencedirect.com/science/article/pii/S001910350096456X
     """
+    orbit = orbit.transpose()
 
-    Ae_iphi = ae_iphi(sigma, omega, rm, r0, r1)
+    A = ae_iphi(sigma, omega, Rm, R0, R1)
 
     Bind_evolution = []
-    for bext, position in zip(Bext_vectors, pos_vectors):
+    for B_ext, vector in zip(B_external, orbit):
 
-        M = -(2 * pi / mu0) * Ae_iphi * bext * (rm**3)
+        position = vector[1:4] 
+
+        M = -(2 * pi / mu0) * A * B_ext * (Rm**3)
+
         rmag = np.linalg.norm(position)
-
         rdotM_r = np.dot(position, M) * position
 
         Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
@@ -61,26 +65,30 @@ def B_induced_finite_conductivity(pos_vectors, Bext_vectors, sigma, omega, rm, r
     return np.array(Bind_evolution)
 
 
-def B_induced_superconductor(pos_vectors, Bext_vectors, rm, r0):
+def B_induced_infinite(orbit, B_external, Rm, R0):
     """
-    Same as B_induced_finite_conductivity() but for a superconductor (i.e., sigma -> infinity)
-    :param pos_vectors:
-    :param Bext_vectors:
-    :param rm: object radius
-    :param r0: conducting layer outer radius
-    :return:
+    Induced magnetic field for infinite conductivity (superconductor)
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param B_external: array of external field vectors Bx, By, Bz in nT
+    :param Rm: object radius in m
+    :param R0: conducting layer outer radius in m
+    :return: time evolution array of Bx, By, Bz in nT
     """
-    A = -((r0 / rm) ** 3)
+    orbit = orbit.transpose()
 
-    Bind_evolution = []
-    for bext, position in zip(Bext_vectors, pos_vectors):
+    A = -((R0 / Rm) ** 3)
 
-        M = -(2 * pi / mu0) * A * bext * (rm**3)
-        rmag = np.linalg.norm(position)
+    B_ind_evolution = []
+    for B_ext, vector in zip(B_external, orbit):
 
-        rdotM_r = np.dot(position, M) * position
+        pos = vector[1:4] 
 
-        Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
-        Bind_evolution.append(Bind)
+        M = -(2 * pi / mu0) * A * 2 * B_ext * (Rm**3)
 
-    return np.array(Bind_evolution)
+        rmag = np.linalg.norm(pos)
+        rdotM_r = np.dot(pos, M) * pos
+
+        B_ind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
+        B_ind_evolution.append(B_ind)
+
+    return np.array(B_ind_evolution)

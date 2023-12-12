@@ -1,15 +1,21 @@
+# plasma sheet
+
 import numpy as np
 from scipy import constants
-from maths import cylindrical_to_cartesian
-#from maths import angle_between
-#from scipy.spatial.transform import Rotation as ROT
-#from current_sheet_edwards import B_current_sheet_static
-from maths import general_rotation
 
-# constants
+# matthew and ciaran's files
+from maths import cylindrical_to_cartesian
+
+RJ = 71492e3
 pi = constants.pi
-RJ = 71492e3  # Jupiter radius
-Cal_Jup_sep = 1.880E9
+
+# parameters for cylindrical plasma sheet
+R0 = 7.8  # disc inner radius (RJ)
+R1 = 51.4  # disc outer radius (RJ)
+D = 3.6  # disc half thickness (RJ)
+Icon = 139.6  # current constant = mu0 * I / 2 (nT)
+#thetaD = np.radians(9.3)  # disc normal from rotation axis (radians)
+#phiD = np.radians(204.2)  # azimuth angle of disc normal (radians)
 
 def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
     """
@@ -21,12 +27,12 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
         phi: azimuthal direction
         z: aligned with magnetic axis
 
-    :param I_constant: current constant (mu0 * I / 2)
-    :param rho: radial position
-    :param z: vertical position
-    :param D: disk half thickness
-    :param a_inner: disk inner edge
-    :param a_outer: disk outer edge
+    :param I_constant: current constant (mu0 * I / 2) in nT
+    :param rho: radial position in m??
+    :param z: vertical position in m??
+    :param D: disk half thickness in RJ
+    :param a_inner: disk inner edge in RJ
+    :param a_outer: disk outer edge in RJ
     :return:
     """
 
@@ -72,175 +78,34 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
 
     return Brho, Bz
 
-def GphiO_to_JupMag(positions_wrt_ganymede, thetaD):
+def B_disk(orbit, R0, R1, D, I_constant):
     """
-    Transforms from GphiO to JupMag
-    :param positions_wrt_ganymede: shape should be (N, 3)
-    :param thetaD: radians
+    :param orbit: juice wrt jupiter in SIII
+    :param R0: inner disk radius in RJ
+    :param R1: outer disk radius in RJ
+    :param D: disk half thickness in RJ
+    :param I_constant: current constant (mu0 * I / 2) in nT
     :return:
     """
 
-    # shift to jupiter centered system
-    pos_wrt_Gan = positions_wrt_ganymede + np.array([0, Cal_Jup_sep, 0])
+    orbit = orbit.transpose()
 
-    # swap x and y, y -> rho
-    pos_wrt_Gan[:, [0, 1]] = pos_wrt_Gan[:, [1, 0]]
-    positions_wrt_jupiter = pos_wrt_Gan
+    X = []
+    Y = []
+    Z = []
 
-    # rotate about [0, 1, 0]
-    positions_wrt_jupiter_mag = general_rotation(
-        vector=positions_wrt_jupiter,
-        rotation_angle=thetaD,
-        axis_of_rotation=np.array([0, 1, 0])
-    )
-
-    # covert to units of RJ
-    positions_wrt_jupiter_mag /= RJ
-
-    return positions_wrt_jupiter_mag
-
-
-def small_rho_approx(Icon, D, z, rho, a):
-    log_term = (z + D + np.sqrt((z + D) ** 2 + a ** 2)) / (
-            z - D + np.sqrt((z - D) ** 2 + a ** 2))
-    Bz_term1 = np.log(log_term)
-
-    Bz_term2_1 = (z + D) / (((z + D) ** 2 + a ** 2) ** 1.5)
-    Bz_term2_2 = - (z - D) / (((z - D) ** 2 + a ** 2) ** 1.5)
-
-    Bz_term2 = (rho ** 2 / 4) * (Bz_term2_1 + Bz_term2_2)
-
-    Bz = Icon * (Bz_term1 + Bz_term2)
-
-    Brho_term1 = (rho / 2) * ((1 /
-                               np.sqrt((z - D) ** 2 + a ** 2)) - (1 / np.sqrt((z + D) ** 2 + a ** 2)))
-
-    Brho_term2_1 = (a ** 2 - 2 * (z - D) ** 2) / ((a ** 2 + (z - D) ** 2) ** 2.5)
-    Brho_term2_2 = - (a ** 2 - 2 * (z + D) ** 2) / ((a ** 2 + (z + D) ** 2) ** 2.5)
-
-    Brho_term2 = (rho ** 3 / 16) * (Brho_term2_1 + Brho_term2_2)
-
-    Brho = Icon * (Brho_term1 + Brho_term2)
-
-    return Brho, Bz
-
-
-def large_rho_approx(Icon, D, z, rho, a):
-    log_term = (z + D + np.sqrt((z + D) ** 2 + rho ** 2)) / (
-            z - D + np.sqrt((z - D) ** 2 + rho ** 2))
-    Bz_term1 = np.log(log_term)
-
-    Bz_term2_1 = (z + D) / (((z + D) ** 2 + rho ** 2) ** 1.5)
-    Bz_term2_2 = - (z - D) / (((z - D) ** 2 + rho ** 2) ** 1.5)
-
-    Bz_term2 = (a ** 2 / 4) * (Bz_term2_1 + Bz_term2_2)
-
-    Bz = (Icon * (Bz_term1 + Bz_term2))
-
-    if np.abs(z) <= D:
-        Brho_term1 = (1 / rho) * (
-                np.sqrt((z - D) ** 2 + rho ** 2) - np.sqrt((z + D) ** 2 + rho ** 2))
-
-        Brho_term2_1 = 1 / (((z + D) ** 2 + rho ** 2) ** 1.5)
-        Brho_term2_2 = - 1 / (((z - D) ** 2 + rho ** 2) ** 1.5)
-
-        Brho_term2 = (rho * a ** 2 / 4) * (Brho_term2_1 + Brho_term2_2)
-
-        Brho_term3 = (2 * z) / rho
-
-        Brho = Icon * (Brho_term1 + Brho_term2 + Brho_term3)
-
-    # above the sheet
-    elif z >= D:
-        Brho_term1_above = (1 / rho) * (
-                np.sqrt((z - D) ** 2 + rho ** 2) - np.sqrt((z + D) ** 2 + rho ** 2))
-
-        Brho_term2_1_above = 1 / (((z + D) ** 2 + rho ** 2) ** 1.5)
-        Brho_term2_2_above = - 1 / (((z - D) ** 2 + rho ** 2) ** 1.5)
-
-        Brho_term2_above = (rho * a ** 2 / 4) * (Brho_term2_1_above + Brho_term2_2_above)
-
-        Brho_term3_above = (2 * D) / rho
-
-        Brho = Icon * (Brho_term1_above + Brho_term2_above + Brho_term3_above)
-
-    # below the sheet
-    elif z < - D:
-        Brho_term1_below = (1 / rho) * (
-                np.sqrt((z - D) ** 2 + rho ** 2) - np.sqrt((z + D) ** 2 + rho ** 2))
-
-        Brho_term2_1_below = 1 / (((z + D) ** 2 + rho ** 2) ** 1.5)
-        Brho_term2_2_below = - 1 / (((z - D) ** 2 + rho ** 2) ** 1.5)
-
-        Brho_term2_below = (rho * a ** 2 / 4) * (Brho_term2_1_below + Brho_term2_2_below)
-
-        Brho_term3_below = - (2 * D) / rho
-
-        Brho = Icon * (Brho_term1_below + Brho_term2_below + Brho_term3_below)
-
-    return Brho, Bz
-
-
-def B_current_sheet_static(Icon, D, positions, a, R1):
-    Bsheet = []
-    for pos in positions:
-        rho, _, z = pos
-
-        Brho_sub, Bz_sub = small_rho_approx(Icon=Icon, D=D, rho=rho, z=z, a=R1)
-        B_subtract = np.array([Brho_sub, 0, Bz_sub])
-
-        if rho > 5:
-            Brho, Bz = large_rho_approx(Icon=Icon, D=D, rho=rho, z=z, a=a)
-            B = np.array([Brho, 0, Bz])
-            Bsheet.append(B - B_subtract)
-
-        elif rho <= 5:
-            Brho, Bz = small_rho_approx(Icon=Icon, D=D, rho=rho, z=z, a=a)
-            B = np.array([Brho, 0, Bz])
-            Bsheet.append(B - B_subtract)
-
-    return np.array(Bsheet)
-
-
-def B_current_sheet_mesh(Icon, D, rho, z, a, R1):
-    N = len(rho)
-
-    Brho = np.zeros((N, N))
-    Bz = np.zeros((N, N))
-
-    for i, rho_val in enumerate(rho):
-        for j, z_val in enumerate(z):
-
-            Brho_sub, Bz_sub = small_rho_approx(Icon=Icon, D=D, rho=rho_val, z=z_val
-                                                , a=R1)
-
-            if rho_val > 5:
-                Brho_, Bz_ = large_rho_approx(Icon=Icon, D=D, rho=rho_val, z=z_val, a=a)
-                Brho[i, j] = Brho_ - Brho_sub
-                Bz[i, j] = Bz_ - Bz_sub
-
-            elif rho_val <= 5:
-                Brho_, Bz_ = small_rho_approx(Icon=Icon, D=D, rho=rho_val, z=z_val, a=a)
-                Brho[i, j] = Brho_ - Brho_sub
-
-                Bz[i, j] = Bz_ - Bz_sub
-
-    return Brho, Bz
-
-def B_sheet_mag(positions, R0, R1, D, I_constant):
-
-    X, Y, Z = positions
+    for vector in orbit:
+        X.append(vector[1] / RJ)
+        Y.append(vector[2] / RJ)
+        Z.append(vector[3] / RJ)
+        
+    X = np.array(X)
+    Y = np.array(Y)
+    Z = np.array(Z)
+    
     rho = np.sqrt(X**2 + Y**2)
 
-    Brho_inner, Bz_inner = B_currents_interior(
-        I_constant=I_constant, rho=rho, z=Z, D=D, a_inner=R0, a_outer=R1
-    )
-    Brho_outer, Bz_outer = B_currents_interior(
-        I_constant=I_constant, rho=rho, z=Z, D=D, a_inner=R0, a_outer=R1
-    )
-
-    Brho = Brho_inner - Brho_outer
-    Bz = Bz_inner - Bz_outer
+    Brho, Bz = B_currents_interior(I_constant=I_constant, rho=rho, z=Z, D=D, a_inner=R0, a_outer=R1)
     Bphi = np.full_like(Brho, 0)
     B = np.array([Brho, Bphi, Bz]).transpose()
 

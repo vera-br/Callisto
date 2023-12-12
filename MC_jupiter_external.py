@@ -14,11 +14,10 @@ RJ = 71492e3  # Jupiter radius
 m = np.arange(0, 3, 1)
 n = np.arange(1, 3, 1)
 
-J_spin_period = 10.1 * 3600
-C_spin_period = 17 * 24 * 3600
-C_omega = 2 * np.pi / C_spin_period
+J_spin_period = 10.53 * 3600
+G_spin_period = 171.57 * 3600
+G_omega = 2 * np.pi / G_spin_period
 J_omega = 2 * np.pi / J_spin_period
-omega = J_omega - C_omega
 
 # Spherical harmonic coefficients
 quad_coeffs = Jupiter_quad_coeffs_2022()
@@ -28,12 +27,12 @@ def Bext_synodic_variation(times, pos_avg):
     """
     Calculates the external field vectors with variation due Jupiter's synodic rotation
     :param times:
-    :param pos_avg: average position vector of callisto
+    :param pos_avg: average position vector of Ganymede
 
     :return: array of external field vectors
     """
     # time intervals and angles
-    rot_theta = omega * times
+    rot_theta = J_omega * times
 
     # convert rotated cartesian mesh to spherical coordinates
     r, theta, phi = cartesian_to_spherical(pos_avg)
@@ -59,7 +58,7 @@ def Bext_synodic_variation(times, pos_avg):
     Bcart = unit_spherical_to_cartesian(Bsph, theta, phi)
     Bx, By, Bz = Bcart
 
-    # calculate Jupiter's field at callisto
+    # calculate Jupiter's field at Ganymede
     magfJ_vectors = []
     for angle in rot_theta:
 
@@ -79,20 +78,20 @@ def Bext_synodic_variation(times, pos_avg):
 
         magfJ_vectors.append(B_cart_rot)
 
-    magfJ_vectors = np.array(magfJ_vectors) - np.mean(magfJ_vectors, axis=0)
+    magfJ_vectors = np.array(magfJ_vectors)
 
-    return magfJ_vectors
+    return magfJ_vectors, magfJ_vectors - np.mean(magfJ_vectors, axis=0)
 
 
 def Bext_eccentric_variation(positions):
     """
     Calculates the external field vectors with variation due to the eccentric orbit
-    :param positions: array of callisto position vectors
+    :param positions: array of Ganymede position vectors
 
     :return: array of external field vectors
     """
 
-    # calculate Jupiter's field at callisto
+    # calculate Jupiter's field at Ganymede
     magfJ_vectors = []
     for pos in positions:
 
@@ -120,9 +119,9 @@ def Bext_eccentric_variation(positions):
         Bcart = unit_spherical_to_cartesian(Bsph, theta, phi)
         magfJ_vectors.append(Bcart)
 
-    magfJ_vectors = np.array(magfJ_vectors) - np.mean(magfJ_vectors, axis=0)
+    magfJ_vectors = np.array(magfJ_vectors)
 
-    return magfJ_vectors
+    return magfJ_vectors, magfJ_vectors - np.mean(magfJ_vectors, axis=0)
 
 
 def Bext_full(positions, times):
@@ -134,9 +133,9 @@ def Bext_full(positions, times):
     :return:
     """
     # time intervals and angles
-    rot_theta = omega * times
+    rot_theta = J_omega * times
 
-    # calculate Jupiter's field at callisto
+    # calculate Jupiter's field at Ganymede
     magfJ_vectors = []
     for angle, pos in zip(rot_theta, positions):
 
