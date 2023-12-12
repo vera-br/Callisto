@@ -200,6 +200,9 @@ for i = 1:length(closest_approach_times)
 
     galileo_callisto_cphio = cspice_spkezr('GALILEO ORBITER', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '504');
     writematrix([galileo_callisto_cphio;et_R], append('spice_data/galileo_wrt_callisto_cphio_GK',string(i),'.csv'));
+
+    galileo_callisto_IAU_CALLISTO = cspice_spkezr('GALILEO ORBITER', et_R, 'IAU_CALLISTO', 'NONE', '504');
+    writematrix([galileo_callisto_IAU_CALLISTO;et_R], append('spice_data/galileo_wrt_callisto_IAU_CALLISTO_GK',string(i),'.csv'));
     
 
 

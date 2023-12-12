@@ -25,6 +25,13 @@ x_c = gal_cal_cphio_1[1] / R_C
 y_c = gal_cal_cphio_1[2] / R_C
 z_c = gal_cal_cphio_1[3] / R_C
 
+galileo_callisto_IAUCAL_GK = get_spice_data('galileo', 'callisto', 'IAU_CALLISTO', 'GK')
+gal_cal_IAUCAL_1 = galileo_callisto_IAUCAL_GK['orbit1']
+t_i = gal_cal_IAUCAL_1[0]
+x_i = gal_cal_IAUCAL_1[1] / R_C
+y_i = gal_cal_IAUCAL_1[2] / R_C
+z_i = gal_cal_IAUCAL_1[3] / R_C
+
 Bx, By, Bz = jm.Internal.Field(x, y, z)
 B_mag = np.sqrt(Bx**2 + By**2 + Bz**2)
 Bx_G = B_gal_1[1] ; By_G = B_gal_1[2] ; Bz_G = B_gal_1[3]
@@ -81,6 +88,22 @@ ax[1].plot(t_G, y_G)
 
 ax[2].plot(t_G, z_G)
 
+ax[0].plot(t_i, x_i)
 
+ax[1].plot(t_i, y_i)
+
+ax[2].plot(t_i, z_i)
+
+
+plt.show()
+
+plt.figure()
+
+r_c = np.sqrt(x_c**2 + y_c**2 + z_c**2)
+r_i = np.sqrt(x_i**2 + y_i**2 + z_i**2)
+r_G = _['orbit1'][4] / R_C
+plt.plot(t_c, r_c)
+plt.plot(t_G, r_G)
+plt.plot(t_i, r_i)
 plt.show()
 
