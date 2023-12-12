@@ -2,3 +2,5 @@
 /mice/**
 *.png
 /spice_data/callisto_wrt_jupiter_SIII_mag_longperiod1.csv
+/GLL/**
+/generic_kernels/**
