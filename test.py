@@ -70,9 +70,14 @@ B_ind_mag = pd.Series(dict(zip(time, B_ind_mag)))
 
 
 # total field
-B_total_x = pd.Series(dict(zip(time, B_external[:,0] + B_sheet[:,0] + B_induced[:,0])))
-B_total_y = pd.Series(dict(zip(time, B_external[:,1] + B_sheet[:,1] + B_induced[:,1])))
-B_total_z = pd.Series(dict(zip(time, B_external[:,2] + B_sheet[:,2] + B_induced[:,2])))
+B_total = B_external + B_sheet + B_induced
+
+B_total_x = pd.Series(dict(zip(time, B_total[:,0])))
+B_total_y = pd.Series(dict(zip(time, B_total[:,1])))
+B_total_z = pd.Series(dict(zip(time, B_total[:,2])))
+
+B_total_mag = (B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)**0.5
+B_total_mag = pd.Series(dict(zip(time, B_total_mag)))
 
 
 #---------plotting-----------
@@ -81,6 +86,7 @@ fig = plt.figure()
 ax = fig.gca()
 plt.style.use('seaborn-v0_8-whitegrid')
 
+B_total_mag.plot(ax=ax, label="|B|", color="midnightblue")
 B_total_x.plot(ax=ax, label="Bx", color="royalblue")
 B_total_y.plot(ax=ax, label="By", color="orange")
 B_total_z.plot(ax=ax, label="Bz", color="deeppink")
@@ -103,12 +109,12 @@ B_ext_z.plot(ax=ax, label="Bz", color="deeppink")
 plt.legend()
 
 # plot radial distance of juice wrt callisto
-#radial.plot(ax=ax, label="distance", color="k", secondary_y=True)
-#ax.right_ax.set_ylabel("Radial distance [R_C]")
-#plt.legend(loc="lower right")
+radial.plot(ax=ax, label="distance", color="k", secondary_y=True)
+ax.right_ax.set_ylabel("Radial distance [R_C]")
+plt.legend(loc="lower right")
 
 # add a vertical line at CA
-#ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)#, label='closest approach')
+ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)#, label='closest approach')
 
 # Format the time on the x-axis to include minutes
 ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
