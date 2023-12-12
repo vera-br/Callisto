@@ -1,11 +1,13 @@
 # plasma sheet
 
 import numpy as np
+from scipy import constants
 
 # matthew and ciaran's files
 from maths import cylindrical_to_cartesian
 
 RJ = 71492e3
+pi = constants.pi
 
 # parameters for cylindrical plasma sheet
 R0 = 7.8  # disc inner radius (RJ)
@@ -103,21 +105,13 @@ def B_disk(orbit, R0, R1, D, I_constant):
     
     rho = np.sqrt(X**2 + Y**2)
 
-    Brho_inner, Bz_inner = B_currents_interior(
-        I_constant=I_constant, rho=rho, z=Z, D=D, a_inner=R0, a_outer=R1
-    )
-    Brho_outer, Bz_outer = B_currents_interior(
-        I_constant=I_constant, rho=rho, z=Z, D=D, a_inner=R0, a_outer=R1
-    )
-
-    Brho = Brho_inner - Brho_outer
-    Bz = Bz_inner - Bz_outer
+    Brho, Bz = B_currents_interior(I_constant=I_constant, rho=rho, z=Z, D=D, a_inner=R0, a_outer=R1)
     Bphi = np.full_like(Brho, 0)
     B = np.array([Brho, Bphi, Bz]).transpose()
 
     Bcart = []
     for vector in B:
-        Bcart.append(cylindrical_to_cartesian(A=vector, theta=-np.pi / 2))
+        Bcart.append(cylindrical_to_cartesian(A=vector, theta=-pi / 2))
     Bcart = np.array(Bcart)
 
     return rho, Z, Bcart
