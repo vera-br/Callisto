@@ -11,7 +11,7 @@ from current_sheet import *
 
 # load data
 juice_wrt_callisto_cphio = get_spice_data("juice", "callisto", "cphio", "J")
-juice_wrt_callisto_cphio_CA = closest_approach_data_J("juice", "callisto", "cphio", "J")
+juice_wrt_callisto_cphio_CA = get_closest_approach_data("juice", "callisto", "cphio", "J")
 juice_wrt_jupiter_SIII = get_spice_data("juice", "jupiter", "SIII", "J")
 #callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "J")
 
