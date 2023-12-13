@@ -16,11 +16,13 @@ juice_wrt_jupiter_SIII = get_spice_data("juice", "jupiter", "SIII", "J")
 juice_wrt_jupiter_SIII_mag = get_spice_data("juice", "jupiter", "SIII_mag", "J")
 #callisto_wrt_jupiter_SIII = get_spice_data("callisto", "jupiter", "SIII", "J")
 
+flyby_n = 5
+
 # specify orbit
-orbit_cphio = juice_wrt_callisto_cphio["orbit5"]
-orbit_SIII = juice_wrt_jupiter_SIII["orbit5"]
-orbit_SIII_mag = juice_wrt_jupiter_SIII_mag["orbit5"]
-orbit_CA = juice_wrt_callisto_cphio_CA["CA_orbit5"]
+orbit_cphio = juice_wrt_callisto_cphio["orbit%s" % (flyby_n)]
+orbit_SIII = juice_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_SIII_mag = juice_wrt_jupiter_SIII_mag["orbit%s" % (flyby_n)]
+orbit_CA = juice_wrt_callisto_cphio_CA["CA_orbit%s" % (flyby_n)]
 
 # convert time into Timestamp format
 OFFSET = datetime(2000,1,1,12) - datetime(1970,1,1) # difference between J2000 and UTC
@@ -47,7 +49,7 @@ B_ext_mag = pd.Series(dict(zip(time, B_ext_mag)))
 
 
 # current sheet
-rho, z, B_sheet = B_disk(orbit_SIII_mag, R0=R0, R1=R1, D=D, I_constant=Icon)
+rho, z, B_sheet = B_disk(orbit_SIII_mag, R0=R0, R1=R1, D=D, I_constant=Icon, azimuthal_field=True)
 
 B_sheet_x = pd.Series(dict(zip(time, B_sheet[:,0])))
 B_sheet_y = pd.Series(dict(zip(time, B_sheet[:,1])))
@@ -117,8 +119,8 @@ plt.legend(loc="lower right")
 ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)#, label='closest approach')
 
 # Format the time on the x-axis to include minutes
-ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+#ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
 
 ax.set_ylabel("B-field [nT]")
-ax.set_title("Total field during Flyby 5")
+ax.set_title("Total field during Flyby %s" % (flyby_n))
 plt.show()

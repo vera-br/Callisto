@@ -11,7 +11,7 @@ pi = constants.pi
 RJ = 71492e3  # Jupiter radius
 Cal_Jup_sep = 1.880E9
 
-def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
+def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer, azimuthal_field=False, I_rho=12):
     """
     Calculates the radial and vertical magnetic fields due do currents in the plasma sheet where
     the current profile is I(p) = I0 / p
@@ -36,8 +36,24 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
 
         Brho_term1 = (1 / rho) * (F1 - F2 + (2 * z))
         Brho_term2 = - ((a_inner ** 2 * rho) / 4) * ((1 / (F1 ** 3)) - (1 / (F2 ** 3)))
+        Brho_term3 = []
+        for rho_i, z_i in zip(rho, z):
+            # in sheet
+            if np.abs(z_i) < D:
+                Brho_term3_i = (2 * z_i) / rho_i
 
-        Brho = I_constant * (Brho_term1 + Brho_term2)
+            # above the sheet
+            elif z_i >= D:
+                Brho_term3_i = (2 * D) / rho_i
+
+            # below the sheet
+            elif z_i <= - D:
+                Brho_term3_i = - (2 * D) / rho_i
+            
+            Brho_term3.append(Brho_term3_i)
+
+
+        Brho = I_constant * (Brho_term1 + Brho_term2 + Brho_term3)
 
         Bz_term1 = 2 * D * (1 / np.sqrt(z**2 + rho**2))
         Bz_term2 = (a_inner ** 2 / 4) * (((z - D) / (F1 ** 3)) - ((z + D) / (F2 ** 3)))
@@ -53,8 +69,23 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
 
         Brho_term1 = (1 / rho) * (F1 - F2 + (2 * z))
         Brho_term2 = - ((a_outer ** 2 * rho) / 4) * ((1 / (F1 ** 3)) - (1 / (F2 ** 3)))
+        Brho_term3 = []
+        for rho_i, z_i in zip(rho, z):
+            # in sheet
+            if np.abs(z_i) < D:
+                Brho_term3_i = (2 * z_i) / rho_i
 
-        Brho = I_constant * (Brho_term1 + Brho_term2)
+            # above the sheet
+            elif z_i >= D:
+                Brho_term3_i = (2 * D) / rho_i
+
+            # below the sheet
+            elif z_i <= - D:
+                Brho_term3_i = - (2 * D) / rho_i
+            
+            Brho_term3.append(Brho_term3_i)
+
+        Brho = I_constant * (Brho_term1 + Brho_term2 + Brho_term3)
 
         Bz_term1 = 2 * D * (1 / np.sqrt(z ** 2 + rho ** 2))
         Bz_term2 = (a_outer ** 2 / 4) * (((z - D) / (F1 ** 3)) - ((z + D) / (F2 ** 3)))
@@ -62,6 +93,26 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
         Bz = I_constant * (Bz_term1 - Bz_term2)
 
         return Brho, Bz
+    
+    def B_current_sheet_azimuthal(I_rho, D, z, rho):
+        '''
+        :param I_rho: - mega-amps [MA]
+        :param rho: R_J
+        :return B_phi: - nano-Teslas [nT] 
+        '''
+        Bphi = []
+        for z_i, rho_i in zip(z, rho): 
+            Bphi_term1 = -2.79752 * (I_rho / rho_i)
+            if rho_i == 0:
+                Bphi_term2 = 0
+            elif np.abs(z_i) >= D and rho_i > 0:
+                Bphi_term2 = z_i / np.abs(z_i)
+            elif np.abs(z_i) < D and rho_i > 0:
+                Bphi_term2 = z_i / D
+            Bphi_i = Bphi_term1 * Bphi_term2
+            Bphi.append(Bphi_i)
+        return Bphi
+
 
     Brho_inner, Bz_inner = inner(I_constant, rho, z, D, a_inner)
     Brho_outer, Bz_outer = outer(I_constant, rho, z, D, a_outer)
@@ -69,7 +120,13 @@ def B_currents_interior(I_constant, rho, z, D, a_inner, a_outer):
     Brho = Brho_inner - Brho_outer
     Bz = Bz_inner - Bz_outer
 
-    return Brho, Bz
+    if azimuthal_field == False:
+        return Brho, Bz
+    
+    elif azimuthal_field == True:
+        Bphi = B_current_sheet_azimuthal(I_rho, D, z, rho)
+
+        return Brho, Bz, Bphi
 
 def GphiO_to_JupMag(positions_wrt_ganymede, thetaD):
     """
