@@ -94,6 +94,7 @@ def B_induced_infinite(orbit, B_external, Rm, R0):
     return np.array(B_ind_evolution)
 
 def ae_iphi_multi_layer(conductivities, r, l, omega):
+    # calculates Ae^iphi for a given l and omega
     def Fs(l, r, k):
         rk = r * k
         sqrt = np.sqrt(pi / (2 * rk))
