@@ -5,7 +5,7 @@ import pandas as pd
 from pandas import Timestamp
 
 from trajectories.trajectory_analysis import *
-from induced_field import *
+from induced_field_test import *
 from jupiter_field import *
 from current_sheet import *
 
@@ -60,8 +60,14 @@ B_sheet_mag = pd.Series(dict(zip(time, B_sheet_mag)))
 
 
 # induced field
-B_induced = B_induced_infinite(orbit_cphio, B_external + B_sheet, R_C, R_C - 100)
-#B_induced = B_induced_finite_conductivity(orbit4_cphio, B_external, 0.03, 2*np.pi /(10.1*3600), R_C, R_C - 100, R_C - 200)
+r_core = 0.2 * R_C ; r_ocean = 0.9 * R_C ; r_surface = R_C ; r_iono = 1.1 * R_C
+radii = [r_core, r_ocean, r_surface, r_iono]
+sigma_core = 1e-6 ; sigma_ocean = 0.03 ; sigma_surface = 1e-6 ; sigma_iono = 0.008
+conductivities = [sigma_core, sigma_ocean, sigma_surface, sigma_iono]
+
+#B_induced = B_induced_infinite(orbit_cphio, B_external + B_sheet, R_C, R_C - 100)
+#B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, 0.03, 2*np.pi /(10.1*3600), R_C, R_C - 100, R_C - 200)
+B_induced = B_induced_finite_conductivity_multilayer(orbit_cphio, B_external, 2*np.pi /(10.1*3600), conductivities, radii)
 
 B_ind_x = pd.Series(dict(zip(time, B_induced[:,0])))
 B_ind_y = pd.Series(dict(zip(time, B_induced[:,1])))
