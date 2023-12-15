@@ -94,7 +94,9 @@ def B_induced_infinite(orbit, B_external, Rm, R0):
     return np.array(B_ind_evolution)
 
 def ae_iphi_multilayer(conductivities, r, l, omega):
-    # calculates Ae^iphi for a given l and omega
+    '''
+    Calculates Ae^iphi for a given l and omega based on the approach given by Seufert et al. (2011)
+    '''
     def Fs(l, r, k):
         rk = r * k
         sqrt = np.sqrt(pi / (2 * rk))
@@ -107,8 +109,6 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
         dF1 = -0.5 * F1 / r + sqrt * dI_v
         dF2 = -0.5 * F2 / r + sqrt * dK_v
         return F1, F2, dF1, dF2
-    
-    #k = np.sqrt(-1j * omega * mu0 * conductivities)
 
     k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
     k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
@@ -147,13 +147,10 @@ def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductiv
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
     :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
-    :param sigma: conductivity in S
     :param omega: angular frequency of inducing field in
-    :param rm: object radius in m
-    :param r0: conducting layer outer radius in m
-    :param r1: conducting layer inner radius in m
+    :param conductivities: array of conductivities of the layers in S
+    :param radii: array of radii of the layers in m
     :return: time evolution array of Bx, By, Bz in nT
-    for more info see (Zimmer et al) https://www.sciencedirect.com/science/article/pii/S001910350096456X
     """
     orbit = orbit.transpose()
 
