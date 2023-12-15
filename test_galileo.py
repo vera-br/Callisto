@@ -41,7 +41,7 @@ B_total = B_external + B_sheet
 
 # induced field
 r_core = 0.1 * R_C ; r_ocean = 0.9 * R_C ; r_surface = R_C ; r_iono = 1.05 * R_C
-sig_core = 1e-9 ; sig_ocean = 10 ; sig_surface = 1e-9 ; sig_iono = 1e-9
+sig_core = 1e-9 ; sig_ocean = 10 ; sig_surface = 1e-9 ; sig_iono = 0.01
 radii = [r_core, r_ocean, r_surface, r_iono]
 conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
 
@@ -61,11 +61,11 @@ ax[0,0].plot(B_PDS[0], B_PDS[1], label='PDS')
 ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.')
 ax[0,0].set_title('Bx')
 
-ax[0,1].plot(B_PDS[0], B_PDS[1], label='PDS')
+ax[0,1].plot(B_PDS[0], B_PDS[2], label='PDS')
 ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.')
 ax[0,1].set_title('By')
 
-ax[1,0].plot(B_PDS[0], B_PDS[1], label='PDS')
+ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS')
 ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Calc.')
 ax[1,0].set_title('Bz')
 
