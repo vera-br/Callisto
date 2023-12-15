@@ -112,20 +112,22 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
 
     k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
     k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
+    
     r1 = r[0]
-    r2 = r[1]
     F11, F21, dF11, dF21 = Fs(l, r1, k1)
     F12, F22, dF12, dF22 = Fs(l, r1, k2)
 
     Djmin1_Cjmin1 = (F12 / F22) * ( ( (dF12 / F12) - (dF11 / F11) ) / ( (dF11 / F11) - (dF22 / F22)) )
+    print('D/C = ' + str(Djmin1_Cjmin1))
 
     for i in range(1, len(r) - 1):
+       
        k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
        k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
        r_jmin1 = r[i]
-       r_j = r[i + 1]
+
        F11, F21, dF11, dF21 = Fs(l, r_jmin1, k_jmin1)
-       F12, F22, dF12, dF22 = Fs(l, r_j, k_j)
+       F12, F22, dF12, dF22 = Fs(l, r_jmin1, k_j)
 
        numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
        denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
@@ -133,12 +135,14 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     
     R = r[-1]
     k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
+    print('R = ' + str(R))
+    print('k_J = ' + str(k_J))
     F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
     numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
     denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
 
     Ae_iphi = numer / denom
-
+    print('Ae^iphi = ' + str(Ae_iphi))
     return Ae_iphi
 
 def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductivities, radii):
@@ -157,15 +161,11 @@ def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductiv
     orbit = orbit.transpose()
 
     A = ae_iphi_multilayer(conductivities, radii, 1, omega).real
-    print('shape(B_external) = ' + str(np.shape(B_external)))
-    print('shape(orbit) = ' + str(np.shape(orbit)))
 
     Bind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
 
         position = vector[1:4]
-        print('shape(position) = ' + str(np.shape(position)))
-        print('shape(B_ext) = ' + str(np.shape(B_ext))) 
         M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
 
         rmag = np.linalg.norm(position)
