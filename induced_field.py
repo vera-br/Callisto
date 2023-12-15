@@ -118,8 +118,7 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     F12, F22, dF12, dF22 = Fs(l, r1, k2)
 
     Djmin1_Cjmin1 = (F12 / F22) * ( ( (dF12 / F12) - (dF11 / F11) ) / ( (dF11 / F11) - (dF22 / F22)) )
-    print('D/C = ' + str(Djmin1_Cjmin1))
-
+    
     for i in range(1, len(r) - 1):
        
        k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
@@ -135,8 +134,6 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     
     R = r[-1]
     k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
-    print('R = ' + str(R))
-    print('k_J = ' + str(k_J))
     F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
     numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
     denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
