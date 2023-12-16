@@ -53,23 +53,5 @@ B_mag_tot = np.sqrt(B_total[:, 0]**2 + B_total[:, 1]**2 + B_total[:, 2]**2)
 #---------plots-----------
 plot_time_evolution_Gal(B_total, orbit_cphio, orbit_CA, flyby_n, "Total")
 
-fig, ax = plt.subplots(2, 2)
-ax[0,0].plot(B_PDS[0], B_PDS[1], label='Data')
-ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Model')
-ax[0,0].set_title('Bx')
-
-ax[0,1].plot(B_PDS[0], B_PDS[2], label='Data')
-ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Model')
-ax[0,1].set_title('By')
-
-ax[1,0].plot(B_PDS[0], B_PDS[3], label='Data')
-ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Model')
-ax[1,0].set_title('Bz')
-
-ax[1,1].plot(B_PDS[0], B_mag, label='Data')
-ax[1,1].plot(orbit_cphio[0], B_mag_tot, label='Model')
-ax[1,1].set_title('|B|')
-ax[1,1].legend()
-
-fig.suptitle('r_ocean = ' + str(r_ocean / R_C) + ', r_iono = ' + str(r_iono / R_C) + ', sig_ocean = ' + str(sig_ocean) + ', sig_iono = ' + str(sig_iono))
-plt.show()
+title = 'r_ocean = ' + str(r_ocean / R_C) + ', r_iono = ' + str(r_iono / R_C) + ', sig_ocean = ' + str(sig_ocean) + ', sig_iono = ' + str(sig_iono)
+plot_compare_model_with_data(B_total, B_PDS, orbit_cphio, orbit_CA, title)

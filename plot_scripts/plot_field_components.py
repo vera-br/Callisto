@@ -1,5 +1,6 @@
 # plot script for field components evolving in time
 
+import numpy as np
 import pandas as pd
 from pandas import Timestamp
 from datetime import datetime, timedelta
@@ -99,4 +100,67 @@ def plot_time_evolution_Gal(B_field, orbit_cphio, orbit_CA, flyby_n, field_type)
 
     ax.set_ylabel("B-field [nT]")
     ax.set_title(field_type + " field during Flyby %s" % (flyby_n))
+    plt.show()
+
+def plot_compare_model_with_data(B_model, PDS_data, orbit_cphio, orbit_CA, title):
+    """
+    
+    """
+
+    # calculate B-field magnitudes
+    B_mag = np.sqrt(PDS_data[1]**2 + PDS_data[2]**2 + PDS_data[3]**2)
+    B_mag_model = np.sqrt(B_model[:,0]**2 + B_model[:,1]**2 + B_model[:,2]**2)
+
+    # convert time from J2000 into Timestamp format
+    J2000 = datetime(2000,1,1,12)
+
+    time_CA = orbit_CA[0]
+    time_CA = Timestamp((J2000 + timedelta(seconds=orbit_CA[0])).strftime('%Y-%m-%d %H:%M:%S'))
+
+    time_model = orbit_cphio[0]
+    time_model = [Timestamp((J2000 + timedelta(seconds=timestamp)).strftime('%Y-%m-%d %H:%M:%S')) for timestamp in time_model]
+
+    time_Gal = PDS_data[0]
+    time_Gal = [Timestamp((J2000 + timedelta(seconds=timestamp)).strftime('%Y-%m-%d %H:%M:%S')) for timestamp in time_Gal]
+
+    # create series for plotting time evolution
+    Bx_Gal = pd.Series(dict(zip(time_Gal, PDS_data[1])))
+    By_Gal = pd.Series(dict(zip(time_Gal, PDS_data[2])))
+    Bz_Gal = pd.Series(dict(zip(time_Gal, PDS_data[3])))
+    Bmag_Gal = pd.Series(dict(zip(time_Gal, B_mag)))
+
+    Bx_model = pd.Series(dict(zip(time_model, B_model[:, 0])))
+    By_model = pd.Series(dict(zip(time_model, B_model[:, 1])))
+    Bz_model = pd.Series(dict(zip(time_model, B_model[:, 2])))
+    Bmag_model = pd.Series(dict(zip(time_model, B_mag_model)))
+
+    # plot
+    fig, ax = plt.subplots(2, 2, figsize=(8,6))
+
+    Bx_Gal.plot(ax=ax[0,0], label="Data", color="skyblue")
+    Bx_model.plot(ax=ax[0,0], label="Model", color="midnightblue")
+    ax[0,0].set_title('Bx')
+
+    By_Gal.plot(ax=ax[0,1], label="Data", color="skyblue")
+    By_model.plot(ax=ax[0,1], label="Model", color="midnightblue")
+    ax[0,1].set_title('By')
+
+    Bz_Gal.plot(ax=ax[1,0], label="Data", color="skyblue")
+    Bz_model.plot(ax=ax[1,0], label="Model", color="midnightblue")
+    ax[1,0].set_title('Bz')
+
+    Bmag_Gal.plot(ax=ax[1,1], label="Data", color="skyblue")
+    Bmag_model.plot(ax=ax[1,1], label="Model", color="midnightblue")
+    ax[1,1].set_title('|B|')
+
+    ax[0,1].legend(loc="upper right")
+
+    # add a vertical line at CA
+    ax[0,0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+    ax[0,1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+    ax[1,0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+    ax[1,1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+
+    fig.suptitle(title)
+    plt.tight_layout()
     plt.show()
