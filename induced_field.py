@@ -92,3 +92,80 @@ def B_induced_infinite(orbit, B_external, Rm, R0):
         B_ind_evolution.append(B_ind)
 
     return np.array(B_ind_evolution)
+
+def ae_iphi_multilayer(conductivities, r, l, omega):
+    '''
+    Calculates Ae^iphi for a given l and omega based on the approach given by Seufert et al. (2011)
+    '''
+    def Fs(l, r, k):
+        rk = r * k
+        sqrt = np.sqrt(pi / (2 * rk))
+        I_v = sps.iv(l + 0.5, rk)
+        dI_v = sps.ivp(l + 0.5, rk)
+        K_v = sps.kv(l + 0.5, rk)
+        dK_v = sps.kvp(l + 0.5, rk)
+        F1 = sqrt * I_v
+        F2 = sqrt * K_v
+        dF1 = -0.5 * F1 / r + sqrt * dI_v
+        dF2 = -0.5 * F2 / r + sqrt * dK_v
+        return F1, F2, dF1, dF2
+
+    k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
+    k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
+    
+    r1 = r[0]
+    F11, F21, dF11, dF21 = Fs(l, r1, k1)
+    F12, F22, dF12, dF22 = Fs(l, r1, k2)
+
+    Djmin1_Cjmin1 = (F12 / F22) * ( ( (dF12 / F12) - (dF11 / F11) ) / ( (dF11 / F11) - (dF22 / F22)) )
+    
+    for i in range(1, len(r) - 1):
+       
+       k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
+       k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
+       r_jmin1 = r[i]
+
+       F11, F21, dF11, dF21 = Fs(l, r_jmin1, k_jmin1)
+       F12, F22, dF12, dF22 = Fs(l, r_jmin1, k_j)
+
+       numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
+       denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
+       Djmin1_Cjmin1 = (F12 / F22) * (numer / denom)
+    
+    R = r[-1]
+    k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
+    F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
+    numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
+    denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
+
+    Ae_iphi = numer / denom
+    print('Ae^iphi = ' + str(Ae_iphi))
+    return Ae_iphi
+
+def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductivities, radii):
+    """
+    Calculate the induced magnetic field with finite conductivity
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
+    :param omega: angular frequency of inducing field in
+    :param conductivities: array of conductivities of the layers in S
+    :param radii: array of radii of the layers in m
+    :return: time evolution array of Bx, By, Bz in nT
+    """
+    orbit = orbit.transpose()
+
+    A = ae_iphi_multilayer(conductivities, radii, 1, omega).real
+
+    Bind_evolution = []
+    for B_ext, vector in zip(B_external, orbit):
+
+        position = vector[1:4]
+        M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
+
+        rmag = np.linalg.norm(position)
+        rdotM_r = np.dot(position, M) * position
+
+        Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
+        Bind_evolution.append(Bind)
+
+    return np.array(Bind_evolution)

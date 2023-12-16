@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy import constants
+import JupiterMag as jm
 
 # matthew and ciaran's files
 from maths import cylindrical_to_cartesian
@@ -181,3 +182,14 @@ def B_disk(orbit, R0, R1, D, I_constant, azimuthal_field=False, I_rho=12):
     Bcart = np.array(Bcart)
 
     return rho, Z, Bcart
+
+def B_sheet_Community(orbit_SIII):
+    jm.Con2020.Config(equation_type='analytic', CartesianIn=True, CartesianOut=False)
+    x = orbit_SIII[1] / RJ
+    y = orbit_SIII[2] / RJ
+    z = orbit_SIII[3] / RJ
+    Br, Btheta, Bphi = jm.Con2020.Field(x, y, z)
+    Bx = Bphi
+    By = -Br
+    Bz = -Btheta
+    return np.array([Bx, By, Bz]).transpose()
