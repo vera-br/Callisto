@@ -1,3 +1,7 @@
+/__pycache__/**
+/plot_scripts/__pycache__/**
+/trajectories/__pycache__/**
+/sph_harmonics/__pycache__/**
 /JUICE/**
 /mice/**
 *.png
@@ -5,3 +9,5 @@
 /.venv/**
 /GLL/**
 /generic_kernels/**
+presentation_test.py
+/media/**

@@ -3,6 +3,7 @@
 from sph_harmonics.coefficients import *
 import sph_harmonics.legendre as legendre
 from scipy.spatial.transform import Rotation as ROT
+import JupiterMag as jm
 
 # matthew and ciaran's files (that we want to get rid of?)
 from maths import unit_spherical_to_cartesian
@@ -80,3 +81,14 @@ def Bext_full(orbit):
 
         magfJ_vectors.append(B_cart_rot)
     return np.array(magfJ_vectors)
+
+def Bext_Community(orbit_SIII):
+    jm.Internal.Config(Model='jrm33', CartesianIn=True, CartesianOut=False)
+    x = orbit_SIII[1] / R_J
+    y = orbit_SIII[2] / R_J
+    z = orbit_SIII[3] / R_J
+    Br, Btheta, Bphi = jm.Internal.Field(x, y, z)
+    Bx = Bphi
+    By = -Br
+    Bz = -Btheta
+    return np.array([Bx, By, Bz]).transpose()
