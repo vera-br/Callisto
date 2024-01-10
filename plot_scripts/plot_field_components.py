@@ -5,6 +5,8 @@ import pandas as pd
 from pandas import Timestamp
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+from matplotlib.ticker import MaxNLocator
 
 # define constants
 R_C = 2410.3 * 1e3
@@ -34,7 +36,6 @@ def plot_time_evolution(B_field, orbit_cphio, orbit_CA, flyby_n, field_type):
 
     fig = plt.figure()
     ax = fig.gca()
-    plt.style.use('seaborn-v0_8-whitegrid')
 
     B_field_mag.plot(ax=ax, label="|B|", color="midnightblue")
     B_field_x.plot(ax=ax, label="Bx", color="royalblue")
@@ -81,14 +82,13 @@ def plot_time_evolution_Gal(B_field, orbit_cphio, orbit_CA, flyby_n, field_type)
 
     fig = plt.figure()
     ax = fig.gca()
-    plt.style.use('seaborn-v0_8-whitegrid')
 
     B_field_mag.plot(ax=ax, label="|B|", color="midnightblue")
     B_field_x.plot(ax=ax, label="Bx", color="royalblue")
     B_field_y.plot(ax=ax, label="By", color="orange")
     B_field_z.plot(ax=ax, label="Bz", color="deeppink")
 
-    plt.legend()
+    plt.legend(framealpha=1)
 
     # plot radial distance of juice wrt callisto
     radial.plot(ax=ax, label="distance", color="k", secondary_y=True)
@@ -97,6 +97,12 @@ def plot_time_evolution_Gal(B_field, orbit_cphio, orbit_CA, flyby_n, field_type)
 
     # add a vertical line at CA
     ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+
+    ax.tick_params(axis='both', direction='in',top = True, right = True, which='major')
+    ax.yaxis.set_minor_locator(MaxNLocator(50)) 
+    #ax.xaxis.set_minor_locator(MaxNLocator(50))
+    
+    ax.grid(color='xkcd:dark blue',alpha =0.2)
 
     ax.set_ylabel("B-field [nT]")
     ax.set_title(field_type + " field during Flyby %s" % (flyby_n))
@@ -135,7 +141,7 @@ def plot_compare_model_with_data(B_model, PDS_data, orbit_cphio, orbit_CA, title
     Bmag_model = pd.Series(dict(zip(time_model, B_mag_model)))
 
     # plot
-    fig, ax = plt.subplots(2, 2, figsize=(8,6))
+    fig, ax = plt.subplots(2, 2, figsize=(12,5))
 
     Bx_Gal.plot(ax=ax[0,0], label="Data", color="skyblue")
     Bx_model.plot(ax=ax[0,0], label="Model", color="midnightblue")
@@ -153,13 +159,42 @@ def plot_compare_model_with_data(B_model, PDS_data, orbit_cphio, orbit_CA, title
     Bmag_model.plot(ax=ax[1,1], label="Model", color="midnightblue")
     ax[1,1].set_title('|B|')
 
-    ax[0,1].legend(loc="upper right")
+    ax[0,1].legend(loc="upper right", framealpha=1)
 
     # add a vertical line at CA
     ax[0,0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
     ax[0,1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
     ax[1,0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
     ax[1,1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+
+    # set axes labels
+    ax[0,0].set_ylabel("nT")
+    ax[0,1].set_ylabel("nT")
+    ax[1,0].set_ylabel("nT")
+    ax[1,1].set_ylabel("nT")
+
+    # set axes ticks
+    ax[0,0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+    ax[0,0].yaxis.set_minor_locator(MaxNLocator(50))
+    #ax[0,0].xaxis.set_minor_locator(MaxNLocator(50))
+
+    ax[0,1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+    ax[0,1].yaxis.set_minor_locator(MaxNLocator(50))
+    #ax[0,1].xaxis.set_minor_locator(MaxNLocator(50))
+
+    ax[1,0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+    ax[1,0].yaxis.set_minor_locator(MaxNLocator(50)) 
+    #ax[1,0].xaxis.set_minor_locator(MaxNLocator(50))
+
+    ax[1,1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+    ax[1,1].yaxis.set_minor_locator(MaxNLocator(50))
+    #ax[1,1].xaxis.set_minor_locator(MaxNLocator(50))
+
+    # set grid
+    ax[0,0].grid(color='xkcd:dark blue',alpha =0.2)
+    ax[0,1].grid(color='xkcd:dark blue',alpha =0.2)
+    ax[1,0].grid(color='xkcd:dark blue',alpha =0.2)
+    ax[1,1].grid(color='xkcd:dark blue',alpha =0.2)
 
     fig.suptitle(title)
     plt.tight_layout()

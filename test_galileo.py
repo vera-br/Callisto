@@ -17,7 +17,7 @@ galileo_wrt_callisto_cphio_CA = get_closest_approach_data("galileo", "callisto",
 galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
 
 # specify orbit
-flyby_n = 2
+flyby_n = 1
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -51,7 +51,7 @@ B_mag_tot = np.sqrt(B_total[:, 0]**2 + B_total[:, 1]**2 + B_total[:, 2]**2)
 
 
 #---------plots-----------
-plot_time_evolution_Gal(B_total, orbit_cphio, orbit_CA, flyby_n, "Total")
+#plot_time_evolution_Gal(B_total, orbit_cphio, orbit_CA, flyby_n, "Total")
 
 title = 'r_ocean = ' + str(r_ocean / R_C) + ', r_iono = ' + str(r_iono / R_C) + ', sig_ocean = ' + str(sig_ocean) + ', sig_iono = ' + str(sig_iono)
 plot_compare_model_with_data(B_total, B_PDS, orbit_cphio, orbit_CA, title)
