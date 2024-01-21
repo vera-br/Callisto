@@ -139,7 +139,6 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
 
     Ae_iphi = numer / denom
-    print('Ae^iphi = ' + str(Ae_iphi))
     return Ae_iphi
 
 def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductivities, radii):
