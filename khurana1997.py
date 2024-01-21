@@ -13,7 +13,7 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     # fit constants from Khurana (1997)
     x0 = -33.5 #* R_J
     rho0 = 33.2 #* R_J
-    v0 = 37.4 #* R_J # hr^-1
+    v0 = 37.4 #* R_J hr^-1
     omega_J = 2 * np.pi / 10.1 # hr
 
     C1 = 80.3 ; C2 = 690.4 ; C3 = 101.3 ; C4 = -1.7
@@ -49,42 +49,49 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
               + C2 * rho * (np.tanh(rho02 / rho))**a2 \
               + C3 * rho * (np.tanh(rho03 / rho))**a3 \
               + C4 * rho
+
     df_dpsi = C1 * rho / D1 * tanh_r01_r**a1 * tanhZZcs_D1 * dZcs_dpsi
+
     df_dz = C1 * a1 * r01 * rho * Z / r**3 * tanh_r01_r**(a1 - 1) * sech2_r01_r * ln_coshZZcs_D1 \
             - C1 * rho / D1 * tanh_r01_r**a1 * tanhZZcs_D1
-    dg_drho = rho * (1 + q * tanhZZcs_D2**2) \
+
+    dg_drho = p * (1 + q * tanhZZcs_D2**2) \
               - 2 * p * q / D2 * rho * tanhZZcs_D2 * coshZZcs_D2**-2 * dZcs_drho
+
     dg_dpsi = 1 - 2 * p * q / D2 * rho * tanhZZcs_D2 * coshZZcs_D2**2 * dZcs_dpsi
+    
     dg_dz = 2 * p * q / D2 * rho * tanhZZcs_D2 * coshZZcs_D2**-2
     
     B_rho = (df_dpsi * dg_dz - df_dz * dg_dpsi) / rho
+
     B_psi = df_dz * dg_drho - df_drho * dg_dz
+
     B_z = (df_drho * dg_dpsi - df_dpsi * dg_drho) / rho
+    
     B_cyl = [B_rho, B_psi, B_z]
-    print(np.shape(B_cyl))
 
     theta_VIP4 = np.pi * 9.2 / 180
     phi_VIP4 = np.pi * 158 / 180
 
-    rot_matrix_theta = np.transpose([[np.cos(theta_VIP4), 0, -np.sin(theta_VIP4)], [0, 1, 0], [np.sin(theta_VIP4), 0, np.cos(theta_VIP4)]])
-    rot_matrix_phi = np.transpose([[np.cos(phi_VIP4), -np.sin(phi_VIP4), 0], [np.sin(phi_VIP4), np.cos(phi_VIP4), 0], [0, 0, 1]])
-    #rot_matrix_theta = [[np.cos(theta_VIP4), 0, -np.sin(theta_VIP4)], [0, 1, 0], [np.sin(theta_VIP4), 0, np.cos(theta_VIP4)]]
-    #rot_matrix_phi = [[np.cos(phi_VIP4), -np.sin(phi_VIP4), 0], [np.sin(phi_VIP4), np.cos(phi_VIP4), 0], [0, 0, 1]]
+    #rot_matrix_theta = np.transpose([[np.cos(theta_VIP4), 0, -np.sin(theta_VIP4)], [0, 1, 0], [np.sin(theta_VIP4), 0, np.cos(theta_VIP4)]])
+    #rot_matrix_phi = np.transpose([[np.cos(phi_VIP4), -np.sin(phi_VIP4), 0], [np.sin(phi_VIP4), np.cos(phi_VIP4), 0], [0, 0, 1]])
+    rot_matrix_theta = [[np.cos(theta_VIP4), 0, -np.sin(theta_VIP4)], [0, 1, 0], [np.sin(theta_VIP4), 0, np.cos(theta_VIP4)]]
+    rot_matrix_phi = [[np.cos(phi_VIP4), -np.sin(phi_VIP4), 0], [np.sin(phi_VIP4), np.cos(phi_VIP4), 0], [0, 0, 1]]
     
     theta_SIII = orbit_SIII[5]
     phi_SIII = orbit_SIII[6]
 
     B_spher_SIII = []
     for psi_i, B_cyl_i, theta_i, phi_i in zip(psi, np.transpose(B_cyl), theta_SIII, phi_SIII):
-        rot_matrix_cyl_cart = np.transpose([[np.cos(psi_i), np.sin(psi_i), 0], [-np.sin(psi_i), np.cos(psi_i), 0], [0, 0, 1]])
-        #rot_matrix_cyl_cart = [[np.cos(psi_i), np.sin(psi_i), 0], [-np.sin(psi_i), np.cos(psi_i), 0], [0, 0, 1]]
+        #rot_matrix_cyl_cart = np.transpose([[np.cos(psi_i), np.sin(psi_i), 0], [-np.sin(psi_i), np.cos(psi_i), 0], [0, 0, 1]])
+        rot_matrix_cyl_cart = [[np.cos(psi_i), np.sin(psi_i), 0], [-np.sin(psi_i), np.cos(psi_i), 0], [0, 0, 1]]
 
         B_cart_mag_i = np.dot(rot_matrix_cyl_cart, B_cyl_i)
 
         B_cart_SIII_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, B_cart_mag_i))
         
-        rot_matrix_cart_spher = np.transpose([[np.cos(phi_i) * np.sin(theta_i), np.cos(phi_i) * np.cos(theta_i), -np.sin(phi_i)], [np.sin(phi_i) * np.sin(theta_i), np.sin(theta_i) * np.cos(theta_i), np.cos(phi_i)], [np.cos(theta_i), np.sin(theta_i), 0]])
-        #rot_matrix_cart_spher = [[np.cos(phi_i) * np.sin(theta_i), np.cos(phi_i) * np.cos(theta_i), -np.sin(phi_i)], [np.sin(phi_i) * np.sin(theta_i), np.sin(theta_i) * np.cos(theta_i), np.cos(phi_i)], [np.cos(theta_i), np.sin(theta_i), 0]]
+        #rot_matrix_cart_spher = np.transpose([[np.cos(phi_i) * np.sin(theta_i), np.cos(phi_i) * np.cos(theta_i), -np.sin(phi_i)], [np.sin(phi_i) * np.sin(theta_i), np.sin(theta_i) * np.cos(theta_i), np.cos(phi_i)], [np.cos(theta_i), np.sin(theta_i), 0]])
+        rot_matrix_cart_spher = [[np.cos(phi_i) * np.sin(theta_i), np.cos(phi_i) * np.cos(theta_i), -np.sin(phi_i)], [np.sin(phi_i) * np.sin(theta_i), np.sin(theta_i) * np.cos(theta_i), np.cos(phi_i)], [np.cos(theta_i), np.sin(theta_i), 0]]
         
         B_spher_SIII_i = np.dot(rot_matrix_cart_spher, B_cart_SIII_i)
         B_spher_SIII.append(B_spher_SIII_i)

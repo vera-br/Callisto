@@ -31,34 +31,24 @@ Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:
 
 fig, ax = plt.subplots(2,2)
 ax[0,0].plot(B_PDS[0], Bx_smooth, label='PDS', color='k')
-
 ax[0,0].plot(B_PDS[0], B_full_ext[:,0], label='Full Ext.', color='b')
-
 ax[0,0].set_title('Bx')
 ax[0,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 
 ax[0,1].plot(B_PDS[0], By_smooth, label='PDS', color='k')
-
 ax[0,1].plot(B_PDS[0], B_full_ext[:,1], label='Full Ext.', color='b')
-
 ax[0,1].set_title('By')
 ax[0,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 
 ax[1,0].plot(B_PDS[0], Bz_smooth, label='PDS', color='k')
-
 ax[1,0].plot(B_PDS[0], B_full_ext[:,2], label='Full Ext.', color='b')
-
 ax[1,0].set_title('Bz')
 ax[1,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 
 ax[1,1].plot(B_PDS[0], Bmag_smooth, label='PDS', color='k')
-
 ax[1,1].plot(B_PDS[0], Bmag_full_ext, label='Full Ext.', color='b')
-
 ax[1,1].set_title('|B|')
 ax[1,1].legend()
 ax[1,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
-
-
 
 plt.show()
