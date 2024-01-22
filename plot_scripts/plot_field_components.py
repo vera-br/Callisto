@@ -5,8 +5,7 @@ import pandas as pd
 from pandas import Timestamp
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import AutoMinorLocator
 
 # define constants
 R_C = 2410.3 * 1e3
@@ -99,8 +98,8 @@ def plot_time_evolution_Gal(B_field, orbit_cphio, orbit_CA, flyby_n, field_type)
     ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
 
     ax.tick_params(axis='both', direction='in',top = True, right = True, which='major')
-    ax.yaxis.set_minor_locator(MaxNLocator(50)) 
-    #ax.xaxis.set_minor_locator(MaxNLocator(50))
+    ax.yaxis.set_minor_locator(AutoMinorLocator()) 
+    #ax.xaxis.set_minor_locator(AutoMinorLocator())
     
     ax.grid(color='xkcd:dark blue',alpha =0.2)
 
@@ -175,20 +174,20 @@ def plot_compare_model_with_data(B_model, PDS_data, orbit_cphio, orbit_CA, title
 
     # set axes ticks
     ax[0,0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-    ax[0,0].yaxis.set_minor_locator(MaxNLocator(50))
-    #ax[0,0].xaxis.set_minor_locator(MaxNLocator(50))
+    ax[0,0].yaxis.set_minor_locator(AutoMinorLocator())
+    #ax[0,0].xaxis.set_minor_locator(AutoMinorLocator())
 
     ax[0,1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-    ax[0,1].yaxis.set_minor_locator(MaxNLocator(50))
-    #ax[0,1].xaxis.set_minor_locator(MaxNLocator(50))
+    ax[0,1].yaxis.set_minor_locator(AutoMinorLocator())
+    #ax[0,1].xaxis.set_minor_locator(AutoMinorLocator())
 
     ax[1,0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-    ax[1,0].yaxis.set_minor_locator(MaxNLocator(50)) 
-    #ax[1,0].xaxis.set_minor_locator(MaxNLocator(50))
+    ax[1,0].yaxis.set_minor_locator(AutoMinorLocator()) 
+    #ax[1,0].xaxis.set_minor_locator(AutoMinorLocator())
 
     ax[1,1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-    ax[1,1].yaxis.set_minor_locator(MaxNLocator(50))
-    #ax[1,1].xaxis.set_minor_locator(MaxNLocator(50))
+    ax[1,1].yaxis.set_minor_locator(AutoMinorLocator())
+    #ax[1,1].xaxis.set_minor_locator(AutoMinorLocator())
 
     # set grid
     ax[0,0].grid(color='xkcd:dark blue',alpha =0.2)
