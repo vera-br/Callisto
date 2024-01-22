@@ -1,3 +1,4 @@
+#%%
 from trajectories.trajectory_analysis import *
 from field_functions import *
 from khurana1997 import *
@@ -18,6 +19,34 @@ orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
 B_PDS = B_PDSs['bfield%s' % (flyby_n)]
 B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
+# test coord transformation
+
+calculated = convert_SIII_to_SIII_mag(orbit_cal_SIII)
+
+fig, ax = plt.subplots(2,3, figsize=(10,6))
+
+ax[0,0].plot(orbit_cal_SIII_mag[1], label="data")
+ax[0,0].plot(calculated[1], label="calculated")
+
+ax[0,1].plot(orbit_cal_SIII_mag[2], label="data")
+ax[0,1].plot(calculated[2], label="calculated")
+
+ax[0,2].plot(orbit_cal_SIII_mag[3], label="data")
+ax[0,2].plot(calculated[3], label="calculated")
+
+ax[1,0].plot(orbit_cal_SIII_mag[4], label="data")
+ax[1,0].plot(calculated[4], label="calculated")
+
+ax[1,1].plot(orbit_cal_SIII_mag[5], label="data")
+ax[1,1].plot(calculated[5], label="calculated")
+
+ax[1,2].plot(orbit_cal_SIII_mag[6], label="data")
+ax[1,2].plot(calculated[6], label="calculated")
+
+ax[1,2].legend(loc="best")
+plt.show()
+
+#%%
 #----------smoothed B measurements for plotting-------------------------
 Bx_smooth = uniform_filter1d(B_PDS[1], size=500)
 By_smooth = uniform_filter1d(B_PDS[2], size=300)
