@@ -21,27 +21,28 @@ B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
 # test coord transformation
 
-calculated = convert_SIII_to_SIII_mag(orbit_cal_SIII)
+transformed = convert_SIII_to_SIII_mag(orbit_cal_SIII)
+
 
 fig, ax = plt.subplots(2,3, figsize=(10,6))
 
 ax[0,0].plot(orbit_cal_SIII_mag[1], label="data")
-ax[0,0].plot(calculated[1], label="calculated")
+ax[0,0].plot(transformed[1], label="calculated")
 
 ax[0,1].plot(orbit_cal_SIII_mag[2], label="data")
-ax[0,1].plot(calculated[2], label="calculated")
+ax[0,1].plot(transformed[2], label="calculated")
 
 ax[0,2].plot(orbit_cal_SIII_mag[3], label="data")
-ax[0,2].plot(calculated[3], label="calculated")
+ax[0,2].plot(transformed[3], label="calculated")
 
 ax[1,0].plot(orbit_cal_SIII_mag[4], label="data")
-ax[1,0].plot(calculated[4], label="calculated")
+ax[1,0].plot(transformed[4], label="calculated")
 
 ax[1,1].plot(orbit_cal_SIII_mag[5], label="data")
-ax[1,1].plot(calculated[5], label="calculated")
+ax[1,1].plot(transformed[5], label="calculated")
 
 ax[1,2].plot(orbit_cal_SIII_mag[6], label="data")
-ax[1,2].plot(calculated[6], label="calculated")
+ax[1,2].plot(transformed[6], label="calculated")
 
 ax[1,2].legend(loc="best")
 plt.show()

@@ -4,19 +4,23 @@ from trajectories.trajectory_analysis import cartesian_to_spherical
 R_J = 71492 * 1e3
 
 # rotation angles for the magnetic dipole from the VIP4 model
-theta_VIP4 = np.pi * 9.2 / 180
-phi_VIP4 = np.pi * 158 / 180
+theta_VIP4 = np.pi * 9.5 / 180
+phi_VIP4 = np.pi * 159.2 / 180
 
 def convert_SIII_to_SIII_mag(orbit_SIII):
-    rot_matrix_theta = [[ np.cos(theta_VIP4),   0,   -np.sin(theta_VIP4)], 
+
+    rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   -np.sin(theta_VIP4)], 
                         [                  0,   1,                    0], 
-                        [ np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]]
-    rot_matrix_phi = [[ np.cos(phi_VIP4),   np.sin(phi_VIP4),   0], 
+                        [ np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
+    
+    rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),   np.sin(phi_VIP4),   0], 
                       [-np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
-                      [                0,                  0,   1]]
+                      [                0,                  0,   1]])
+    
     orbit_SIII_mag = orbit_SIII
     orbit_SIII_mag[1:4] = np.dot(rot_matrix_theta, np.dot(rot_matrix_phi, orbit_SIII[1:4]))
     orbit_SIII_mag[4:] = cartesian_to_spherical(orbit_SIII_mag[1:4].transpose()).transpose()
+    
     return orbit_SIII_mag
 
 def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
@@ -129,6 +133,3 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     By = -Br
     Bz = -Btheta
     return np.array([Bx, By, Bz]).transpose()
-
-
-    
