@@ -23,7 +23,24 @@ def convert_SIII_to_SIII_mag(orbit_SIII):
     
     return orbit_SIII_mag
 
-def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
+def SIII_to_SIII_mag(SIII_coords):
+    """
+    Takes 3d array in SIII and converts to 3d array in SIII_mag
+    """
+
+    rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   -np.sin(theta_VIP4)], 
+                        [                  0,   1,                    0], 
+                        [ np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
+    
+    rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),   np.sin(phi_VIP4),   0], 
+                      [-np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
+                      [                0,                  0,   1]])
+    
+    SIII_mag = np.dot(rot_matrix_theta, np.dot(rot_matrix_phi, SIII_coords))
+    
+    return SIII_mag
+
+def B_sheet_khurana(orbit_JSO, orbit_SIII_mag):
     x_JSO = orbit_JSO[1] / R_J
 
     # coords. in magnetodisc frame
@@ -93,43 +110,34 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     B_z = (df_drho * dg_dpsi - df_dpsi * dg_drho) / rho
     
     B_cyl = [B_rho, B_psi, B_z]
-    
-    rot_matrix_theta = [[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)], 
-                        [                  0,   1,                    0], 
-                        [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]]
-    
-    rot_matrix_phi = [[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0], 
-                      [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
-                      [                0,                  0,   1]]
-    
-    # angles from SIII frame for cartesian to spherical transformation
-    theta_SIII = orbit_SIII[5]
-    phi_SIII = orbit_SIII[6]
+   
 
-    B_spher_SIII = []
-    for psi_i, B_cyl_i, theta_i, phi_i in zip(psi, np.transpose(B_cyl), theta_SIII, phi_SIII):
+    B_cart_SIII = np.empty((0,3))
+    for psi_i, B_cyl_i in zip(psi, np.transpose(B_cyl)):
+
+        # cylindrical to cartesian transformation in magnetodisc coords.
+
         rot_matrix_cyl_cart = [[ np.cos(psi_i),  -np.sin(psi_i),   0], 
                                [ np.sin(psi_i),   np.cos(psi_i),   0], 
                                [             0,               0,   1]]
 
-        # cylindrical to cartesian transformation in magnetodisc coords.
         B_cart_mag_i = np.dot(rot_matrix_cyl_cart, B_cyl_i)
 
-        # rotation of dipole relating to untilting coord. axis by theta_VIP4 then unrotating by phi_VIP4
-        B_cart_SIII_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, B_cart_mag_i))
-        
-        rot_matrix_cart_spher = [[ np.cos(phi_i) * np.sin(theta_i),     np.cos(phi_i) * np.cos(theta_i),  -np.sin(phi_i)], 
-                                 [ np.sin(phi_i) * np.sin(theta_i),   np.sin(theta_i) * np.cos(theta_i),   np.cos(phi_i)], 
-                                 [                 np.cos(theta_i),                     np.sin(theta_i),               0]]
-        
-        # cartesian to spherical transformation in SIII coords.
-        B_spher_SIII_i = np.dot(rot_matrix_cart_spher, B_cart_SIII_i)
-        B_spher_SIII.append(B_spher_SIII_i)
-    
+        # transforming from SIII to SIII_mag
+        # rotation of dipole relating to untilting coord. axis by theta_VIP4 then (un)rotating by phi_VIP4
+        B_cart_SIII_i = SIII_to_SIII_mag(B_cart_mag_i)
+
+        # append cartesian values to array
+        B_cart_SIII = np.vstack([B_cart_SIII, B_cart_SIII_i])
+
+    # cartesian to spherical transformation in SIII coords.
+    B_spher_SIII = cartesian_to_spherical(B_cart_SIII)    
     B_spher_SIII = np.transpose(B_spher_SIII)
     Br, Btheta, Bphi = B_spher_SIII
+
     # conversion into CPhiO coord. system
     Bx = Bphi
     By = -Br
     Bz = -Btheta
+
     return np.array([Bx, By, Bz]).transpose()

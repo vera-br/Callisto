@@ -19,33 +19,7 @@ orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
 B_PDS = B_PDSs['bfield%s' % (flyby_n)]
 B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
-# test coord transformation
 
-transformed = convert_SIII_to_SIII_mag(orbit_cal_SIII)
-
-
-fig, ax = plt.subplots(2,3, figsize=(10,6))
-
-ax[0,0].plot(orbit_cal_SIII_mag[1], label="data")
-ax[0,0].plot(transformed[1], label="calculated")
-
-ax[0,1].plot(orbit_cal_SIII_mag[2], label="data")
-ax[0,1].plot(transformed[2], label="calculated")
-
-ax[0,2].plot(orbit_cal_SIII_mag[3], label="data")
-ax[0,2].plot(transformed[3], label="calculated")
-
-ax[1,0].plot(orbit_cal_SIII_mag[4], label="data")
-ax[1,0].plot(transformed[4], label="calculated")
-
-ax[1,1].plot(orbit_cal_SIII_mag[5], label="data")
-ax[1,1].plot(transformed[5], label="calculated")
-
-ax[1,2].plot(orbit_cal_SIII_mag[6], label="data")
-ax[1,2].plot(transformed[6], label="calculated")
-
-ax[1,2].legend(loc="best")
-plt.show()
 
 #%%
 #----------smoothed B measurements for plotting-------------------------
@@ -54,7 +28,7 @@ By_smooth = uniform_filter1d(B_PDS[2], size=300)
 Bz_smooth = uniform_filter1d(B_PDS[3], size=1000)
 Bmag_smooth = uniform_filter1d(B_mag, size=300)
 
-B_sheet = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
+B_sheet = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag)
 B_external = Bext_Community(orbit_cal_SIII)
 B_full_ext = B_sheet + B_external
 Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:, 2]**2)
@@ -81,4 +55,33 @@ ax[1,1].set_title('|B|')
 ax[1,1].legend()
 ax[1,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 
+plt.show()
+
+# %%
+# test coord transformation
+
+transformed = convert_SIII_to_SIII_mag(orbit_cal_SIII)
+
+
+fig, ax = plt.subplots(2,3, figsize=(10,6))
+
+ax[0,0].plot(orbit_cal_SIII_mag[1], label="data")
+ax[0,0].plot(transformed[1], label="calculated")
+
+ax[0,1].plot(orbit_cal_SIII_mag[2], label="data")
+ax[0,1].plot(transformed[2], label="calculated")
+
+ax[0,2].plot(orbit_cal_SIII_mag[3], label="data")
+ax[0,2].plot(transformed[3], label="calculated")
+
+ax[1,0].plot(orbit_cal_SIII_mag[4], label="data")
+ax[1,0].plot(transformed[4], label="calculated")
+
+ax[1,1].plot(orbit_cal_SIII_mag[5], label="data")
+ax[1,1].plot(transformed[5], label="calculated")
+
+ax[1,2].plot(orbit_cal_SIII_mag[6], label="data")
+ax[1,2].plot(transformed[6], label="calculated")
+
+ax[1,2].legend(loc="best")
 plt.show()
