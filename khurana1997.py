@@ -4,7 +4,7 @@ from trajectories.trajectory_analysis import cartesian_to_spherical
 R_J = 71492 * 1e3
 
 # rotation angles for the magnetic dipole from the VIP4 model
-theta_VIP4 = np.pi * 9.2 / 180
+theta_VIP4 = np.pi * 9.5 / 180
 phi_VIP4 = np.pi * 158 / 180
 
 def convert_SIII_to_SIII_mag(orbit_SIII):
