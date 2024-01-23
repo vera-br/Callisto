@@ -12,6 +12,7 @@ callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', '
 
 flyby_n = 2
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_SIII_mag_gal = convert_SIII_to_SIII_mag(orbit_SIII)
 orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
 orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
 orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
@@ -24,7 +25,7 @@ By_smooth = uniform_filter1d(B_PDS[2], size=300)
 Bz_smooth = uniform_filter1d(B_PDS[3], size=1000)
 Bmag_smooth = uniform_filter1d(B_mag, size=300)
 
-B_sheet = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
+B_sheet = B_sheet_khurana(orbit_cal_JSO, orbit_SIII_mag_gal, orbit_SIII)
 B_external = Bext_Community(orbit_cal_SIII)
 B_full_ext = B_sheet + B_external
 Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:, 2]**2)
