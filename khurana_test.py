@@ -10,7 +10,7 @@ callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII
 callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
 callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII_mag')
 
-flyby_n = 2
+flyby_n = 1
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
 orbit_SIII_mag_gal = convert_SIII_to_SIII_mag(orbit_SIII)
 orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
