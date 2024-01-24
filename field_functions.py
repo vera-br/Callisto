@@ -45,6 +45,38 @@ def Galileo_trajectories_SIII_from_CPhiO():
 
     return galileo_jupiter_SIII
 
+def Galileo_trajectories_SIII_from_CPhiO2():
+    galileo_callisto_cphio, _ = get_pds_data()
+    callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
+    galileo_jupiter_SIII = {}
+    
+    i = 1
+    for _orb1, gal_cal_vector in galileo_callisto_cphio.items():
+        cal_jup_vector = callisto_jupiter_SIII['orbit%s' % (i)]
+        theta_SIII = cal_jup_vector[5]
+        phi_SIII = cal_jup_vector[6]
+        
+        gal_cal_cphio_xyz = np.transpose(gal_cal_vector[1:4])
+        cal_jup_vector_xyz = np.transpose(cal_jup_vector[1:4])
+        gal_jup_SIII_cart = np.zeros_like(gal_cal_cphio_xyz)
+        j = 0
+        for gal_cal_cphio_xyz_i, cal_jup_vector_xyz_i, theta_i, phi_i in zip(gal_cal_cphio_xyz, cal_jup_vector_xyz, theta_SIII, phi_SIII):
+            rot_matrix_spher_cart = np.transpose([[ np.cos(phi_i) * np.sin(theta_i),     np.sin(phi_i) * np.sin(theta_i),   np.cos(theta_i)], 
+                                                  [ np.cos(phi_i) * np.cos(theta_i),     np.sin(phi_i) * np.cos(theta_i),  -np.sin(theta_i)], 
+                                                  [                  -np.sin(phi_i),                       np.cos(phi_i),                 0]])
+            gal_cal_SIII_cart_i = np.dot(rot_matrix_spher_cart, gal_cal_cphio_xyz_i)
+            gal_jup_SIII_cart_i = gal_cal_SIII_cart_i + cal_jup_vector_xyz_i
+            gal_jup_SIII_cart[j,:] = gal_jup_SIII_cart_i
+            j += 1
+        
+        gal_jup_SIII_spher = cartesian_to_spherical(gal_jup_SIII_cart)
+        gal_jup_SIII_vector = np.c_[cal_jup_vector[0], gal_jup_SIII_cart]
+        gal_jup_SIII_vector = np.c_[gal_jup_SIII_vector, gal_jup_SIII_spher]
+        galileo_jupiter_SIII['orbit%s' % (i)] = gal_jup_SIII_vector.transpose()
+        i += 1
+
+    return galileo_jupiter_SIII
+
 # testing graphs
 
 # galileo_callisto_cphio, _ = get_pds_data()
