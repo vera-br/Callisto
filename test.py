@@ -1,172 +1,41 @@
-#%%
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-
 from trajectories.trajectory_analysis import *
-from induced_field import *
-from jupiter_field import *
-from current_sheet import *
 from field_functions import *
+from khurana1997 import *
+from khurana_2 import *
+from jupiter_field import *
+from scipy.ndimage import uniform_filter1d 
 
-R_C = 2410.3 * 1e3 # m
-C_orbit = 1070 * 1e6
+galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
+galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
+callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
+callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
+callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII_mag')
 
-
-# ---------- Coordinate Transformations ---------
-
-# not sure if this works correctly
-def spherical_coordinates_transformation(sph_coords, distance):
-
-    r = sph_coords[0]
-    theta = sph_coords[1]
-    phi = sph_coords[2]
-
-    # Radial Distance
-    r_prime = np.sqrt(r**2 + distance**2 - 2 * r * distance * np.cos(theta))
-
-    # Polar Angle
-    cos_theta_prime = (r * np.cos(theta) - distance) / r_prime
-    sin_theta_prime = (r * np.sin(theta)) / (r_prime * np.sin(phi))
-
-    # Avoid floating-point errors for arccos and arcsin
-    cos_theta_prime = np.clip(cos_theta_prime, -1, 1)
-    sin_theta_prime = np.clip(sin_theta_prime, -1, 1)
-
-    theta_prime = np.arccos(cos_theta_prime)
-    theta_prime = np.where(sin_theta_prime < 0, 2 * np.pi - theta_prime, theta_prime)
-
-    # Azimuthal Angle
-    tan_phi_prime = (r * np.sin(theta) * np.sin(phi)) / (r * np.sin(theta) * np.cos(phi) - distance)
-    phi_prime = np.arctan(tan_phi_prime)
-
-    return np.column_stack((r_prime, theta_prime, phi_prime))
-
-def spherical_to_cartesian(sph_coords):
-    r = sph_coords[:, 0]
-    theta = sph_coords[:, 1]
-    phi = sph_coords[:, 2]
-
-    x = r * np.sin(theta) * np.cos(phi)
-    y = r * np.sin(theta) * np.sin(phi)
-    z = r * np.cos(theta)
-
-    return np.column_stack((x, y, z))
+flyby_n = 2
+orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
+orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
+B_PDS = B_PDSs['bfield%s' % (flyby_n)]
+B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
 
+#--------------------
 
-# ---------- Magnetic Field ---------
+B_Archie = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag)
+B_Vera = B_khurana_2(orbit_cal_JSO, orbit_cal_SIII_mag)
 
-def Bext_Community(x3, y3, z3):
-    """
-    x,y,z in SIII coords
-    """
-    jm.Internal.Config(Model='jrm33', CartesianIn=True, CartesianOut=False)
-    x = x3 / R_J
-    y = y3 / R_J
-    z = z3 / R_J
-    Br, Btheta, Bphi = jm.Internal.Field(x, y, z)
-    Bx = Bphi
-    By = -Br
-    Bz = -Btheta
-    return np.array([Bx, By, Bz]).transpose()
+fig, ax = plt.subplots(2,2)
+ax[0,0].plot(B_PDS[0], B_Archie[0], label='A', color='k')
+ax[0,0].plot(B_PDS[0], B_Vera[0], label='V', color='b')
+ax[0,0].set_title('Brho')
 
-def B_sheet_Community(x3, y3, z3):
-    """
-    x,y,z in SIII coords
-    """
-    jm.Con2020.Config(equation_type='analytic', CartesianIn=True, CartesianOut=False)
-    x = x3 / R_J
-    y = y3 / R_J
-    z = z3 / R_J
-    Br, Btheta, Bphi = jm.Con2020.Field(x, y, z)
-    Bx = Bphi
-    By = -Br
-    Bz = -Btheta
-    return np.array([Bx, By, Bz]).transpose()
+ax[0,1].plot(B_PDS[0], B_Archie[1], label='A', color='k')
+ax[0,1].plot(B_PDS[0], B_Vera[1], label='V', color='b')
+ax[0,1].set_title('Bphi')
 
-def B_induced_finite_conductivity_multilayer(position, B_external, omega, conductivities, radii):
-    """
-    Calculate the induced magnetic field with finite conductivity
-    :param position: array with x (m), y(m), z(m) in cphio
-    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
-    :param omega: angular frequency of inducing field in
-    :param conductivities: array of conductivities of the layers in S
-    :param radii: array of radii of the layers in m
-    :return: time evolution array of Bx, By, Bz in nT
-    """
-    A = ae_iphi_multilayer(conductivities, radii, 1, omega).real
+ax[1,0].plot(B_PDS[0], B_Archie[2], label='A', color='k')
+ax[1,0].plot(B_PDS[0], B_Vera[2], label='V', color='b')
+ax[1,0].set_title('Bz')
 
-    Bind_evolution = []
-    for B_ext, pos in zip(B_external, position):
-
-        M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
-
-        rmag = np.linalg.norm(pos)
-        rdotM_r = np.dot(pos, M) * pos
-
-        Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
-        Bind_evolution.append(Bind)
-
-    return np.array(Bind_evolution)
-
-
-# induced field params
-r_core = 0.1 * R_C 
-r_ocean = 0.9 * R_C 
-r_surface = R_C 
-r_iono = 1.05 * R_C
-sig_core = 1e-9 
-sig_ocean = 10 
-sig_surface = 1e-9 
-sig_iono = 0.01
-radii = [r_core, r_ocean, r_surface, r_iono]
-conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
-
-
-# ---------- Setting the Domain ---------
-
-# create time array for one jupiter rotation (synodic)
-time = np.arange(0, 10.1*3600, 60)
-
-
-theta_values = np.linspace(0, np.pi, 100)  # Theta values (latitude)
-phi_values = np.linspace(-np.pi, np.pi, 200)  # Phi values (longitude)
-
-# Create a grid of points on the spherical surface
-theta, phi = np.meshgrid(theta_values, phi_values)
-print(np.shape(theta), np.shape(phi))
-
-B_total_mag = np.zeros((len(phi_values), len(theta_values)))
-print(np.shape(B_total_mag))
-
-for j in range(len(theta_values)):
-    for i in range(len(phi_values)):
-
-        A = R_C + 50 *1e3
-
-        x = A * np.sin(theta[i,j]) * np.cos(phi[i,j])
-        y = A * np.sin(theta[i,j]) * np.sin(phi[i,j])
-        z = A * np.cos(theta[i,j])
-
-        position_cphio = np.array([x,y,z])
-        sph_cphio = np.array([R_C, theta[i,j], phi[i,j]])
-
-        sph_SIII = spherical_coordinates_transformation(sph_cphio, C_orbit)
-        position_SIII = spherical_to_cartesian(sph_SIII)
-        position_SIII = position_SIII.transpose()
-
-        B_external = Bext_Community(position_SIII[0], position_SIII[1], position_SIII[2])
-        B_sheet = B_sheet_Community(position_SIII[0], position_SIII[1], position_SIII[2])
-
-        B_induced = B_induced_finite_conductivity_multilayer(position_cphio, B_external + B_sheet, omega=2 * np.pi / (10.1 * 3600), conductivities=conductivities, radii=radii)
-
-        B_total = B_external + B_sheet + B_induced
-        B_total_mag[i,j] = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
-
-print(np.shape(B_total_mag))
-
-#%%
-plt.matshow(B_total_mag)
 plt.show()
-# %%
