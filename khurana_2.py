@@ -5,10 +5,38 @@ from trajectories.trajectory_analysis import cartesian_to_spherical
 
 
 RJ = 71492 * 1e3
+orbital_dist = 26.3 #* RJ
 
 # rotation angles for the magnetic dipole from the VIP4 model
 theta_VIP4 = np.pi * 9.5 / 180
 phi_VIP4 = np.pi * 159.2 / 180
+
+# not sure if this works correctly!!
+def spherical_coordinates_transformation(sph_coords, distance):
+    
+    r = sph_coords[0]
+    theta = sph_coords[1]
+    phi = sph_coords[2]
+
+    # Radial Distance
+    r_prime = np.sqrt(r**2 + distance**2 - 2 * r * distance * np.cos(theta))
+
+    # Polar Angle
+    cos_theta_prime = (r * np.cos(theta) - distance) / r_prime
+    sin_theta_prime = (r * np.sin(theta)) / (r_prime * np.sin(phi))
+
+    # Avoid floating-point errors for arccos and arcsin
+    cos_theta_prime = np.clip(cos_theta_prime, -1, 1)
+    sin_theta_prime = np.clip(sin_theta_prime, -1, 1)
+
+    theta_prime = np.arccos(cos_theta_prime)
+    theta_prime = np.where(sin_theta_prime < 0, 2 * np.pi - theta_prime, theta_prime)
+
+    # Azimuthal Angle
+    tan_phi_prime = (r * np.sin(theta) * np.sin(phi)) / (r * np.sin(theta) * np.cos(phi) - distance)
+    phi_prime = np.arctan(tan_phi_prime)
+
+    return np.column_stack((r_prime, theta_prime, phi_prime))
 
 
 def B_khurana_2(orbit_JSO, orbit_SIII_mag):
@@ -120,8 +148,10 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag):
     Br, Btheta, Bphi = B_spher_SIII
 
     # conversion into CPhiO coord. system
-    Bx = Bphi
-    By = Br
-    Bz = -Btheta
+    B_spher_cphio = spherical_coordinates_transformation(B_spher_SIII, orbital_dist)
+
+    Bx = B_spher_cphio[:,2] #phi
+    By = B_spher_cphio[:,0] #r
+    Bz = -(90 - B_spher_cphio[:,1]* 180/np.pi) # -theta but converted to deg
 
     return np.array([Bx, By, Bz]).transpose()
