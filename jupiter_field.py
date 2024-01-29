@@ -83,15 +83,18 @@ def Bext_full(orbit):
     return np.array(magfJ_vectors)
 
 def Bext_Community(orbit_SIII):
-    jm.Internal.Config(Model='VIP4', CartesianIn=False, CartesianOut=False)
+    # jm.Internal.Config(Model='VIP4', CartesianIn=True, CartesianOut=False)
     # x = orbit_SIII[1] / R_J
     # y = orbit_SIII[2] / R_J
     # z = orbit_SIII[3] / R_J
     # Br, Btheta, Bphi = jm.Internal.Field(x, y, z)
+
+    jm.Internal.Config(Model='VIP4', CartesianIn=False, CartesianOut=False)
     r = orbit_SIII[4] / R_J
     theta = orbit_SIII[5]
     phi = orbit_SIII[6]
     Br, Btheta, Bphi = jm.Internal.Field(r, theta, phi)
+
     Bx = Bphi
     By = -Br
     Bz = -Btheta
