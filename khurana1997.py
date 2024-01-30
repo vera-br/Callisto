@@ -8,7 +8,7 @@ theta_VIP4 = -np.pi * 9.5 / 180
 phi_VIP4 = -np.pi * 159.2 / 180
 
 def convert_SIII_to_SIII_mag(orbit_SIII):
-    _orbit_SIII_mag = orbit_SIII
+    _orbit_SIII_mag = orbit_SIII.copy()
     rot_matrix_theta = [[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)], 
                         [                  0,   1,                    0], 
                         [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]]
@@ -21,27 +21,31 @@ def convert_SIII_to_SIII_mag(orbit_SIII):
     return _orbit_SIII_mag
 
 def convert_SIII_mag_to_SIII(orbit_SIII_mag):
-    _orbit_SIII = orbit_SIII_mag
+    _orbit_SIII = orbit_SIII_mag.copy()
     rot_matrix_theta = [[ np.cos(theta_VIP4),   0,   -np.sin(theta_VIP4)], 
-                                     [                  0,   1,                     0], 
-                                     [ np.sin(theta_VIP4),   0,    np.cos(theta_VIP4)]]
+                        [                  0,   1,                     0], 
+                        [ np.sin(theta_VIP4),   0,    np.cos(theta_VIP4)]]
     rot_matrix_phi = [[ np.cos(phi_VIP4),   np.sin(phi_VIP4),   0], 
-                                   [-np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
-                                   [                0,                  0,   1]]
+                      [-np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
+                      [                0,                  0,   1]]
     _orbit_SIII[1:4] = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, _orbit_SIII[1:4]))
     _orbit_SIII[4:] = cartesian_to_spherical(_orbit_SIII[1:4].transpose()).transpose()
     return _orbit_SIII
 
 
 def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
-    x_JSO = orbit_JSO[1] / R_J
+    O_JSO = orbit_JSO.copy()
+    O_SIII_mag = orbit_SIII_mag.copy()
+    O_SIII = orbit_SIII.copy()
+    
+    x_JSO = O_JSO[1] / R_J
 
     # coords. in magnetodisc frame
-    rho = np.sqrt(orbit_SIII_mag[1]**2 + orbit_SIII_mag[2]**2) / R_J
-    Z = orbit_SIII_mag[3] / R_J
-    r = orbit_SIII_mag[4] / R_J
+    rho = np.sqrt(O_SIII_mag[1]**2 + O_SIII_mag[2]**2) / R_J
+    Z = O_SIII_mag[3] / R_J
+    r = O_SIII_mag[4] / R_J
 
-    psi = orbit_SIII_mag[6]
+    psi = O_SIII_mag[6]
 
     # fit constants from Khurana (1997)
     x0 = -33.5 #* R_J
@@ -113,8 +117,8 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
                       [                0,                  0,   1]]
     
     # angles from SIII frame for cartesian to spherical transformation
-    theta_SIII = orbit_SIII[5]
-    phi_SIII = orbit_SIII[6]
+    theta_SIII = O_SIII[5]
+    phi_SIII = O_SIII[6]
 
     B_spher_SIII = []
     for psi_i, B_cyl_i, theta_i, phi_i in zip(psi, np.transpose(B_cyl), theta_SIII, phi_SIII):

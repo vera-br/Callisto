@@ -26,8 +26,10 @@ orbit_SIII = galileo_wrt_jupiter_SIII2["orbit%s" % (flyby_n)]
 orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
 B_PDS = B_PDSs['bfield%s' % (flyby_n)]
 B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
-orbit_SIII[1:5] = orbit_SIII[1:5] / R_J
-orbit_cal_SIII[1:5] = orbit_cal_SIII[1:5] / R_J
+O_SIII = orbit_SIII.copy()
+O_cal_SIII = orbit_cal_SIII.copy()
+O_SIII[1:5] = O_SIII[1:5] / R_J
+O_cal_SIII[1:5] = O_cal_SIII[1:5] / R_J
 
 
 fig, ax = plt.subplots(2,3)
