@@ -21,7 +21,7 @@ callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII
 callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
 
 # specify orbit
-flyby_n = 1
+flyby_n = 2
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -89,15 +89,15 @@ ax[1,1].plot(B_PDS[0], Bmag_smooth, label='PDS Smoothed', color='k')
 # ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
 # ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
 
-ax[0,0].plot(B_PDS[0], B_external[:,0], label='Jupiter', color='g')
-ax[0,1].plot(B_PDS[0], B_external[:,1], label='Jupiter', color='g')
-ax[1,0].plot(B_PDS[0], B_external[:,2], label='Jupiter', color='g')
-ax[1,1].plot(B_PDS[0], Bmag_external, label='Jupiter', color='g')
+# ax[0,0].plot(B_PDS[0], B_external[:,0], label='Jupiter', color='g')
+# ax[0,1].plot(B_PDS[0], B_external[:,1], label='Jupiter', color='g')
+# ax[1,0].plot(B_PDS[0], B_external[:,2], label='Jupiter', color='g')
+# ax[1,1].plot(B_PDS[0], Bmag_external, label='Jupiter', color='g')
 
-ax[0,0].plot(B_PDS[0], B_sheet[:,0], label='Sheet', color='m')
-ax[0,1].plot(B_PDS[0], B_sheet[:,1], label='Sheet', color='m')
-ax[1,0].plot(B_PDS[0], B_sheet[:,2], label='Sheet', color='m')
-ax[1,1].plot(B_PDS[0], Bmag_sheet, label='Sheet', color='m')
+# ax[0,0].plot(B_PDS[0], B_sheet[:,0], label='Sheet', color='m')
+# ax[0,1].plot(B_PDS[0], B_sheet[:,1], label='Sheet', color='m')
+# ax[1,0].plot(B_PDS[0], B_sheet[:,2], label='Sheet', color='m')
+# ax[1,1].plot(B_PDS[0], Bmag_sheet, label='Sheet', color='m')
 
 # ax[0,0].plot(B_PDS[0], B_induced[:,0], label='Induced')
 # ax[0,1].plot(B_PDS[0], B_induced[:,1], label='Induced')
@@ -109,10 +109,10 @@ ax[0,1].plot(B_PDS[0], B_full_ext[:,1], label='Full Ext.', color='b')
 ax[1,0].plot(B_PDS[0], B_full_ext[:,2], label='Full Ext.', color='b')
 ax[1,1].plot(B_PDS[0], Bmag_full_ext, label='Full Ext.', color='b')
 
-# ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.', color='r')
-# ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.', color='r')
-# ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Calc.', color='r')
-# ax[1,1].plot(orbit_cphio[0], B_mag_tot, label='Calc.', color='r')
+ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.', color='r')
+ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.', color='r')
+ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Calc.', color='r')
+ax[1,1].plot(orbit_cphio[0], B_mag_tot, label='Calc.', color='r')
 
 ax[0,0].set_title('Bx')
 ax[0,1].set_title('By')
