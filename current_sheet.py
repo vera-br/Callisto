@@ -6,6 +6,7 @@ import JupiterMag as jm
 
 # matthew and ciaran's files
 from maths import cylindrical_to_cartesian
+from field_functions import *
 
 RJ = 71492e3
 pi = constants.pi
@@ -183,8 +184,9 @@ def B_disk(orbit, R0, R1, D, I_constant, azimuthal_field=False, I_rho=12):
 
     return rho, Z, Bcart
 
-def B_sheet_Community(orbit_SIII):
+def B_sheet_Community(orbit_SIII, orbit_SIII_mag):
     O_SIII = orbit_SIII.copy()
+    O_SIII_mag = orbit_SIII_mag.copy()
     
     # jm.Con2020.Config(equation_type='analytic', CartesianIn=True, CartesianOut=False)
     # x = orbit_SIII[1] / RJ
@@ -192,11 +194,38 @@ def B_sheet_Community(orbit_SIII):
     # z = orbit_SIII[3] / RJ
     # Br, Btheta, Bphi = jm.Con2020.Field(x, y, z)
     
-    jm.Con2020.Config(equation_type='analytic', CartesianIn=False, CartesianOut=False)
-    r = O_SIII[4] / RJ
-    Br, Btheta, Bphi = jm.Con2020.Field(r, O_SIII[5], O_SIII[6])
+    # jm.Con2020.Config(equation_type='analytic', CartesianIn=False, CartesianOut=False)
+    # r = O_SIII[4] / RJ
+    # Br, Btheta, Bphi = jm.Con2020.Field(r, O_SIII[5], O_SIII[6])
     
-    Bx = Bphi
-    By = -Br
-    Bz = -Btheta
+    # Bx = Bphi
+    # By = -Br
+    # Bz = -Btheta
+
+    theta_mag = O_SIII_mag[5]
+    psi_mag = O_SIII_mag[6]
+
+    jm.Con2020.Config(equation_type='analytic', CartesianIn=True, CartesianOut=True)
+    x = O_SIII[1] / RJ
+    y = O_SIII[2] / RJ
+    z = O_SIII[3] / RJ
+    B_cart_SIII = jm.Con2020.Field(x, y, z)
+    B_cart_SIII_mag = rotation_SIII_to_SIII_mag(B_cart_SIII)
+    B_cyl_tilted = []
+    for B_cart_i, psi_i, theta_i in zip(np.transpose(B_cart_SIII_mag), psi_mag, theta_mag):
+        rot_matrix_cart_cyl = [[ np.cos(psi_i),   np.sin(psi_i),   0], 
+                               [-np.sin(psi_i),   np.cos(psi_i),   0], 
+                               [             0,               0,   1]]
+        B_cyl_i = np.dot(rot_matrix_cart_cyl, B_cart_i)
+        
+        rot_matrix_theta = [[ np.sin(theta_i),   0,   np.cos(theta_i)], 
+                            [               0,   1,                 0], 
+                            [-np.cos(theta_i),   0,   np.sin(theta_i)]]
+        B_cyl_tilted_i = np.dot(rot_matrix_theta, B_cyl_i)
+        B_cyl_tilted.append(B_cyl_tilted_i)
+    Brho, Bpsi, Bz = np.transpose(B_cyl_tilted)
+    # conversion into CPhiO coord. system
+    Bx = Bpsi
+    By = -Brho
+    Bz = Bz
     return np.array([Bx, By, Bz]).transpose()

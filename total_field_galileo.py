@@ -18,6 +18,7 @@ galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
 galileo_wrt_callisto_cphio_CA = get_closest_approach_data("galileo", "callisto", "cphio", "G")
 galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
 callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII1965')
+callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII_mag')
 callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
 
 # specify orbit
@@ -25,10 +26,10 @@ flyby_n = 2
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
-orbit_SIII_mag = convert_SIII_to_SIII_mag(orbit_SIII)
+orbit_SIII_mag = convert_orbit_SIII_to_SIII_mag(orbit_SIII)
 orbit_CA = galileo_wrt_callisto_cphio_CA["CA_orbit%s" % (flyby_n)]
 orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
-orbit_cal_SIII_mag = convert_SIII_to_SIII_mag(orbit_cal_SIII)
+orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
 orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
 B_PDS = B_PDSs['bfield%s' % (flyby_n)]
 B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
@@ -42,19 +43,26 @@ Bmag_smooth = uniform_filter1d(B_mag, size=300)
 #---------magnetic fields-----------
 
 # jovian field
-B_external = Bext_Community(orbit_SIII)
+B_external = Bext_Community2(orbit_cal_SIII, orbit_cal_SIII_mag)
+B_external_og = Bext_Community(orbit_cal_SIII)
 Bmag_external = np.sqrt(B_external[:, 0]**2 + B_external[:, 1]**2 + B_external[:, 2]**2)
-B_external_cal = Bext_Community(orbit_cal_SIII)
+Bmag_external_og = np.sqrt(B_external_og[:, 0]**2 + B_external_og[:, 1]**2 + B_external_og[:, 2]**2)
+B_external_cal = Bext_Community2(orbit_cal_SIII, orbit_cal_SIII_mag)
+B_external_cal_og = Bext_Community(orbit_cal_SIII)
 
 
 # current sheet
-# B_sheet = B_sheet_Community(orbit_SIII)
-# B_sheet_cal = B_sheet_Community(orbit_cal_SIII)
-B_sheet = B_sheet_khurana(orbit_cal_JSO, orbit_SIII_mag, orbit_SIII)
-B_sheet_cal = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
+# B_sheet = B_sheet_Community(orbit_cal_SIII, orbit_cal_SIII_mag)
+# B_sheet_cal = B_sheet_Community(orbit_cal_SIII, orbit_cal_SIII_mag)
+B_sheet_og = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
+# B_sheet_cal_og = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
+B_sheet = B_sheet_khurana2(orbit_cal_JSO, orbit_cal_SIII_mag)
+B_sheet_cal = B_sheet_khurana2(orbit_cal_JSO, orbit_cal_SIII_mag)
 Bmag_sheet = np.sqrt(B_sheet[:, 0]**2 + B_sheet[:, 1]**2 + B_sheet[:, 2]**2)
 B_full_ext = B_external + B_sheet
+B_full_ext_og = B_external_og + B_sheet_og
 Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:, 2]**2)
+Bmag_full_ext_og = np.sqrt(B_full_ext_og[:, 0]**2 + B_full_ext_og[:, 1]**2 + B_full_ext_og[:, 2]**2)
 
 # induced field
 # C3
@@ -84,10 +92,10 @@ ax[0,1].plot(B_PDS[0], By_smooth, label='PDS', color='k')
 ax[1,0].plot(B_PDS[0], Bz_smooth, label='PDS', color='k')
 ax[1,1].plot(B_PDS[0], Bmag_smooth, label='PDS Smoothed', color='k')
 
-# ax[0,0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
-# ax[0,1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
-# ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
-# ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
+ax[0,0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
+ax[0,1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
+ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
+ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
 
 # ax[0,0].plot(B_PDS[0], B_external[:,0], label='Jupiter', color='g')
 # ax[0,1].plot(B_PDS[0], B_external[:,1], label='Jupiter', color='g')
@@ -108,6 +116,11 @@ ax[0,0].plot(B_PDS[0], B_full_ext[:,0], label='Full Ext.', color='b')
 ax[0,1].plot(B_PDS[0], B_full_ext[:,1], label='Full Ext.', color='b')
 ax[1,0].plot(B_PDS[0], B_full_ext[:,2], label='Full Ext.', color='b')
 ax[1,1].plot(B_PDS[0], Bmag_full_ext, label='Full Ext.', color='b')
+
+ax[0,0].plot(B_PDS[0], B_full_ext_og[:,0], label='Full Ext. OG', color='g')
+ax[0,1].plot(B_PDS[0], B_full_ext_og[:,1], label='Full Ext. OG', color='g')
+ax[1,0].plot(B_PDS[0], B_full_ext_og[:,2], label='Full Ext. OG', color='g')
+ax[1,1].plot(B_PDS[0], Bmag_full_ext_og, label='Full Ext. OG', color='g')
 
 ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.', color='r')
 ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.', color='r')

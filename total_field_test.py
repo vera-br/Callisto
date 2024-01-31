@@ -44,23 +44,25 @@ Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:
 
 
 fig, ax = plt.subplots(2, 2)
-
+ax[0,0].grid()
 ax[0,0].plot(B_external[:,0], label='Jupiter', color='g')
 ax[0,0].plot(B_sheet[:,0], label='Sheet', color='m')
 ax[0,0].plot(B_full_ext[:,0], label='Full Ext.', color='b')
 ax[0,0].set_title('Bx')
 
+ax[0,1].grid()
 ax[0,1].plot(B_external[:,1], label='Jupiter', color='g')
 ax[0,1].plot(B_sheet[:,1], label='Sheet', color='m')
 ax[0,1].plot(B_full_ext[:,1], label='Full Ext.', color='b')
 ax[0,1].set_title('By')
 
-
+ax[1,0].grid()
 ax[1,0].plot(B_external[:,2], label='Jupiter', color='g')
 ax[1,0].plot(B_sheet[:,2], label='Sheet', color='m')
 ax[1,0].plot(B_full_ext[:,2], label='Full Ext.', color='b')
 ax[1,0].set_title('Bz')
 
+ax[1,1].grid()
 ax[1,1].plot(Bmag_external, label='Jupiter', color='g')
 ax[1,1].plot(Bmag_sheet, label='Sheet', color='m')
 ax[1,1].plot(Bmag_full_ext, label='Full Ext.', color='b')

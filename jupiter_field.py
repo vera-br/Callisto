@@ -8,6 +8,7 @@ import JupiterMag as jm
 # matthew and ciaran's files (that we want to get rid of?)
 from maths import unit_spherical_to_cartesian
 from sph_harmonics.magf_higher_order import *
+from field_functions import *
 
 
 # constants
@@ -86,9 +87,9 @@ def Bext_Community(orbit_SIII):
     O_SIII = orbit_SIII.copy()
     
     jm.Internal.Config(Model='VIP4', CartesianIn=True, CartesianOut=False)
-    x = orbit_SIII[1] / R_J
-    y = orbit_SIII[2] / R_J
-    z = orbit_SIII[3] / R_J
+    x = O_SIII[1] / R_J
+    y = O_SIII[2] / R_J
+    z = O_SIII[3] / R_J
     Br, Btheta, Bphi = jm.Internal.Field(x, y, z)
 
     # jm.Internal.Config(Model='VIP4', CartesianIn=False, CartesianOut=False)
@@ -100,5 +101,37 @@ def Bext_Community(orbit_SIII):
     Bx = Bphi
     By = -Br
     Bz = -Btheta
+    return np.array([Bx, By, Bz]).transpose()
+
+def Bext_Community2(orbit_SIII, orbit_SIII_mag):
+    O_SIII = orbit_SIII.copy()
+    O_SIII_mag = orbit_SIII_mag.copy()
+    theta_mag = O_SIII_mag[5]
+    psi_mag = O_SIII_mag[6]
+
+    jm.Internal.Config(Model='VIP4', CartesianIn=True, CartesianOut=True)
+    x = O_SIII[1] / R_J
+    y = O_SIII[2] / R_J
+    z = O_SIII[3] / R_J
+    B_cart_SIII = jm.Internal.Field(x, y, z)
+    B_cart_SIII_mag = rotation_SIII_to_SIII_mag(B_cart_SIII)
+    B_cyl_tilted = []
+    for B_cart_i, psi_i, theta_i in zip(np.transpose(B_cart_SIII_mag), psi_mag, theta_mag):
+        rot_matrix_cart_cyl = [[ np.cos(psi_i),   np.sin(psi_i),   0], 
+                               [-np.sin(psi_i),   np.cos(psi_i),   0], 
+                               [             0,               0,   1]]
+        B_cyl_i = np.dot(rot_matrix_cart_cyl, B_cart_i)
+        
+        rot_matrix_theta = [[ np.sin(theta_i),   0,   np.cos(theta_i)], 
+                            [               0,   1,                 0], 
+                            [-np.cos(theta_i),   0,   np.sin(theta_i)]]
+        B_cyl_tilted_i = np.dot(rot_matrix_theta, B_cyl_i)
+        B_cyl_tilted.append(B_cyl_tilted_i)
+    Brho, Bpsi, Bz = np.transpose(B_cyl_tilted)
+    # conversion into CPhiO coord. system
+    Bx = Bpsi
+    By = -Brho
+    Bz = Bz
+
     return np.array([Bx, By, Bz]).transpose()
 

@@ -65,56 +65,44 @@ def Galileo_trajectories_SIII_from_CPhiO():
 
     return galileo_jupiter_SIII
 
+# rotation angles for the magnetic dipole from the VIP4 model
+theta_VIP4 = -np.pi * 9.5 / 180
+phi_VIP4 = -np.pi * 159.2 / 180
 
-# testing graphs
+def rotation_SIII_to_SIII_mag(vector):
+    rot_matrix_theta = [[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)], 
+                        [                  0,   1,                    0], 
+                        [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]]
+    
+    rot_matrix_phi = [[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0], 
+                      [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
+                      [                0,                  0,   1]]
+    rotated_vector = np.dot(rot_matrix_theta, np.dot(rot_matrix_phi, vector))
+    return rotated_vector
 
-# galileo_callisto_cphio, _ = get_pds_data()
-# galileo_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
+def rotation_SIII_mag_to_SIII(vector):
+    rot_matrix_theta = [[ np.cos(theta_VIP4),   0,  -np.sin(theta_VIP4)], 
+                        [                  0,   1,                    0], 
+                        [ np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]]
+    
+    rot_matrix_phi = [[ np.cos(phi_VIP4),   np.sin(phi_VIP4),   0], 
+                      [-np.sin(phi_VIP4),   np.cos(phi_VIP4),   0], 
+                      [                0,                  0,   1]]
+    rotated_vector = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, vector))
+    return rotated_vector
 
-# callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
+def convert_orbit_SIII_to_SIII_mag(orbit_SIII):
+    _orbit_SIII_mag = orbit_SIII.copy()
+    _orbit_SIII_mag[1:4] = rotation_SIII_to_SIII_mag(_orbit_SIII_mag[1:4])
+    _orbit_SIII_mag[4:] = cartesian_to_spherical(_orbit_SIII_mag[1:4].transpose()).transpose()
+    return _orbit_SIII_mag
 
-# colors = ['r', 'y', 'g']
+def convert_orbit_SIII_mag_to_SIII(orbit_SIII_mag):
+    _orbit_SIII = orbit_SIII_mag.copy()
+    _orbit_SIII[1:4] = rotation_SIII_mag_to_SIII(_orbit_SIII[1:4])
+    _orbit_SIII[4:] = cartesian_to_spherical(_orbit_SIII[1:4].transpose()).transpose()
+    return _orbit_SIII
 
-# plt.figure()
-# for i in range(3):
-#     plt.plot(galileo_jupiter_SIII['orbit%s' % (i+1)][0] - callisto_jupiter_SIII['orbit%s' % (i+1)][0], color=colors[i])
-# plt.show()
-
-# time_diffs = galileo_jupiter_SIII['orbit%s' % (1)][0] - callisto_jupiter_SIII['orbit%s' % (1)][0]
-# print(np.linalg.norm(time_diffs))
-
-# fig, ax = plt.subplots(2, 3)
-# for i in range(3):
-#     ax[0,0].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][1] / R_J, color=colors[i])
-#     ax[0,0].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][1] / R_J, '--', color=colors[i])
-# ax[0,0].set_title('x')
-
-# for i in range(3):
-#     ax[0,1].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][2] / R_J, color=colors[i])
-#     ax[0,1].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][2] / R_J, '--', color=colors[i])
-# ax[0,1].set_title('y')
-
-# for i in range(3):
-#     ax[0,2].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][3] / R_J, color=colors[i])
-#     ax[0,2].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][3] / R_J, '--', color=colors[i])
-# ax[0,2].set_title('z')
-
-# for i in range(3):
-#     ax[1,0].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][4] / R_J, color=colors[i])
-#     ax[1,0].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][4] / R_J, '--', color=colors[i])
-# ax[1,0].set_title('r')
-
-# for i in range(3):
-#     ax[1,1].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][5], color=colors[i])
-#     ax[1,1].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][5], '--', color=colors[i])
-# ax[1,1].set_title('theta')
-
-# for i in range(3):
-#     ax[1,2].plot(galileo_jupiter_SIII['orbit%s' % (i+1)][6], color=colors[i])
-#     ax[1,2].plot(callisto_jupiter_SIII['orbit%s' % (i+1)][6], '--', color=colors[i])
-# ax[1,2].set_title('phi')
-
-# plt.show()
         
 
         
