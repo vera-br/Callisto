@@ -21,7 +21,7 @@ callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII
 callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
 
 # specify orbit
-flyby_n = 2
+flyby_n = 1
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -80,45 +80,51 @@ plot_time_evolution_Gal(B_total, orbit_cphio, orbit_CA, flyby_n, "Total")
 
 fig, ax = plt.subplots(2, 2)
 ax[0,0].plot(B_PDS[0], Bx_smooth, label='PDS', color='k')
-ax[0,0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
-# ax[0,0].plot(B_PDS[0], B_external[:,0], label='Jupiter', color='g')
-# ax[0,0].plot(B_PDS[0], B_sheet[:,0], label='Sheet', color='m')
-# ax[0,0].plot(B_PDS[0], B_induced[:,0], label='Induced')
-ax[0,0].plot(B_PDS[0], B_full_ext[:,0], label='Full Ext.', color='b')
-ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.', color='r')
-ax[0,0].set_title('Bx')
-ax[0,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
-
 ax[0,1].plot(B_PDS[0], By_smooth, label='PDS', color='k')
-ax[0,1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
-# ax[0,1].plot(B_PDS[0], B_external[:,1], label='Jupiter', color='g')
-# ax[0,1].plot(B_PDS[0], B_sheet[:,1], label='Sheet', color='m')
-# ax[0,1].plot(B_PDS[0], B_induced[:,1], label='Induced')
-ax[0,1].plot(B_PDS[0], B_full_ext[:,1], label='Full Ext.', color='b')
-ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.', color='r')
-ax[0,1].set_title('By')
-ax[0,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
-
 ax[1,0].plot(B_PDS[0], Bz_smooth, label='PDS', color='k')
-ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
-# ax[1,0].plot(B_PDS[0], B_external[:,2], label='Jupiter', color='g')
-# ax[1,0].plot(B_PDS[0], B_sheet[:,2], label='Sheet', color='m')
-# ax[1,0].plot(B_PDS[0], B_induced[:,2], label='Induced')
-ax[1,0].plot(B_PDS[0], B_full_ext[:,2], label='Full Ext.', color='b')
-ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Calc.', color='r')
-ax[1,0].set_title('Bz')
-ax[1,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
-
 ax[1,1].plot(B_PDS[0], Bmag_smooth, label='PDS Smoothed', color='k')
-ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
-# ax[1,1].plot(B_PDS[0], Bmag_external, label='Jupiter', color='g')
-# ax[1,1].plot(B_PDS[0], Bmag_sheet, label='Sheet', color='m')
+
+# ax[0,0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
+# ax[0,1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
+# ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
+# ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
+
+ax[0,0].plot(B_PDS[0], B_external[:,0], label='Jupiter', color='g')
+ax[0,1].plot(B_PDS[0], B_external[:,1], label='Jupiter', color='g')
+ax[1,0].plot(B_PDS[0], B_external[:,2], label='Jupiter', color='g')
+ax[1,1].plot(B_PDS[0], Bmag_external, label='Jupiter', color='g')
+
+ax[0,0].plot(B_PDS[0], B_sheet[:,0], label='Sheet', color='m')
+ax[0,1].plot(B_PDS[0], B_sheet[:,1], label='Sheet', color='m')
+ax[1,0].plot(B_PDS[0], B_sheet[:,2], label='Sheet', color='m')
+ax[1,1].plot(B_PDS[0], Bmag_sheet, label='Sheet', color='m')
+
+# ax[0,0].plot(B_PDS[0], B_induced[:,0], label='Induced')
+# ax[0,1].plot(B_PDS[0], B_induced[:,1], label='Induced')
+# ax[1,0].plot(B_PDS[0], B_induced[:,2], label='Induced')
 # ax[1,1].plot(B_PDS[0], Bmag_induced, label='Induced')
+
+ax[0,0].plot(B_PDS[0], B_full_ext[:,0], label='Full Ext.', color='b')
+ax[0,1].plot(B_PDS[0], B_full_ext[:,1], label='Full Ext.', color='b')
+ax[1,0].plot(B_PDS[0], B_full_ext[:,2], label='Full Ext.', color='b')
 ax[1,1].plot(B_PDS[0], Bmag_full_ext, label='Full Ext.', color='b')
-ax[1,1].plot(orbit_cphio[0], B_mag_tot, label='Calc.', color='r')
+
+# ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.', color='r')
+# ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.', color='r')
+# ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Calc.', color='r')
+# ax[1,1].plot(orbit_cphio[0], B_mag_tot, label='Calc.', color='r')
+
+ax[0,0].set_title('Bx')
+ax[0,1].set_title('By')
+ax[1,0].set_title('Bz')
 ax[1,1].set_title('|B|')
-ax[1,1].legend(framealpha=1, fancybox=True)
+
+ax[0,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+ax[0,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+ax[1,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 ax[1,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+
+ax[1,1].legend(framealpha=1, fancybox=True)
 
 
 

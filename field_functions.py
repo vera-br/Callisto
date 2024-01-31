@@ -18,6 +18,26 @@ def SIII_find_axis_unit_vectors(thetas, phis):
         z_hats.append(z_hat)
     return (x_hats, y_hats, z_hats)
 
+def convert_CPhiO_to_SIII(O_cal_SIII, O_cphio):
+    orbit_cal_SIII = O_cal_SIII.copy()
+    orbit_cphio = O_cphio.copy()
+
+    theta_SIII = orbit_cal_SIII[5]
+    phi_SIII = orbit_cal_SIII[6]
+    x_hats_SIII, y_hats_SIII, z_hats_SIII = SIII_find_axis_unit_vectors(theta_SIII, phi_SIII)
+    gal_cal_cphio_xyz = np.transpose(orbit_cphio[1:4])
+    x_new = [] ; y_new = [] ; z_new = []
+    for gal_cal_cphio_xyz_i, x_hat_SIII, y_hat_SIII, z_hat_SIII in zip(gal_cal_cphio_xyz, x_hats_SIII, y_hats_SIII, z_hats_SIII):
+        new_x = np.dot(x_hat_SIII, np.transpose(gal_cal_cphio_xyz_i)) ; x_new.append(new_x)
+        new_y = np.dot(y_hat_SIII, np.transpose(gal_cal_cphio_xyz_i)) ; y_new.append(new_y)
+        new_z = np.dot(z_hat_SIII, np.transpose(gal_cal_cphio_xyz_i)) ; z_new.append(new_z)
+    gal_cal_SIII_cart = np.array([x_new, y_new, z_new])
+    gal_jup_SIII_cart = gal_cal_SIII_cart + orbit_cal_SIII[1:4]
+    gal_jup_SIII_spher = cartesian_to_spherical(gal_jup_SIII_cart.transpose())
+    gal_jup_SIII_vector = np.c_[orbit_cal_SIII[0], gal_jup_SIII_cart.transpose()]
+    gal_jup_SIII_vector = np.c_[gal_jup_SIII_vector, gal_jup_SIII_spher]
+    return gal_jup_SIII_vector
+
 def Galileo_trajectories_SIII_from_CPhiO():
     galileo_callisto_cphio, _ = get_pds_data()
     callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
