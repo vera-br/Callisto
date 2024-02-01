@@ -107,9 +107,9 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     B_spher_SIII = np.transpose(B_spher_SIII)
     Br, Btheta, Bphi = B_spher_SIII
     # conversion into CPhiO coord. system
-    Bx = B_psi
-    By = -B_rho
-    Bz = B_z
+    Bx = Bphi
+    By = -Br
+    Bz = -Btheta
     return np.array([Bx, By, Bz]).transpose()
 
 def B_sheet_khurana2(orbit_JSO, orbit_SIII_mag):
