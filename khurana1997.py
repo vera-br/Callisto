@@ -130,7 +130,7 @@ def B_sheet_khurana2(orbit_JSO, orbit_SIII_mag):
     x0 = -33.5 #* R_J
     rho0 = 33.2 #* R_J
     v0 = 37.4 #* R_J hr^-1
-    omega_J = 2 * np.pi / 10.1 # hr
+    omega_J = 2 * np.pi / 10.18 # hr
 
     C1 = 80.3 ; C2 = 690.4 ; C3 = 101.3 ; C4 = -1.7
     a1 = 2.49 ; a2 = 1.80 ; a3 = 2.64
