@@ -140,14 +140,15 @@ kJ = cspice_bodvcd(5, 'GM', 10); % GM of Jupiter with 10 significant
 rJ = cspice_bodvcd(503, 'RADII', 10);% Radius of Ganymede
 
 hour = 3600;
+day = 86400;
 
 for i = 1:length(closest_approach_times)
 
     date_CA = closest_approach_times(i);
     date_CA_i = convertStringsToChars(date_CA);
     et_CA = cspice_str2et(date_CA_i);
-    et_0 = et_CA - 1 * hour;
-    et_R = et_0:3600/12000:(et_0 + 2 * hour);
+    et_0 = et_CA - 1.5 * day;
+    et_R = et_0:3600/60:(et_0 + 3 * day);
     
     % position relative to Callisto
     %juice_callisto_cphio = cspice_spkezr('-28', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
@@ -180,14 +181,14 @@ for i = 1:length(closest_approach_times)
 
     % position relative to Callisto
     %writematrix([juice_callisto_cphio;et_R], append('spice_data/juice_wrt_callisto_cphio_G',string(i),'.csv'));
-    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G',string(i),'.csv'));
-    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'.csv'));
+    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G_longperiod',string(i),'.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G_longperiod',string(i),'.csv'));
     
     % position relative to Jupiter
     %writematrix([juice_jupiter_cphio;et_R], append('spice_data/juice_wrt_jupiter_cphio_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G_longperiod',string(i),'.csv'));
     %writematrix([juice_jupiter_SIII;et_R], append('spice_data/juice_wrt_jupiter_SIII_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_G_longperiod',string(i),'.csv'));
 
     % position relative to Jupiter - Magnetodisc
     %writematrix([juice_jupiter_SIII_mag;et_R], append('spice_data/juice_wrt_jupiter_SIII_mag_G',string(i),'.csv'));
@@ -200,11 +201,11 @@ for i = 1:length(closest_approach_times)
 
     % position relative to Sun
     %writematrix([juice_sun_cphio;et_R], append('spice_data/juice_wrt_sun_cphio_G',string(i),'.csv'));
-    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'.csv'));
-    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G',string(i),'.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G_longperiod',string(i),'.csv'));
+    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G_longperiod',string(i),'.csv'));
     %writematrix([juice_sun_IAU_SUN;et_R], append('spice_data/juice_wrt_sun_IAU_SUN_G',string(i),'.csv'));
-    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_G',string(i),'.csv'));
-    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_G',string(i),'.csv'));
+    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_G_longperiod',string(i),'.csv'));
+    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_G_longperiod',string(i),'.csv'));
 
 
 end

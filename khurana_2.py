@@ -1,18 +1,19 @@
 #
 
 import numpy as np
-from trajectories.trajectory_analysis import cartesian_to_spherical
 
 
 RJ = 71492 * 1e3
 orbital_dist = 26.3 #* RJ
 
 # rotation angles for the magnetic dipole from the VIP4 model
-theta_VIP4 = np.pi * 9.5 / 180
-phi_VIP4 = np.pi * 159.2 / 180
+theta_VIP4 = -np.pi * 9.5 / 180
+phi_VIP4 = -np.pi * 159.2 / 180
 
 # not sure if this works correctly!!
-def spherical_coordinates_transformation(sph_coords, distance):
+def spherical_coordinates_transformation(sph_coords_, distance):
+
+    sph_coords = sph_coords_.copy()
     
     r = sph_coords[0]
     theta = sph_coords[1]
@@ -38,8 +39,22 @@ def spherical_coordinates_transformation(sph_coords, distance):
 
     return np.column_stack((r_prime, theta_prime, phi_prime))
 
+def cartesian_to_spherical_vector(cart_vector_, phi_, theta_):
+    cart_vector = cart_vector_.copy()
+    phi = phi_.copy()
+    theta = theta_.copy()
 
-def B_khurana_2(orbit_JSO, orbit_SIII_mag):
+    trans_matrix = np.array([[np.sin(theta)*np.cos(phi), np.sin(theta)*np.sin(phi), np.cos(theta)],
+                             [np.cos(theta)*np.cos(phi), np.cos(theta)*np.sin(phi), -np.sin(theta)],
+                             [-np.sin(phi), np.cos(phi), 0]])
+
+    sph_vector = np.dot(trans_matrix, cart_vector)
+
+    return sph_vector
+
+
+def B_khurana_2(orbit_JSO, orbit_SIII_mag, orbit_SIII):
+    
 
     # hinging distance in terms of JSO x coordinate
     x = orbit_JSO[1] / RJ
@@ -55,6 +70,9 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag):
 
     # radial coordinate
     r = orbit_SIII_mag[4] / RJ
+
+    theta_SIII = orbit_SIII[5]
+    phi_SIII = orbit_SIII[6]
 
     # angular velocity (synodic)
     omegaJ = 2 *np.pi / 10.18 #hr^-1
@@ -116,21 +134,21 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag):
 
 
     # rotation matrix to tilt system about y
-    rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   -np.sin(theta_VIP4)],
+    rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)],
                                  [                  0,   1,                    0],
-                                 [ np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
+                                 [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
     
     # rotation matrix to set prime meridian 
-    rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),   np.sin(phi_VIP4),   0],
-                               [-np.sin(phi_VIP4),   np.cos(phi_VIP4),   0],
+    rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0],
+                               [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0],
                                [                0,                  0,   1]])
     
 
     B_cart_SIII = np.empty((0,3))
     for phi_i, B_cyl_i in zip(phi, np.transpose(B_cyl_SIII_mag)):
-        
+
         # rotate and tilt into RH SIII
-        B_cyl_SIII_i = np.dot(rot_matrix_theta, np.dot(rot_matrix_phi, B_cyl_i))
+        B_cyl_SIII_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, B_cyl_i))
 
         # transformation matrix to convert from cylindrical to cartesian coords
         rot_matrix_cyl_cart = [[ np.cos(phi_i),  -np.sin(phi_i),   0], 
@@ -143,15 +161,13 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag):
         B_cart_SIII = np.vstack([B_cart_SIII, B_cart_SIII_i])
 
     # cartesian to spherical transformation in SIII coords.
-    B_spher_SIII = cartesian_to_spherical(B_cart_SIII)    
+    B_spher_SIII = [cartesian_to_spherical_vector(B_cart_SIII_i, phi, theta) for B_cart_SIII_i, phi, theta in zip(B_cart_SIII, phi_SIII, theta_SIII)]    
     B_spher_SIII = np.transpose(B_spher_SIII)
     Br, Btheta, Bphi = B_spher_SIII
 
     # conversion into CPhiO coord. system
-    B_spher_cphio = spherical_coordinates_transformation(B_spher_SIII, orbital_dist)
-
-    Bx = B_spher_cphio[:,2] #phi
-    By = B_spher_cphio[:,0] #r
-    Bz = -(90 - B_spher_cphio[:,1]* 180/np.pi) # -theta but converted to deg
+    Bx = Bphi
+    By = -Br
+    Bz = -Btheta
 
     return np.array([Bx, By, Bz]).transpose()
