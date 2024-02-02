@@ -8,13 +8,15 @@ from scipy.ndimage import uniform_filter1d
 
 galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
 galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
-callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
-callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
-callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII_mag')
+
+callisto_jupiter_SIII = get_spice_data_longperiod('callisto', 'jupiter', 'SIII', 'G')
+callisto_jupiter_JSO = get_spice_data_longperiod('callisto', 'jupiter', 'jupsunorb', 'G')
+callisto_jupiter_SIII_mag = get_spice_data_longperiod('callisto', 'jupiter', 'SIII_mag', 'G')
 
 flyby_n = 1
 
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
+
 orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
 orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
 orbit_cal_SIII_mag_ = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
@@ -49,33 +51,33 @@ Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:
 
 fig, ax = plt.subplots(2, 2, figsize=(10, 6))
 ax[0, 0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
-ax[0, 0].plot(B_PDS[0], B_external[:, 0], label='B_external', color='g')
-ax[0, 0].plot(B_PDS[0], B_sheet[:, 0], label='B_sheet', color='b')
-ax[0, 0].plot(B_PDS[0], B_full_ext[:, 0], label='Full Ext. ', color='r')
+ax[0, 0].plot(orbit_cal_SIII[0], B_external[:, 0], label='B_external', color='g')
+ax[0, 0].plot(orbit_cal_SIII[0], B_sheet[:, 0], label='B_sheet', color='b')
+ax[0, 0].plot(orbit_cal_SIII[0], B_full_ext[:, 0], label='Full Ext. ', color='r')
 ax[0, 0].set_title('Bx')
-ax[0, 0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+ax[0, 0].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
 
 ax[0, 1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
-ax[0, 1].plot(B_PDS[0], B_external[:, 1], label='B_external', color='g')
-ax[0, 1].plot(B_PDS[0], B_sheet[:, 1], label='B_sheet', color='b')
-ax[0, 1].plot(B_PDS[0], B_full_ext[:, 1], label='Full Ext. ', color='r')
+ax[0, 1].plot(orbit_cal_SIII[0], B_external[:, 1], label='B_external', color='g')
+ax[0, 1].plot(orbit_cal_SIII[0], B_sheet[:, 1], label='B_sheet', color='b')
+ax[0, 1].plot(orbit_cal_SIII[0], B_full_ext[:, 1], label='Full Ext. ', color='r')
 ax[0, 1].set_title('By')
-ax[0, 1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+ax[0, 1].set_xlim(orbit_cal_SIII(B_PDS[0]), orbit_cal_SIII(B_PDS[0]))
 
 ax[1, 0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
-ax[1, 0].plot(B_PDS[0], B_external[:, 2], label='B_external', color='g')
-ax[1, 0].plot(B_PDS[0], B_sheet[:, 2], label='B_sheet', color='b')
-ax[1, 0].plot(B_PDS[0], B_full_ext[:, 2], label='Full Ext. ', color='r')
+ax[1, 0].plot(orbit_cal_SIII[0], B_external[:, 2], label='B_external', color='g')
+ax[1, 0].plot(orbit_cal_SIII[0], B_sheet[:, 2], label='B_sheet', color='b')
+ax[1, 0].plot(orbit_cal_SIII[0], B_full_ext[:, 2], label='Full Ext. ', color='r')
 ax[1, 0].set_title('Bz')
-ax[1, 0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+ax[1, 0].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
 
 ax[1, 1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
-ax[1, 1].plot(B_PDS[0], B_external_mag, label='B_external', color='g')
-ax[1, 1].plot(B_PDS[0], B_sheet_mag, label='B_sheet', color='b')
-ax[1, 1].plot(B_PDS[0], Bmag_full_ext, label='Full Ext. ', color='r')
+ax[1, 1].plot(orbit_cal_SIII[0], B_external_mag, label='B_external', color='g')
+ax[1, 1].plot(orbit_cal_SIII[0], B_sheet_mag, label='B_sheet', color='b')
+ax[1, 1].plot(orbit_cal_SIII[0], Bmag_full_ext, label='Full Ext. ', color='r')
 ax[1, 1].set_title('|B|')
 ax[1, 1].legend()
-ax[1, 1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
+ax[1, 1].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
 
 plt.tight_layout()
 plt.show()

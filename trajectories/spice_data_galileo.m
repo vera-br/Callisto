@@ -181,31 +181,31 @@ for i = 1:length(closest_approach_times)
 
     % position relative to Callisto
     %writematrix([juice_callisto_cphio;et_R], append('spice_data/juice_wrt_callisto_cphio_G',string(i),'.csv'));
-    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G_longperiod',string(i),'.csv'));
-    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G_longperiod',string(i),'.csv'));
+    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G',string(i),'_longperiod.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'_longperiod.csv'));
     
     % position relative to Jupiter
     %writematrix([juice_jupiter_cphio;et_R], append('spice_data/juice_wrt_jupiter_cphio_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G_longperiod',string(i),'.csv'));
+    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G',string(i),'_longperiod.csv'));
     %writematrix([juice_jupiter_SIII;et_R], append('spice_data/juice_wrt_jupiter_SIII_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_G_longperiod',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_G',string(i),'_longperiod.csv'));
 
     % position relative to Jupiter - Magnetodisc
     %writematrix([juice_jupiter_SIII_mag;et_R], append('spice_data/juice_wrt_jupiter_SIII_mag_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_G',string(i),'_longperiod.csv'));
 
     % position relative to Jupiter - magnetosphere
     %writematrix([juice_jupiter_jupsunorb;et_R], append('spice_data/juice_wrt_jupiter_jupsunorb_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_G',string(i),'.csv'));
-    writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_G',string(i),'_longperiod.csv'));
+    writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_G',string(i),'_longperiod.csv'));
 
     % position relative to Sun
     %writematrix([juice_sun_cphio;et_R], append('spice_data/juice_wrt_sun_cphio_G',string(i),'.csv'));
-    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G_longperiod',string(i),'.csv'));
-    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G_longperiod',string(i),'.csv'));
+    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G_longperiod',string(i),'_longperiod.csv'));
+    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G_longperiod',string(i),'_longperiod.csv'));
     %writematrix([juice_sun_IAU_SUN;et_R], append('spice_data/juice_wrt_sun_IAU_SUN_G',string(i),'.csv'));
-    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_G_longperiod',string(i),'.csv'));
-    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_G_longperiod',string(i),'.csv'));
+    writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_G_longperiod',string(i),'_longperiod.csv'));
+    writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_G_longperiod',string(i),'_longperiod.csv'));
 
 
 end

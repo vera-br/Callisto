@@ -137,6 +137,50 @@ def get_spice_data(target, reference_point, frame, mission):
 
     return orbits_all
 
+def get_spice_data_longperiod(target, reference_point, frame, mission):
+    '''
+    Load spice data and return dictionary of 7d arrays storing values for t, x, y, z, r, theta, phi
+    mission = "J" (juice) or "G" (galileo)
+    '''
+    # define file names
+    data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
+    data_path_all = []
+
+    #create array with all file names
+    if mission == "J":
+        for i in range(1, 22):
+            data_path_all.append(data_path + str(i) + "_longperiod.csv")
+    elif mission == "G":
+        for i in range(1, 8):
+            data_path_all.append(data_path + str(i) + "_longperiod.csv")
+    elif mission == "GK":
+        for i in range(1, 3):
+            data_path_all.append(data_path + str(i) + "_longperiod.csv")
+
+    # create dictionary for orbit data
+    orbits_all = {}
+
+    for i in range(len(data_path_all)):
+
+        # open spice data file
+        data = np.loadtxt(data_path_all[i], delimiter=",", unpack=True)
+        data = data.transpose()
+        Xjc, Yjc, Zjc, vxjc, vyjc, vzjc, t = data
+
+        # convert positions to m
+        cart = 1e3 * np.array([Xjc, Yjc, Zjc]).transpose()
+
+        # and to spherical coords
+        spher = cartesian_to_spherical(cart)
+
+        # combine t, cart, spher arrays
+        z = np.c_[t, cart]
+        z = np.c_[z, spher]
+
+        # save array as dictionary item
+        orbits_all['orbit%s' % (i+1)] = np.transpose(z)
+
+    return orbits_all
 
 def get_pds_data():
     '''
