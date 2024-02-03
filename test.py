@@ -1,41 +1,96 @@
 from trajectories.trajectory_analysis import *
 from field_functions import *
-from khurana1997 import *
-from khurana_2 import *
-from jupiter_field import *
-from scipy.ndimage import uniform_filter1d 
 
-galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
-galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
-callisto_jupiter_SIII = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII')
-callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
-callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', 'SIII_mag')
+#---------constants-----------
+
+
+prime_meridian = np.radians(249.2)
+
+
+#---------functions-----------
+
+
+def transform_SIII_mag_to_SIII(vector_SIII_mag):
+    """
+    Transform a vector from SIII Mag to SIII.
+
+    Parameters:
+    - vector_SIII_mag: 1D NumPy array representing the vector in SIII Mag coordinates [X_mag, Y_mag, Z_mag].
+
+    Returns:
+    - vector_SIII: 1D NumPy array representing the vector in SIII coordinates [X, Y, Z].
+    """
+
+    # Transformation matrix from SIII Mag to SIII
+    transformation_matrix = np.array([
+        [np.sin(prime_meridian), 0, -np.cos(prime_meridian)],
+        [0, 1, 0],
+        [np.cos(prime_meridian), 0, np.sin(prime_meridian)]
+    ])
+
+    # Apply the transformation
+    vector_SIII = np.dot(transformation_matrix, vector_SIII_mag)
+
+    return vector_SIII
+
+
+
+#---------load data-----------
+
+
+juice_wrt_callisto_cphio = get_spice_data('juice', 'callisto', 'cphio', 'J')
+juice_jupiter_SIII = get_spice_data('juice', 'jupiter', 'SIII', 'J')
+juice_jupiter_SIII_mag = get_spice_data('juice', 'jupiter', 'SIII_mag', 'J')
 
 flyby_n = 2
-orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
-orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
-orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
-orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
-B_PDS = B_PDSs['bfield%s' % (flyby_n)]
-B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
+
+orbit_cphio = juice_wrt_callisto_cphio["orbit%s" % (flyby_n)]
+orbit_SIII = juice_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_SIII_mag = juice_jupiter_SIII_mag["orbit%s" % (flyby_n)]
 
 
-#--------------------
+#---------coordinate transformation-----------
 
-B_Archie = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag)
-B_Vera = B_khurana_2(orbit_cal_JSO, orbit_cal_SIII_mag)
+# orbit_SIII = [rotation_SIII_mag_to_SIII(vector) for vector in orbit_SIII_mag[:, 1:4].T]
 
-fig, ax = plt.subplots(2,2)
-ax[0,0].plot(B_PDS[0], B_Archie[0], label='A', color='k')
-ax[0,0].plot(B_PDS[0], B_Vera[0], label='V', color='b')
-ax[0,0].set_title('Brho')
+# x = orbit_SIII[6] #phi
+# y = -orbit_SIII[4] #r
+# z = -orbit_SIII[5] #theta
 
-ax[0,1].plot(B_PDS[0], B_Archie[1], label='A', color='k')
-ax[0,1].plot(B_PDS[0], B_Vera[1], label='V', color='b')
-ax[0,1].set_title('Bphi')
+# t = orbit_SIII_mag[0].transpose()
+# print(np.shape(t))
+# print(np.shape(x))
+vector = orbit_SIII_mag[1:4]
+transformed = rotation_SIII_mag_to_SIII(vector)
 
-ax[1,0].plot(B_PDS[0], B_Archie[2], label='A', color='k')
-ax[1,0].plot(B_PDS[0], B_Vera[2], label='V', color='b')
-ax[1,0].set_title('Bz')
+#---------plotting-----------
+spice_data = orbit_SIII
 
+fig, ax = plt.subplots(1,3)
+ax[0].plot(spice_data[0], transformed[0], label='calculated', color='r')
+ax[0].plot(spice_data[0], spice_data[0], label='spice', color='b')
+ax[0].set_title('X')
+
+ax[1].plot(spice_data[0], transformed[1], label='calculated', color='r')
+ax[1].plot(spice_data[0], spice_data[1], label='spice', color='b')
+ax[1].set_title('Y')
+
+ax[2].plot(spice_data[0], transformed[2], label='calculated', color='r')
+ax[2].plot(spice_data[0], spice_data[2], label='spice', color='b')
+ax[2].set_title('Z')
+
+# ax[1,0].plot(transformed[0], transformed[4], label='calculated', color='r')
+# ax[1,0].plot(spice_data[0], spice_data[4], label='spice', color='b')
+# ax[1,0].set_title('R')
+
+# ax[0,1].plot(transformed[0], transformed[5], label='calculated', color='r')
+# ax[0,1].plot(spice_data[0], spice_data[5], label='spice', color='b')
+# ax[0,1].set_title('THETA')
+
+# ax[0,2].plot(transformed[0], transformed[6], label='calculated', color='r')
+# ax[0,2].plot(spice_data[0], spice_data[6], label='spice', color='b')
+# ax[0,2].set_title('PHI')
+
+ax[2].legend()
+plt.suptitle("rotation_SIII_mag_to_SIII")
 plt.show()
