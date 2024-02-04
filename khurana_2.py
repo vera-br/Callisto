@@ -72,7 +72,11 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     r = orbit_SIII_mag[4] / RJ
 
     theta_SIII = orbit_SIII[5]
-    phi_SIII = orbit_SIII[6]
+    theta_SIII_mag = orbit_SIII_mag[5]
+
+    phi_SIII = orbit_SIII_mag[6]
+    phi_SIII_mag = orbit_SIII_mag[6]
+    phi_diff = phi_SIII_mag - phi_SIII
 
     # angular velocity (synodic)
     omegaJ = 2 *np.pi / 10.18 #hr^-1
@@ -132,42 +136,60 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag, orbit_SIII):
 
     B_cyl_SIII_mag = [Brho, Bphi, Bz]
 
+    # tilting from magnetic axis to spin axis
+    B_cyl_tilted = []
+    for B_cyl_i, theta_i, phi_i in zip(np.transpose(B_cyl_SIII_mag), theta_SIII_mag, phi_diff):
 
-    # rotation matrix to tilt system about y
-    rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)],
-                                 [                  0,   1,                    0],
-                                 [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
+        rot_matrix_theta = [[ np.sin(theta_i),   0,   np.cos(theta_i)], 
+                            [               0,   1,                 0], 
+                            [-np.cos(theta_i),   0,   np.sin(theta_i)]]
+        
+        rot_matrix_phi =np.array([[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0],
+                                 [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0],
+                                 [                0,                  0,   1]])
+        
+        B_cyl_tilted_i = np.dot(rot_matrix_theta, B_cyl_i)
+        #B_cyl_tilted_i = np.dot(rot_matrix_phi, B_cyl_tilted_i)
+        B_cyl_tilted.append(B_cyl_tilted_i)
     
-    # rotation matrix to set prime meridian 
-    rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0],
-                               [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0],
-                               [                0,                  0,   1]])
+    Brho, Bphi, Bz = np.transpose(B_cyl_tilted)
+
+
+    # # rotation matrix to tilt system about y
+    # rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)],
+    #                              [                  0,   1,                    0],
+    #                              [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
+    
+    # # rotation matrix to set prime meridian 
+    # rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0],
+    #                            [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0],
+    #                            [                0,                  0,   1]])
     
 
-    B_cart_SIII = np.empty((0,3))
-    for phi_i, B_cyl_i in zip(phi, np.transpose(B_cyl_SIII_mag)):
+    # B_cart_SIII = np.empty((0,3))
+    # for phi_i, B_cyl_i in zip(phi, np.transpose(B_cyl_SIII_mag)):
 
-        # rotate and tilt into RH SIII
-        B_cyl_SIII_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, B_cyl_i))
+    #     # rotate and tilt into RH SIII
+    #     B_cyl_SIII_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, B_cyl_i))
 
-        # transformation matrix to convert from cylindrical to cartesian coords
-        rot_matrix_cyl_cart = [[ np.cos(phi_i),  -np.sin(phi_i),   0], 
-                               [ np.sin(phi_i),   np.cos(phi_i),   0], 
-                               [             0,               0,   1]]
+    #     # transformation matrix to convert from cylindrical to cartesian coords
+    #     rot_matrix_cyl_cart = [[ np.cos(phi_i),  -np.sin(phi_i),   0], 
+    #                            [ np.sin(phi_i),   np.cos(phi_i),   0], 
+    #                            [             0,               0,   1]]
 
-        B_cart_SIII_i = np.dot(rot_matrix_cyl_cart, B_cyl_SIII_i)
+    #     B_cart_SIII_i = np.dot(rot_matrix_cyl_cart, B_cyl_SIII_i)
 
-        # append cartesian values to array
-        B_cart_SIII = np.vstack([B_cart_SIII, B_cart_SIII_i])
+    #     # append cartesian values to array
+    #     B_cart_SIII = np.vstack([B_cart_SIII, B_cart_SIII_i])
 
-    # cartesian to spherical transformation in SIII coords.
-    B_spher_SIII = [cartesian_to_spherical_vector(B_cart_SIII_i, phi, theta) for B_cart_SIII_i, phi, theta in zip(B_cart_SIII, phi_SIII, theta_SIII)]    
-    B_spher_SIII = np.transpose(B_spher_SIII)
-    Br, Btheta, Bphi = B_spher_SIII
+    # # cartesian to spherical transformation in SIII coords.
+    # B_spher_SIII = [cartesian_to_spherical_vector(B_cart_SIII_i, phi, theta) for B_cart_SIII_i, phi, theta in zip(B_cart_SIII, phi_SIII, theta_SIII)]    
+    # B_spher_SIII = np.transpose(B_spher_SIII)
+    # Br, Btheta, Bphi = B_spher_SIII
 
     # conversion into CPhiO coord. system
-    Bx = Bphi
-    By = -Br
-    Bz = -Btheta
+    Bx = Bphi #+5
+    By = -Brho #+3
+    Bz = Bz
 
     return np.array([Bx, By, Bz]).transpose()
