@@ -184,24 +184,27 @@ def B_disk(orbit, R0, R1, D, I_constant, azimuthal_field=False, I_rho=12):
 
     return rho, Z, Bcart
 
-def B_sheet_Community(orbit_SIII, orbit_SIII_mag):
+def B_sheet_Community(orbit_SIII):
     O_SIII = orbit_SIII.copy()
-    O_SIII_mag = orbit_SIII_mag.copy()
+    x = orbit_SIII[1] / RJ
+    y = orbit_SIII[2] / RJ
+    z = orbit_SIII[3] / RJ
+    r = O_SIII[4] / RJ
     
     # jm.Con2020.Config(equation_type='analytic', CartesianIn=True, CartesianOut=False)
-    # x = orbit_SIII[1] / RJ
-    # y = orbit_SIII[2] / RJ
-    # z = orbit_SIII[3] / RJ
     # Br, Btheta, Bphi = jm.Con2020.Field(x, y, z)
     
-    # jm.Con2020.Config(equation_type='analytic', CartesianIn=False, CartesianOut=False)
-    # r = O_SIII[4] / RJ
-    # Br, Btheta, Bphi = jm.Con2020.Field(r, O_SIII[5], O_SIII[6])
+    jm.Con2020.Config(equation_type='analytic', CartesianIn=False, CartesianOut=False)
+    Br, Btheta, Bphi = jm.Con2020.Field(r, O_SIII[5], O_SIII[6])
     
-    # Bx = Bphi
-    # By = -Br
-    # Bz = -Btheta
+    Bx = Bphi
+    By = -Br
+    Bz = -Btheta
+    return np.array([Bx, By, Bz]).transpose()
 
+def B_sheet_Community2(orbit_SIII, orbit_SIII_mag):
+    O_SIII = orbit_SIII.copy()
+    O_SIII_mag = orbit_SIII_mag.copy()
     theta_mag = O_SIII_mag[5]
     psi_mag = O_SIII_mag[6]
 

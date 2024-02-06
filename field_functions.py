@@ -150,6 +150,30 @@ def convert_orbit_SIII_mag_to_SIII(orbit_SIII_mag):
     _orbit_SIII[4:] = cartesian_to_spherical(_orbit_SIII[1:4].transpose()).transpose()
     return _orbit_SIII
 
+def convert_B_to_PDS_CPhiO(B_CPhiO, orbit_cal_jup_SIII, orbit_cal_jup_SIII_CA):
+    theta_CA = orbit_cal_jup_SIII_CA[5]
+    phi_CA = orbit_cal_jup_SIII_CA[6]
+    
+    thetas = orbit_cal_jup_SIII[5]
+    phis = orbit_cal_jup_SIII[6]
+    
+    delta_theta = thetas - np.ones_like(thetas) * theta_CA
+    delta_phi = phis - np.ones_like(phis) * phi_CA
+
+    print(max(delta_theta))
+    print(max(delta_phi))
+
+    B_rot = []
+    for B, theta_i, phi_i in zip(B_CPhiO, delta_theta, delta_phi):
+        rot_matrix_theta = [[  1,                0,                0],
+                            [  0,  np.cos(theta_i), -np.sin(theta_i)],
+                            [  0,  np.sin(theta_i),  np.cos(theta_i)]]
+        rot_matrix_phi = [[  np.cos(phi_i), -np.sin(phi_i),  0],
+                          [  np.sin(phi_i),  np.cos(phi_i),  0],
+                          [              0,              0,  1]]
+        B_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, B))
+        B_rot.append(B_i)
+    return np.array(B_rot)
         
 
         
