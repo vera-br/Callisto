@@ -160,9 +160,6 @@ def convert_B_to_PDS_CPhiO(B_CPhiO, orbit_cal_jup_SIII, orbit_cal_jup_SIII_CA):
     delta_theta = thetas - np.ones_like(thetas) * theta_CA
     delta_phi = phis - np.ones_like(phis) * phi_CA
 
-    print(max(delta_theta))
-    print(max(delta_phi))
-
     B_rot = []
     for B, theta_i, phi_i in zip(B_CPhiO, delta_theta, delta_phi):
         rot_matrix_theta = [[  1,                0,                0],
