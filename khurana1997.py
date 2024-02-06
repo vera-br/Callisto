@@ -152,7 +152,7 @@ def B_sheet_khurana2(orbit_JSO, orbit_SIII_mag, model="common"):
     D2 = [20.6, 19.23, 16.81, 13.27]
     p = [6.66*1e-3, 7.48*1e-3, 5.73*1e-3, 6.26*1e-3]
     q = [0.32, 0.33, 0.35, 0.35]
-
+    print(model)
     if model == "Pioneer10":
         C1 = C1[0]; C2 = C2[0]; C3 = C3[0]; C4 = C4[0]
         a1 = a1[0]; a2 = a2[0]; a3 = a3[0]
@@ -233,10 +233,19 @@ def B_sheet_khurana2(orbit_JSO, orbit_SIII_mag, model="common"):
     
     B_cyl_tilted = []
     for B_cyl_i, theta_i in zip(np.transpose(B_cyl), theta_mag):
+
+        phi = np.radians(9.5)
+
         rot_matrix_theta = [[ np.sin(theta_i),   0,   np.cos(theta_i)], 
                             [               0,   1,                 0], 
                             [-np.cos(theta_i),   0,   np.sin(theta_i)]]
+        
+        rot_matrix_phi =np.array([[np.cos(phi),  np.sin(phi),   0],
+                                 [-np.sin(phi),   np.cos(phi),   0],
+                                 [                0,                  0,   1]])
+        
         B_cyl_tilted_i = np.dot(rot_matrix_theta, B_cyl_i)
+        #B_cyl_tilted_i = np.dot(rot_matrix_phi, B_cyl_tilted_i)
         B_cyl_tilted.append(B_cyl_tilted_i)
     
     Brho, Bpsi, Bz = np.transpose(B_cyl_tilted)

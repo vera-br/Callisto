@@ -156,10 +156,15 @@ def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductiv
 
     A = ae_iphi_multilayer(conductivities, radii, 1, omega).real
 
+    i= 1
+
     Bind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
 
-        position = vector[1:4]
+        vector[1] = 2410*1e3 + 200*1e3
+        vector[2] = np.pi/8183
+        vector[3] = 2*np.pi/8183 * i
+        position =  vector[1:4]
         M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
 
         rmag = np.linalg.norm(position)
@@ -167,5 +172,6 @@ def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductiv
 
         Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
         Bind_evolution.append(Bind)
+        i +=1
 
     return np.array(Bind_evolution)

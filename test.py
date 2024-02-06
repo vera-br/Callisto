@@ -1,114 +1,96 @@
 from trajectories.trajectory_analysis import *
 from field_functions import *
+from khurana1997 import *
+from khurana_2 import *
+from jupiter_field import *
 
 #---------constants-----------
 
 
-prime_meridian = np.radians(249.2)
-
-
-#---------functions-----------
-
-
-def transform_SIII_mag_to_SIII(vector_SIII_mag):
-    """
-    Transform a vector from SIII Mag to SIII.
-
-    Parameters:
-    - vector_SIII_mag: 1D NumPy array representing the vector in SIII Mag coordinates [X_mag, Y_mag, Z_mag].
-
-    Returns:
-    - vector_SIII: 1D NumPy array representing the vector in SIII coordinates [X, Y, Z].
-    """
-
-    # Transformation matrix from SIII Mag to SIII
-    transformation_matrix = np.array([
-        [np.sin(prime_meridian), 0, -np.cos(prime_meridian)],
-        [0, 1, 0],
-        [np.cos(prime_meridian), 0, np.sin(prime_meridian)]
-    ])
-
-    # Apply the transformation
-    vector_SIII = np.dot(transformation_matrix, vector_SIII_mag)
-
-    return vector_SIII
 
 
 
 #---------load data-----------
 
 
-juice_wrt_callisto_cphio = get_spice_data('juice', 'callisto', 'cphio', 'J')
-juice_jupiter_SIII = get_spice_data('juice', 'jupiter', 'SIII', 'J')
-juice_jupiter_SIII_mag = get_spice_data('juice', 'jupiter', 'SIII_mag', 'J')
+galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
+galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
+
+callisto_jupiter_SIII = get_spice_data('callisto', 'jupiter', 'SIII', 'G')
+callisto_jupiter_JSO = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'G')
+callisto_jupiter_SIII_mag = get_spice_data('callisto', 'jupiter', 'SIII_mag', 'G')
 
 flyby_n = 2
 
-orbit_cphio = juice_wrt_callisto_cphio["orbit%s" % (flyby_n)]
-orbit_SIII = juice_jupiter_SIII["orbit%s" % (flyby_n)]
-orbit_SIII_mag = juice_jupiter_SIII_mag["orbit%s" % (flyby_n)]
+orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
 
-phi_SIII_mag = orbit_SIII_mag[6]
+orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
+orbit_cal_SIII_mag_ = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
+orbit_cal_SIII_mag = orbit_cal_SIII_mag_.copy()
+
+B_PDS = B_PDSs['bfield%s' % (flyby_n)]
+B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
 
-#---------coordinate transformation-----------
+#--------------------
 
-# rotation matrix to tilt system about y
-rot_matrix_theta = np.array([[ np.cos(theta_VIP4),   0,   np.sin(theta_VIP4)],
-                                [                  0,   1,                    0],
-                                [-np.sin(theta_VIP4),   0,   np.cos(theta_VIP4)]])
+B_external = Bext_Community(orbit_cal_SIII)
+B_external_mag = np.sqrt(B_external[:, 0]**2 + B_external[:, 1]**2 + B_external[:, 2]**2)
 
-# rotation matrix to set prime meridian 
-rot_matrix_phi =np.array( [[ np.cos(phi_VIP4),  -np.sin(phi_VIP4),   0],
-                            [ np.sin(phi_VIP4),   np.cos(phi_VIP4),   0],
-                            [                0,                  0,   1]])
+fig, ax = plt.subplots(2, 2, figsize=(10, 6))
 
-calculated_SIII = np.empty((0,3))
-for phi_i, SIII_mag_i in zip(phi_SIII_mag, np.transpose(orbit_SIII_mag[1:4])):
-    # rotate and tilt into RH SIII
-    orbit_SIII_i = np.dot(rot_matrix_phi, np.dot(rot_matrix_theta, SIII_mag_i))
+ax[0, 0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
+#ax[0, 0].plot(orbit_cal_SIII[0], B_external[:, 0], label='B_external', color='k')
 
-    calculated_SIII = np.vstack([calculated_SIII, orbit_SIII_i])
+ax[0, 0].set_title('Bx')
+#ax[0, 0].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
 
-# orbit_SIII = [rotation_SIII_mag_to_SIII(vector) for vector in orbit_SIII_mag[:, 1:4].T]
+ax[0, 1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
+#ax[0, 1].plot(orbit_cal_SIII[0], B_external[:, 1], label='B_external', color='k')
 
-# x = orbit_SIII[6] #phi
-# y = -orbit_SIII[4] #r
-# z = -orbit_SIII[5] #theta
+ax[0, 1].set_title('By')
+#ax[0, 1].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
 
-# t = orbit_SIII_mag[0].transpose()
-# print(np.shape(t))
-# print(np.shape(x))
+ax[1, 0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
+#ax[1, 0].plot(orbit_cal_SIII[0], B_external[:, 2], label='B_external', color='k')
 
-transformed = np.column_stack([orbit_SIII_mag[0], calculated_SIII]).transpose()
+ax[1, 0].set_title('Bz')
+#ax[1, 0].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
 
-#---------plotting-----------
-spice_data = orbit_SIII
+ax[1, 1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
+#ax[1, 1].plot(orbit_cal_SIII[0], B_external_mag, label='B_external', color='k')
 
-fig, ax = plt.subplots(2,3)
-ax[0,0].plot(spice_data[0], transformed[1], label='calculated', color='r')
-ax[0,0].plot(spice_data[0], spice_data[1], label='spice', color='b')
-ax[0,0].set_title('X')
+ax[1, 1].set_title('|B|')
 
-ax[0,1].plot(spice_data[0], transformed[2], label='calculated', color='r')
-ax[0,1].plot(spice_data[0], spice_data[2], label='spice', color='b')
-ax[0,1].set_title('Y')
 
-ax[0,2].plot(spice_data[0], transformed[3], label='calculated', color='r')
-ax[0,2].plot(spice_data[0], spice_data[3], label='spice', color='b')
-ax[0,2].set_title('Z')
+models = ["Pioneer10", "Voyager1", "Voyager2", "common"]
+colour = ["r", "b", "g", "gold"]
 
-# ax[1,0].plot(transformed[0], transformed[4], label='calculated', color='r')
-# ax[1,0].plot(spice_data[0], spice_data[4], label='spice', color='b')
-# ax[1,0].set_title('R')
+for i in range(4):
 
-# ax[1,1].plot(transformed[0], transformed[5], label='calculated', color='r')
-# ax[1,1].plot(spice_data[0], spice_data[5], label='spice', color='b')
-# ax[1,1].set_title('THETA')
+    B_sheet = B_sheet_khurana2(orbit_cal_JSO, orbit_cal_SIII_mag, models[i])
+    B_sheet_mag = np.sqrt(B_sheet[:, 0]**2 + B_sheet[:, 1]**2 + B_sheet[:, 2]**2)
 
-# ax[1,2].plot(transformed[0], transformed[6], label='calculated', color='r')
-# ax[1,2].plot(spice_data[0], spice_data[6], label='spice', color='b')
-# ax[1,2].set_title('PHI')
+    B_full_ext = B_sheet + B_external
+    Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:, 2]**2)
 
-#ax[0,2].legend()
+
+    #ax[0, 0].plot(orbit_cal_SIII[0], B_sheet[:, 0], label='B_sheet', color=colour[i], linestyle="--")
+    ax[0, 0].plot(orbit_cal_SIII[0], B_full_ext[:, 0], label=models[i], color=colour[i])
+
+    #ax[0, 1].plot(orbit_cal_SIII[0], B_sheet[:, 1], label='B_sheet', color=colour[i], linestyle="--")
+    ax[0, 1].plot(orbit_cal_SIII[0], B_full_ext[:, 1], label=models[i], color=colour[i])
+
+    #ax[1, 0].plot(orbit_cal_SIII[0], B_sheet[:, 2], label='B_sheet', color=colour[i], linestyle="--")
+    ax[1, 0].plot(orbit_cal_SIII[0], B_full_ext[:, 2], label=models[i], color=colour[i])
+
+    #ax[1, 1].plot(orbit_cal_SIII[0], B_sheet_mag, label='B_sheet', color=colour[i], linestyle="--")
+    ax[1, 1].plot(orbit_cal_SIII[0], Bmag_full_ext, label=models[i], color=colour[i])
+
+ax[1, 1].legend()
+#ax[1, 1].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
+
+#plt.suptitle("Flyby C3")
+plt.tight_layout()
 plt.show()

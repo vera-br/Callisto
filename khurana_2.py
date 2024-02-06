@@ -188,8 +188,8 @@ def B_khurana_2(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     # Br, Btheta, Bphi = B_spher_SIII
 
     # conversion into CPhiO coord. system
-    Bx = Bphi #+5
-    By = -Brho #+3
+    Bx = -Bphi
+    By = -Brho
     Bz = Bz
 
     return np.array([Bx, By, Bz]).transpose()
