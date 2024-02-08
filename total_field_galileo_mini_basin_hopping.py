@@ -1,8 +1,5 @@
 # load modules and functions
 import matplotlib.pyplot as plt
-from datetime import datetime
-import pandas as pd
-from pandas import Timestamp
 from scipy.ndimage import uniform_filter1d
 from scipy.optimize import minimize, basinhopping
 
@@ -48,14 +45,6 @@ Bmag_smooth_norm = Bmag_smooth_offset / max(Bmag_smooth_offset)
 
 #---------magnetic fields-----------
 
-# # jovian field
-# B_external = Bext_Community(orbit_SIII)
-
-
-# # current sheet
-# B_sheet = B_sheet_Community(orbit_SIII)
-# B_total = B_external + B_sheet
-
 polys = []
 section = int(len(B_PDS[0]) / 3)
 for i in range(3):
@@ -74,30 +63,31 @@ for p in polys:
 B_poly = np.transpose(B_poly)
 B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
-#-----------multiple induced field parameter run
 
-r_cores = np.array([0.1, 0.2, 0.3]) * R_C ; r_oceans = np.array([0.5, 0.7, 0.9]) * R_C ; r_surface = R_C ; r_ionos = np.array([1.0125, 1.025, 1.0375, 1.05, 1.0625, 1.075]) * R_C
-sig_cores = [1e-6]    ; sig_oceans = np.array([0.1, 0.5, 1, 5, 10])      ; sig_surfaces = [1e-6] ; sig_ionos = np.array([0.001, 0.005, 0.01, 0.05, 0.1])
+r_surface = R_C ; r_iono = 1.042 * R_C
+sig_core = 1e-6 ; sig_surface = 1e-6
 
 
 def get_rsq(params, minimise='All', rsq=None, rs=None, sigs=None):
     if minimise == 'All':
-        r_core, r_ocean, r_iono = params[0:3] * R_C
-        sigs_ = 10**params[3:]
+        r_ocean = params[0] * R_C
+        r_core = params[1] * r_ocean
+        sigs_ = 10**params[2:]
         print(sigs_)
-        sig_core, sig_ocean, sig_surface, sig_iono = sigs_
+        sig_ocean, sig_iono = sigs_
 
     if minimise == 'Radii':
-        r_core, r_ocean, r_iono = params * R_C
-        sig_core, sig_ocean, sig_surface, sig_iono = 10**sigs
+        r_core, r_ocean = params * R_C
+        sig_ocean, sig_iono = 10**sigs
     if minimise == 'Conductivities':
-        sig_core, sig_ocean, sig_surface, sig_iono = 10**params
-        r_core, r_ocean, r_iono = rs * R_C
+        sig_ocean, sig_iono = 10**params
+        r_core, r_ocean = rs * R_C
 
     radii = [r_core, r_ocean, r_surface, r_iono]
     conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
-    B_induced = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
 
+    B_induced = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
+    
     # total field
     B_total = B_poly + B_induced
     B_mag_tot = np.sqrt(B_total[:, 0]**2 + B_total[:, 1]**2 + B_total[:, 2]**2)
@@ -136,19 +126,21 @@ def get_rsq(params, minimise='All', rsq=None, rs=None, sigs=None):
     return rsq_
 
 # initial guess
-r_core_i = 0.1 * R_C ; r_ocean_i = 0.8 * R_C ; r_iono_i = 1.05 * R_C
-rs_i = np.array([r_core_i, r_ocean_i, r_iono_i]) / R_C
-radii_i = [r_core_i, r_ocean_i, r_surface, r_iono_i]
+r_core_i = 0.1 * R_C ; r_ocean_i = 0.9 * R_C
+sig_ocean_i = 5 ; sig_iono_i = 0.1
 
-sig_core_i = 1e-6 ; sig_ocean_i = 1 ; sig_surface_i = 1e-6 ; sig_iono_i = 0.01
-sigs_i = np.array([sig_core_i, sig_ocean_i, sig_surface_i, sig_iono_i])
+core_ocean_ratio = r_core_i / r_ocean_i
+
+rs_i = np.array([r_ocean_i / R_C, core_ocean_ratio]) 
+radii_i = [r_core_i, r_ocean_i, r_surface, r_iono]
+
+sigs_i = np.array([sig_ocean_i, sig_iono_i])
 log10_sigs_i = np.log10(sigs_i)
-print(log10_sigs_i)
-initial_guess = np.r_[rs_i, sigs_i]
-bnds = ((0, 1), (0, 1), (1, None), (-12,-5), (-1,2), (-12,-5), (-3,1))
-print(bnds[0:3])
-bndsx = bnds[0:3]
-bndssigs = bnds[3:]
+
+initial_guess = np.r_[rs_i, log10_sigs_i]
+bnds = ((0, 1), (0, 1), (-1,2), (-3,1))
+bndsx = bnds[0:2]
+bndssigs = bnds[2:]
 
 minimise = 'All'
 rsqi = 'rsqx'
@@ -159,22 +151,25 @@ minimiser_kwargs = {'bounds':bnds}
 # note for future: change get_rsq function to take log(sig_i) and to set stepsize
 
 if minimise == 'All':
-    resxr = minimize(get_rsq, initial_guess, args=(minimise, rsqi, None, None), bounds=bnds)
-    #resxr = basinhopping(get_rsq, initial_guess, minimizer_kwargs={'bounds':bnds, 'args':(minimise, rsqi, None, None)})
-    r_core, r_ocean, r_iono, sig_core, sig_ocean, sig_surface, sig_iono = resxr.x
-    radii = np.array([r_core, r_ocean, 1, r_iono]) * R_C
-    
+    #resxr = minimize(get_rsq, initial_guess, args=(minimise, rsqi, None, None), bounds=bnds)
+    resxr = basinhopping(get_rsq, initial_guess, minimizer_kwargs={'bounds':bnds, 'args':(minimise, rsqi, None, None)})
+    r_ocean, core_ocean_ratio, log10_sig_ocean, log10_sig_iono = resxr.x
+    r_core = r_ocean * core_ocean_ratio
+    radii = [r_core * R_C, r_ocean * R_C, r_surface, r_iono]
+    sig_ocean, sig_iono = 10**np.array([log10_sig_ocean, log10_sig_iono])
     print(' \n Radii')
     print(np.array(radii) / R_C)
-    conductivities = 10**np.array([sig_core, sig_ocean, sig_surface, sig_iono])
+    conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
     print(' \n Conductivities')
     print(conductivities)
+
 elif minimise == 'Radii':
     resxr = minimize(get_rsq, rs_i, args=(minimise, rsqi, None, sigs_i), bounds=bndsx)
-    r_core, r_ocean, r_iono = resxr.x
-    radii = [r_core, r_ocean, r_surface, r_iono]
+    r_core, r_ocean = resxr.x
+    radii = [r_core * R_C, r_ocean * R_C, r_surface, r_iono]
     print(np.array(radii)/R_C)
     conductivities = sigs_i
+
 elif minimise == 'Conductivities':
     resxsig = minimize(get_rsq, log10_sigs_i, args=(minimise, rsqi, rs_i, None), bounds=bndssigs)
     sig_core, sig_ocean, sig_surface, sig_iono = resxsig.x
@@ -182,8 +177,11 @@ elif minimise == 'Conductivities':
     print(conductivities)
     radii = rs_i
 
+sigs_init = [sig_core, sig_ocean_i, sig_surface, sig_iono_i]
+radii_init = [r_core_i, r_ocean_i, r_surface, r_iono]
+
 B_induced = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
-B_induced_init = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), sigs_i, radii_i)
+B_induced_init = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), sigs_init, radii_init)
 
 # total field
 B_total = B_poly + B_induced
@@ -223,7 +221,7 @@ ax[1,0].plot(B_PDS[0], B_total[:, 2], 'r')
 ax[1,1].plot(B_PDS[0], B_mag_tot, 'r', label='Min.')
 ax[1,1].legend()
 
-fig.suptitle('r_ocean = ' + str(r_core / R_C) + '-' + str(r_ocean / R_C) + ' R_C, r_iono = 1-' + str(r_iono / R_C) + ' R_C \n  sig_ocean = ' + str(sig_ocean) + ', sig_iono = ' + str(sig_iono))
+fig.suptitle('r_ocean = ' + str(r_core) + '-' + str(r_ocean) + ' R_C, r_iono = 1-' + str(r_iono / R_C) + ' R_C \n  sig_ocean = ' + str(sig_ocean) + ', sig_iono = ' + str(sig_iono))
 
 plt.show()
 # plot_all_combs = False

@@ -1,17 +1,11 @@
 # load modules and functions
 import matplotlib.pyplot as plt
-from datetime import datetime
-import pandas as pd
-from pandas import Timestamp
 from scipy.ndimage import uniform_filter1d 
 
 from trajectories.trajectory_analysis import *
 from plot_scripts.plot_field_components import *
 from induced_field import *
-from jupiter_field import *
-from current_sheet import *
 from field_functions import *
-from khurana1997 import *
 
 # load data
 galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
@@ -24,7 +18,7 @@ callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', '
 callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
 
 # specify orbit
-flyby_n = 3
+flyby_n = 2
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -43,39 +37,8 @@ By_smooth = uniform_filter1d(B_PDS[2], size=300)
 Bz_smooth = uniform_filter1d(B_PDS[3], size=1000)
 Bmag_smooth = uniform_filter1d(B_mag, size=300)
 
-#---------magnetic fields-----------
-
-# SIII_mag coords
-B_external = Bext_Community2(orbit_SIII, orbit_SIII_mag)
-Bmag_external = np.sqrt(B_external[:, 0]**2 + B_external[:, 1]**2 + B_external[:, 2]**2)
-B_sheet = B_sheet_khurana2(orbit_cal_JSO, orbit_SIII_mag)
-Bmag_sheet = np.sqrt(B_sheet[:, 0]**2 + B_sheet[:, 1]**2 + B_sheet[:, 2]**2)
-
-B_external_cal = Bext_Community2(orbit_cal_SIII, orbit_cal_SIII_mag)
-B_sheet_cal = B_sheet_khurana2(orbit_cal_JSO, orbit_cal_SIII_mag)
-B_full_ext_cal = B_external_cal + B_sheet_cal
-
-B_full_ext = B_external + B_sheet
-# B_full_ext = convert_B_to_PDS_CPhiO(B_full_ext, orbit_cal_SIII, orbit_cal_SIII_CA)
-Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:, 2]**2)
-
-# SIII coords
-B_external_og = Bext_Community(orbit_SIII)
-Bmag_external_og = np.sqrt(B_external_og[:, 0]**2 + B_external_og[:, 1]**2 + B_external_og[:, 2]**2)
-B_sheet_og = B_sheet_khurana(orbit_cal_JSO, orbit_SIII_mag, orbit_SIII)
-Bmag_sheet_og = np.sqrt(B_sheet_og[:, 0]**2 + B_sheet_og[:, 1]**2 + B_sheet_og[:, 2]**2)
-
-B_external_cal_og = Bext_Community(orbit_cal_SIII)
-B_sheet_cal_og = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
-B_full_ext_cal_og = B_external_cal_og + B_sheet_cal_og
-
-B_full_ext_og = B_external_og + B_sheet_og
-# B_full_ext_og = convert_B_to_PDS_CPhiO(B_full_ext_og, orbit_cal_SIII, orbit_cal_SIII_CA)
-Bmag_full_ext_og = np.sqrt(B_full_ext_og[:, 0]**2 + B_full_ext_og[:, 1]**2 + B_full_ext_og[:, 2]**2)
-
-
 #----------polynomial fits-------------
-B_poly = []
+polys = []
 section = int(len(B_PDS[0]) / 3)
 for i in range(3):
     t = B_PDS[0]
@@ -84,6 +47,10 @@ for i in range(3):
     Bi = np.append(Bi[:section], Bi[2*section:])
     poly = np.polyfit(t, Bi, 3)
     p = np.poly1d(poly)
+    polys.append(p)
+
+B_poly = []
+for p in polys:
     Bi_poly = p(B_PDS[0])
     B_poly.append(Bi_poly)
 B_poly = np.transpose(B_poly)
@@ -91,26 +58,13 @@ B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
 
 # induced field parameters
-r_core = 0.1 * R_C ; r_ocean = 0.8 * R_C ; r_surface = R_C    ; r_iono = 1.02 * R_C
-sig_core = 1e-6    ; sig_ocean = 1      ; sig_surface = 1e-6 ; sig_iono = 1e-6
+r_core = 0.1 * R_C ; r_ocean = 0.6 * R_C ; r_surface = R_C    ; r_iono = 1.05 * R_C
+sig_core = 1e-6    ; sig_ocean = 20e-3      ; sig_surface = 1e-6 ; sig_iono = 0.5e-3
 
 radii = [r_core, r_ocean, r_surface, r_iono]
 conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
 
-
-# SIII_mag
-# B_induced_model = B_induced_finite_conductivity_multilayer(orbit_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii)
-# Bmag_induced_model = np.sqrt(B_induced_model[:, 0]**2 + B_induced_model[:, 1]**2 + B_induced_model[:, 2]**2)
-# B_total = B_full_ext + B_induced_model
-# B_mag_tot = np.sqrt(B_total[:, 0]**2 + B_total[:, 1]**2 + B_total[:, 2]**2)
-
-# SIII
-B_induced_model_og = B_induced_finite_conductivity_multilayer(orbit_cphio, B_full_ext_cal_og, 2*np.pi /(10.1*3600), conductivities, radii)
-Bmag_induced_model_og = np.sqrt(B_induced_model_og[:, 0]**2 + B_induced_model_og[:, 1]**2 + B_induced_model_og[:, 2]**2)
-B_total_og = B_full_ext_og + B_induced_model_og
-B_mag_tot_og = np.sqrt(B_total_og[:, 0]**2 + B_total_og[:, 1]**2 + B_total_og[:, 2]**2)
-
-# Polynomial
+# Induced Field calculation
 B_induced_poly = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
 Bmag_induced_model_og = np.sqrt(B_induced_poly[:, 0]**2 + B_induced_poly[:, 1]**2 + B_induced_poly[:, 2]**2)
 B_total_poly = B_poly + B_induced_poly
@@ -118,7 +72,6 @@ B_mag_tot_poly = np.sqrt(B_total_poly[:, 0]**2 + B_total_poly[:, 1]**2 + B_total
 
 
 #---------plot-----------
-# plot_time_evolution_Gal(B_total, orbit_cphio, orbit_CA, flyby_n, "Total")
 
 fig, ax = plt.subplots(2, 2)
 ax[0,0].plot(B_PDS[0], Bx_smooth, label='PDS', color='k')
@@ -131,57 +84,15 @@ ax[0,1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
 ax[1,0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
 ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
 
-ax[0,0].plot(B_PDS[0], B_poly[:,0], '--k')
-ax[0,1].plot(B_PDS[0], B_poly[:,1], '--k')
-ax[1,0].plot(B_PDS[0], B_poly[:,2], '--k')
-ax[1,1].plot(B_PDS[0], B_poly_mag, '--k')
-
-# ax[0,0].plot(B_PDS[0], B_external[:,0], label='Jupiter', color='g')
-# ax[0,1].plot(B_PDS[0], B_external[:,1], label='Jupiter', color='g')
-# ax[1,0].plot(B_PDS[0], B_external[:,2], label='Jupiter', color='g')
-# ax[1,1].plot(B_PDS[0], Bmag_external, label='Jupiter', color='g')
-
-# ax[0,0].plot(B_PDS[0], B_sheet[:,0], label='Sheet', color='m')
-# ax[0,1].plot(B_PDS[0], B_sheet[:,1], label='Sheet', color='m')
-# ax[1,0].plot(B_PDS[0], B_sheet[:,2], label='Sheet', color='m')
-# ax[1,1].plot(B_PDS[0], Bmag_sheet, label='Sheet', color='m')
-
-# ax[0,0].plot(B_PDS[0], B_induced[:,0], label='Induced')
-# ax[0,1].plot(B_PDS[0], B_induced[:,1], label='Induced')
-# ax[1,0].plot(B_PDS[0], B_induced[:,2], label='Induced')
-# ax[1,1].plot(B_PDS[0], Bmag_induced, label='Induced')
-
-# SIII_mag
-# ax[0,0].plot(B_PDS[0], B_full_ext[:,0], '--g', label='Full Ext.')
-# ax[0,1].plot(B_PDS[0], B_full_ext[:,1], '--g', label='Full Ext.')
-# ax[1,0].plot(B_PDS[0], B_full_ext[:,2], '--g', label='Full Ext.')
-# ax[1,1].plot(B_PDS[0], Bmag_full_ext, '--g')
-
-# ax[0,0].plot(orbit_cphio[0], B_total[:, 0], label='Calc.', color='g')
-# ax[0,1].plot(orbit_cphio[0], B_total[:, 1], label='Calc.', color='g')
-# ax[1,0].plot(orbit_cphio[0], B_total[:, 2], label='Calc.', color='g')
-# ax[1,1].plot(orbit_cphio[0], B_mag_tot, label='Calc.', color='g')
-
-# SIII
-ax[0,0].plot(B_PDS[0], B_full_ext_og[:,0], '--b', label='Full Ext. OG')
-ax[0,1].plot(B_PDS[0], B_full_ext_og[:,1], '--b', label='Full Ext. OG')
-ax[1,0].plot(B_PDS[0], B_full_ext_og[:,2], '--b', label='Full Ext. OG')
-ax[1,1].plot(B_PDS[0], Bmag_full_ext_og, '--b')
-
-ax[0,0].plot(orbit_cphio[0], B_total_og[:, 0], label='Calc.', color='b')
-ax[0,1].plot(orbit_cphio[0], B_total_og[:, 1], label='Calc.', color='b')
-ax[1,0].plot(orbit_cphio[0], B_total_og[:, 2], label='Calc.', color='b')
-ax[1,1].plot(orbit_cphio[0], B_mag_tot_og, label='Model', color='b')
-
 # Polynomial
-ax[0,0].plot(B_PDS[0], B_poly[:,0], '--r', label='Full Ext. OG')
-ax[0,1].plot(B_PDS[0], B_poly[:,1], '--r', label='Full Ext. OG')
-ax[1,0].plot(B_PDS[0], B_poly[:,2], '--r', label='Full Ext. OG')
+ax[0,0].plot(B_PDS[0], B_poly[:,0], '--r')
+ax[0,1].plot(B_PDS[0], B_poly[:,1], '--r')
+ax[1,0].plot(B_PDS[0], B_poly[:,2], '--r')
 ax[1,1].plot(B_PDS[0], B_poly_mag, '--r')
 
-ax[0,0].plot(orbit_cphio[0], B_total_poly[:, 0], label='Calc.', color='r')
-ax[0,1].plot(orbit_cphio[0], B_total_poly[:, 1], label='Calc.', color='r')
-ax[1,0].plot(orbit_cphio[0], B_total_poly[:, 2], label='Calc.', color='r')
+ax[0,0].plot(orbit_cphio[0], B_total_poly[:, 0], color='r')
+ax[0,1].plot(orbit_cphio[0], B_total_poly[:, 1], color='r')
+ax[1,0].plot(orbit_cphio[0], B_total_poly[:, 2], color='r')
 ax[1,1].plot(orbit_cphio[0], B_mag_tot_poly, label='Poly.', color='r')
 
 ax[0,0].set_title('Bx')
