@@ -11,7 +11,7 @@ from field_functions import *
 from khurana1997 import *
 
 # specify orbit
-flyby_n = 4
+flyby_n = 2
 
 # load data
 galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
@@ -19,8 +19,8 @@ galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
 
 
 #callisto
-
-galileo_wrt_callisto_cphio_CA = get_closest_approach_data("galileo", "callisto", "cphio", "G")
+galileo_wrt_callisto_cphio = get_spice_data("juice", "callisto", "cphio", "J")
+galileo_wrt_callisto_cphio_CA = get_closest_approach_data("juice", "callisto", "cphio", "J")
 callisto_jupiter_SIII = get_spice_data('callisto', 'jupiter', 'SIII', 'J')
 callisto_jupiter_JSO = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
 callisto_jupiter_SIII_mag = get_spice_data('callisto', 'jupiter', 'SIII_mag', 'J')
@@ -36,15 +36,15 @@ B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
 
 # create array with time series and constant position in CphiO
-time_series = orbit_SIII[0]
+time_series = np.linspace(0, 24, len(orbit_SIII[0]))
 
-constant_pos = np.array([0, 150e3, 0]) #200km above surface on y axis
+constant_pos = np.array([0, 150e3, 0]) #150km above surface on y axis
 constant_pos = constant_pos.reshape(1, -1) 
 pos_series = np.repeat(constant_pos, len(time_series), axis=0)
 
-orbit_200km = np.c_[time_series, pos_series]
+orbit_150km = np.c_[time_series, pos_series]
 
-orbit_cphio = orbit_200km.transpose()
+orbit_cphio = orbit_150km.transpose()
 
 
 #---------magnetic fields-----------
@@ -74,6 +74,7 @@ B_induced = B_induced_finite_conductivity_multilayer(orbit_cphio, B_external + B
 B_total = B_external + B_sheet + B_induced
 B_full_ext = B_external + B_sheet
 
+plot_time_evolution_altitude(B_external, time_series, 150, "Jupiter's")
 
 #---------formatting-----------
 

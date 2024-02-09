@@ -51,6 +51,10 @@ def plot_time_evolution(B_field, orbit_cphio, orbit_CA, flyby_n, field_type):
     # add a vertical line at CA
     ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
 
+    ax.tick_params(axis='both', direction='in',top = True, right = True, which='major')
+    ax.yaxis.set_minor_locator(AutoMinorLocator()) 
+    #ax.xaxis.set_minor_locator(AutoMinorLocator())
+
     # Format the time on the x-axis to include minutes
     ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
 
@@ -105,6 +109,36 @@ def plot_time_evolution_Gal(B_field, orbit_cphio, orbit_CA, flyby_n, field_type)
 
     ax.set_ylabel("B-field [nT]")
     ax.set_title(field_type + " field during Flyby %s" % (flyby_n))
+    plt.show()
+
+def plot_time_evolution_altitude(B_field, time, altitude, field_type):
+
+    B_field_x = B_field[:,0]
+    B_field_y = B_field[:,1]
+    B_field_z = B_field[:,2]
+
+    B_field_mag = (B_field[:,0]**2 + B_field[:,1]**2 + B_field[:,2]**2)**0.5
+    B_field_mag = pd.Series(dict(zip(time, B_field_mag)))
+
+    fig = plt.figure(figsize=(8,6))
+    ax = fig.gca()
+
+    plt.plot(time, B_field_mag, label="|B|", color="midnightblue")
+    plt.plot(time, B_field_x, label="Bx", color="royalblue")
+    plt.plot(time, B_field_y, label="By", color="orange")
+    plt.plot(time, B_field_z, label="Bz", color="deeppink")
+
+    ax.tick_params(axis='both', direction='in',top = True, right = True, which='both')
+    ax.set_xticks(np.arange(0, 29, step=6))
+    ax.yaxis.set_minor_locator(AutoMinorLocator()) 
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+
+    plt.legend(loc="best")
+    ax.grid(color='xkcd:dark blue',alpha =0.2)
+
+    ax.set_xlabel("Bx-field [nT]")
+    ax.set_ylabel("By-field [nT]")
+    ax.set_title(field_type + " field %skm above Callisto's surface" % (altitude))
     plt.show()
 
 def plot_compare_model_with_data(B_model, PDS_data, orbit_cphio, orbit_CA, title):
