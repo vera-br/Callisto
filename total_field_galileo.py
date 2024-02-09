@@ -58,11 +58,30 @@ B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
 
 # induced field parameters
-r_core = 0.1 * R_C ; r_ocean = 0.6 * R_C ; r_surface = R_C    ; r_iono = 1.05 * R_C
-sig_core = 1e-6    ; sig_ocean = 20e-3      ; sig_surface = 1e-6 ; sig_iono = 0.5e-3
+model = 'ocean and ionosphere'
 
-radii = [r_core, r_ocean, r_surface, r_iono]
-conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
+if model == 'ocean and iono':
+    # Conducting Ocean and Ionosphere
+    r_core = 0.1 * R_C ;   r_ocean = 0.6 * R_C ;   r_surface = R_C    ;   r_iono = 1.042 * R_C
+    sig_core = 1e-9    ;   sig_ocean = 20e-3   ;   sig_surface = 1e-9 ;   sig_iono = 0.5e-3
+
+    radii = [r_core, r_ocean, r_surface, r_iono]
+    conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
+
+elif model == 'ocean only':
+    r_core = 0.1 * R_C ;   r_ocean = 0.6 * R_C ;   r_surface = R_C
+    sig_core = 1e-9    ;   sig_ocean = 20e-3   ;   sig_surface = 1e-9
+
+    radii = [r_core, r_ocean, r_surface]
+    conductivities = [sig_core, sig_ocean, sig_surface]
+
+elif model == 'iono only':
+    r_surface = R_C    ;   r_iono = 1.042 * R_C
+    sig_surface = 1e-9 ;   sig_iono = 0.5e-3
+
+    radii = [r_surface, r_iono]
+    conductivities = [sig_surface, sig_iono]
+
 
 # Induced Field calculation
 B_induced_poly = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
@@ -95,10 +114,10 @@ ax[0,1].plot(orbit_cphio[0], B_total_poly[:, 1], color='r')
 ax[1,0].plot(orbit_cphio[0], B_total_poly[:, 2], color='r')
 ax[1,1].plot(orbit_cphio[0], B_mag_tot_poly, label='Poly.', color='r')
 
-ax[0,0].set_title('Bx')
-ax[0,1].set_title('By')
-ax[1,0].set_title('Bz')
-ax[1,1].set_title('|B|')
+ax[0,0].set_title('$B_x$')
+ax[0,1].set_title('$B_y$')
+ax[1,0].set_title('$B_z$')
+ax[1,1].set_title('$|B|$')
 
 ax[0,0].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 ax[0,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
@@ -107,6 +126,6 @@ ax[1,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 
 ax[1,1].legend(framealpha=1, fancybox=True)
 
-fig.suptitle('r_ocean = ' + str(r_core / R_C) + '-' + str(r_ocean / R_C) + ' R_C, r_iono = 1-' + str(r_iono / R_C) + ' R_C \n  sig_ocean = ' + str(sig_ocean) + ', sig_iono = ' + str(sig_iono))
+fig.suptitle('$r_{} = {:.1f}-{:.1f} R_C,  r_{} = 1-{:.3f} R_C$ \n $\sigma_{} = {:2.0e} Sm^{}, \sigma_{} = {:2.0e} Sm^{}$'.format('{ocean}', r_core / R_C, r_ocean / R_C, '{iono}', r_iono / R_C, '{ocean}', sig_ocean, '{-1}', '{iono}', sig_iono, '{-1}'))
 plt.show()
 
