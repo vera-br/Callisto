@@ -58,7 +58,7 @@ B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
 
 # induced field parameters
-model = 'ocean and ionosphere'
+model = 'ocean and iono'
 
 if model == 'ocean and iono':
     # Conducting Ocean and Ionosphere
