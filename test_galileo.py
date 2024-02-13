@@ -79,7 +79,6 @@ B_sheet = B_sheet_khurana2(orbit_cal_JSO, orbit_SIII_mag)
 B_full_ext = B_external + B_sheet
 
 
-
 #---------formatting-----------
 
 # calculate B-field magnitudes
