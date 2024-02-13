@@ -4,6 +4,7 @@ import numpy as np
 from scipy import constants
 import scipy.special as sps
 from maths import *
+from field_functions import *
 
 mu0 = constants.mu_0
 pi = constants.pi
@@ -97,17 +98,25 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     '''
     Calculates Ae^iphi for a given l and omega based on the approach given by Seufert et al. (2011)
     '''
+    # def Fs(l, r, k):
+    #     rk = r * k
+    #     sqrt = np.sqrt(pi / (2 * rk))
+    #     I_v = sps.iv(l + 0.5, rk)
+    #     dI_v = sps.ivp(l + 0.5, rk)
+    #     K_v = sps.kv(l + 0.5, rk)
+    #     dK_v = sps.kvp(l + 0.5, rk)
+    #     F1 = sqrt * I_v
+    #     F2 = sqrt * K_v
+    #     dF1 = -0.5 * F1 / r + sqrt * dI_v
+    #     dF2 = -0.5 * F2 / r + sqrt * dK_v
+    #     return F1, F2, dF1, dF2
+    
     def Fs(l, r, k):
         rk = r * k
-        sqrt = np.sqrt(pi / (2 * rk))
-        I_v = sps.iv(l + 0.5, rk)
-        dI_v = sps.ivp(l + 0.5, rk)
-        K_v = sps.kv(l + 0.5, rk)
-        dK_v = sps.kvp(l + 0.5, rk)
-        F1 = sqrt * I_v
-        F2 = sqrt * K_v
-        dF1 = -0.5 * F1 / r + sqrt * dI_v
-        dF2 = -0.5 * F2 / r + sqrt * dK_v
+        F1 = sps.spherical_in(l, rk)
+        F2 = sps.spherical_kn(l, rk)
+        dF1 = sps.spherical_in(l, rk, derivative=True)
+        dF2 = sps.spherical_in(l, rk, derivative=True)
         return F1, F2, dF1, dF2
 
     k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
@@ -118,6 +127,7 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     F12, F22, dF12, dF22 = Fs(l, r1, k2)
 
     Djmin1_Cjmin1 = (F12 / F22) * ( ( (dF12 / F12) - (dF11 / F11) ) / ( (dF11 / F11) - (dF22 / F22)) )
+    # print(Djmin1_Cjmin1)
     
     for i in range(1, len(r) - 1):
        
@@ -130,15 +140,20 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
 
        numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
        denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
+       
        Djmin1_Cjmin1 = (F12 / F22) * (numer / denom)
+    #    print(Djmin1_Cjmin1)
     
     R = r[-1]
     k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
     F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
     numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
+    # print(numer)
     denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
-
+    # print(denom)
     Ae_iphi = numer / denom
+    print('|A| = {}'.format(abs(Ae_iphi)))
+    print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
     return Ae_iphi
 
 def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductivities, radii):
