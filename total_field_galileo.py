@@ -70,7 +70,7 @@ if model == 'ocean and iono':
 
 elif model == 'ocean only':
     r_core = 0.1 * R_C ;   r_ocean = 0.7 * R_C ;   r_surface = R_C
-    sig_core = 1e-9    ;   sig_ocean = 5e1      ;   sig_surface = 1e-9
+    sig_core = 1e-9    ;   sig_ocean = 1e2    ;   sig_surface = 1e-9
 
     radii = [r_core, r_ocean, r_surface]
     conductivities = [sig_core, sig_ocean, sig_surface]
@@ -86,6 +86,9 @@ elif model == 'iono only':
 # Induced Field calculation
 #Aeiphi = ae_iphi_multilayer(conductivities, radii, 1, 2*np.pi /(10.1*3600))
 #print(Aeiphi)
+sigma_m = 2 / (mu0 * 2*np.pi /(10.1*3600) * R_C*R_C)
+print(sigma_m)
+
 B_induced_poly = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
 Bmag_induced_model_og = np.sqrt(B_induced_poly[:, 0]**2 + B_induced_poly[:, 1]**2 + B_induced_poly[:, 2]**2)
 B_total_poly = B_poly + B_induced_poly

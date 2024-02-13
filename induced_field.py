@@ -119,8 +119,12 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
         dF2 = sps.spherical_in(l, rk, derivative=True)
         return F1, F2, dF1, dF2
 
-    k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
-    k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
+    # k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
+    # k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
+
+    # Zimmer k
+    k1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[0] / 2)
+    k2 = (1-1j) * np.sqrt(omega * mu0 * conductivities[1] / 2)
     
     r1 = r[0]
     F11, F21, dF11, dF21 = Fs(l, r1, k1)
@@ -131,8 +135,13 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     
     for i in range(1, len(r) - 1):
        
-       k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
-       k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
+    #    k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
+    #    k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
+
+       # Zimmer k
+       k_jmin1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[i] / 2)
+       k_j = (1-1j) * np.sqrt(omega * mu0 * conductivities[i + 1] / 2)
+
        r_jmin1 = r[i]
 
        F11, F21, dF11, dF21 = Fs(l, r_jmin1, k_jmin1)
@@ -145,15 +154,16 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     #    print(Djmin1_Cjmin1)
     
     R = r[-1]
-    k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
+    # k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
+    k_J = (1-1j) * np.sqrt(omega * mu0 * conductivities[-1] / 2)
     F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
     numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
     # print(numer)
     denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
     # print(denom)
     Ae_iphi = numer / denom
-    print('|A| = {}'.format(abs(Ae_iphi)))
-    print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
+    # print('|A| = {}'.format(abs(Ae_iphi)))
+    # print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
     return Ae_iphi
 
 def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductivities, radii):
