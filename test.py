@@ -1,8 +1,12 @@
 from trajectories.trajectory_analysis import *
+from induced_field import *
 from field_functions import *
 from khurana1997 import *
 from khurana_2 import *
 from jupiter_field import *
+
+from matplotlib.ticker import AutoMinorLocator
+from plot_scripts.plot_field_components import *
 
 #---------constants-----------
 
@@ -12,85 +16,106 @@ from jupiter_field import *
 
 #---------load data-----------
 
+juice_wrt_callisto = get_spice_data('juice', 'callisto', 'cphio', 'J')
+callisto_jupiter_SIII = get_spice_data('callisto', 'jupiter', 'SIII', 'J')
+callisto_jupiter_JSO = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
+callisto_jupiter_SIII_mag = get_spice_data('callisto', 'jupiter', 'SIII_mag', 'J')
 
-galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
-galileo_wrt_jupiter_SIII = Galileo_trajectories_SIII_from_CPhiO()
+#---------select flybys-----------
 
-callisto_jupiter_SIII = get_spice_data('callisto', 'jupiter', 'SIII', 'G')
-callisto_jupiter_JSO = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'G')
-callisto_jupiter_SIII_mag = get_spice_data('callisto', 'jupiter', 'SIII_mag', 'G')
+flybys = [6, 15, 16, 17]
+flyby_n = 6
 
-flyby_n = 2
+orbit_cphio = juice_wrt_callisto["orbit%s" % (flyby_n)]
+orbit_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
+orbit_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
 
-orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
+orbit_CA = get_closest_approach_data('juice', 'callisto', 'cphio', 'J')
 
-orbit_cal_SIII = callisto_jupiter_SIII["orbit%s" % (flyby_n)]
-orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
-orbit_cal_SIII_mag_ = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
-orbit_cal_SIII_mag = orbit_cal_SIII_mag_.copy()
 
-B_PDS = B_PDSs['bfield%s' % (flyby_n)]
-B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
+# #---------B-field-----------
+B_jupiter = Bext_Community(orbit_SIII)
+B_sheet = B_sheet_khurana2(orbit_JSO, orbit_SIII_mag)
+B_induced = B_induced_infinite(orbit_cphio, B_jupiter + B_sheet, R_C, R_C-80e3)
+
+B_total = B_jupiter + B_sheet #+ B_induced
+
+
+plot_time_evolution(B_total, orbit_cphio, orbit_CA, flyby_n, "External")
 
 
 #--------------------
 
-B_external = Bext_Community(orbit_cal_SIII)
-B_external_mag = np.sqrt(B_external[:, 0]**2 + B_external[:, 1]**2 + B_external[:, 2]**2)
+fig, ax = plt.subplots(1, 3, figsize=(12, 3))
 
-fig, ax = plt.subplots(2, 2, figsize=(10, 6))
+# Defining and applying the common limits
+lim = 6
 
-ax[0, 0].plot(B_PDS[0], B_PDS[1], label='PDS', color='k', alpha=0.3)
-#ax[0, 0].plot(orbit_cal_SIII[0], B_external[:, 0], label='B_external', color='k')
+common_xlim = (-lim, lim)  
+common_ylim = (-lim, lim) 
 
-ax[0, 0].set_title('Bx')
-#ax[0, 0].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
+ax[0].set_xlim(common_xlim)
+ax[0].set_ylim(common_ylim)
+ax[1].set_xlim(common_xlim)
+ax[1].set_ylim(common_ylim)
+ax[2].set_xlim(common_xlim)
+ax[2].set_ylim(common_ylim)
 
-ax[0, 1].plot(B_PDS[0], B_PDS[2], label='PDS', color='k', alpha=0.3)
-#ax[0, 1].plot(orbit_cal_SIII[0], B_external[:, 1], label='B_external', color='k')
+ax[0].grid(color='xkcd:dark blue',alpha =0.1)
+ax[1].grid(color='xkcd:dark blue',alpha =0.1)
+ax[2].grid(color='xkcd:dark blue',alpha =0.1)
 
-ax[0, 1].set_title('By')
-#ax[0, 1].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
+# plot jupiter
+jup1 = plt.Circle((0, 0), 1, color='xkcd:dull brown', zorder=1)
+jup2 = plt.Circle((0, 0), 1, color='xkcd:dull brown', zorder=1)
+jup3 = plt.Circle((0, 0), 1, color='xkcd:dull brown', zorder=1)
 
-ax[1, 0].plot(B_PDS[0], B_PDS[3], label='PDS', color='k', alpha=0.3)
-#ax[1, 0].plot(orbit_cal_SIII[0], B_external[:, 2], label='B_external', color='k')
+ax[0].add_patch(jup1)
+ax[1].add_patch(jup2)
+ax[2].add_patch(jup3)
 
-ax[1, 0].set_title('Bz')
-#ax[1, 0].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
+ax[0].annotate('Callisto', (1.7, -0.25))
+ax[1].annotate('Callisto', (1.7, -0.25))
+ax[2].annotate('Callisto', (1.7, -0.25))
 
-ax[1, 1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
-#ax[1, 1].plot(orbit_cal_SIII[0], B_external_mag, label='B_external', color='k')
+# set axis labels
+ax[0].set_xlabel('x [$R_C$]')
+ax[0].set_ylabel('y [$R_C$]')
+ax[1].set_xlabel('z [$R_C$]')
+ax[1].set_ylabel('y [$R_C$]')
+ax[2].set_xlabel('x [$R_C$]')
+ax[2].set_ylabel('z [$R_C$]')
 
-ax[1, 1].set_title('|B|')
+ax[0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+ax[1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+ax[2].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+
+ax[0].xaxis.set_minor_locator(AutoMinorLocator()) 
+ax[1].xaxis.set_minor_locator(AutoMinorLocator()) 
+ax[2].xaxis.set_minor_locator(AutoMinorLocator()) 
+
+ax[0].yaxis.set_minor_locator(AutoMinorLocator()) 
+ax[1].yaxis.set_minor_locator(AutoMinorLocator()) 
+ax[2].yaxis.set_minor_locator(AutoMinorLocator()) 
 
 
-models = ["Pioneer10", "Voyager1", "Voyager2", "common"]
-colour = ["r", "b", "g", "gold"]
+# plot closest appproaches
+for i in range(len(flybys)):
 
-for i in range(4):
+    flyby_n = flybys[i]
+    orbit = juice_wrt_callisto["orbit%s" % (flyby_n)]
 
-    B_sheet = B_sheet_khurana2(orbit_cal_JSO, orbit_cal_SIII_mag, models[i])
-    B_sheet_mag = np.sqrt(B_sheet[:, 0]**2 + B_sheet[:, 1]**2 + B_sheet[:, 2]**2)
+    # rho = np.sqrt((orbit_SIII_mag[1])**2 + (orbit_SIII_mag[2]**2))
 
-    B_full_ext = B_sheet + B_external
-    Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:, 2]**2)
+    ax[0].plot(orbit[1] / R_C, orbit[2] / R_C, label="orbit%s" % (flyby_n))
+    ax[2].plot(orbit[1] / R_C, orbit[3] / R_C, label="orbit%s" % (flyby_n))
+    ax[1].plot(orbit[3] / R_C, orbit[2] / R_C, label="orbit%s" % (flyby_n))
+    
 
+# ax[2].axhspan(2.5, -2.5, facecolor='slateblue', alpha=0.5, label="plasma sheet")
 
-    #ax[0, 0].plot(orbit_cal_SIII[0], B_sheet[:, 0], label='B_sheet', color=colour[i], linestyle="--")
-    ax[0, 0].plot(orbit_cal_SIII[0], B_full_ext[:, 0], label=models[i], color=colour[i])
+ax[2].legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
 
-    #ax[0, 1].plot(orbit_cal_SIII[0], B_sheet[:, 1], label='B_sheet', color=colour[i], linestyle="--")
-    ax[0, 1].plot(orbit_cal_SIII[0], B_full_ext[:, 1], label=models[i], color=colour[i])
-
-    #ax[1, 0].plot(orbit_cal_SIII[0], B_sheet[:, 2], label='B_sheet', color=colour[i], linestyle="--")
-    ax[1, 0].plot(orbit_cal_SIII[0], B_full_ext[:, 2], label=models[i], color=colour[i])
-
-    #ax[1, 1].plot(orbit_cal_SIII[0], B_sheet_mag, label='B_sheet', color=colour[i], linestyle="--")
-    ax[1, 1].plot(orbit_cal_SIII[0], Bmag_full_ext, label=models[i], color=colour[i])
-
-ax[1, 1].legend()
-#ax[1, 1].set_xlim(min(orbit_cal_SIII[0]), max(orbit_cal_SIII[0]))
-
-#plt.suptitle("Flyby C3")
 plt.tight_layout()
 plt.show()

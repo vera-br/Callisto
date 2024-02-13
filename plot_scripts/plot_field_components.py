@@ -20,8 +20,8 @@ def plot_time_evolution(B_field, orbit_cphio, orbit_CA, flyby_n, field_type):
     OFFSET = datetime(2000,1,1,12) - datetime(1970,1,1) # difference between J2000 and UTC
 
     time = orbit_cphio[0]
-    time = [Timestamp((datetime.utcfromtimestamp(timestamp) + OFFSET).strftime('%Y-%m-%d %H:%M:%S')) for timestamp in time]
-    time_CA = Timestamp((datetime.utcfromtimestamp(orbit_CA[0]) + OFFSET).strftime('%Y-%m-%d %H:%M:%S'))
+    #time = [Timestamp((datetime.utcfromtimestamp(timestamp) + OFFSET).strftime('%Y-%m-%d %H:%M:%S')) for timestamp in time]
+    #time_CA = orbit_CA[0] #Timestamp((datetime.utcfromtimestamp(orbit_CA[0]) + OFFSET).strftime('%Y-%m-%d %H:%M:%S'))
 
     # radial distance of juice wrt callisto
     radial = pd.Series(dict(zip(time, orbit_cphio[4] / R_C)))
@@ -44,19 +44,21 @@ def plot_time_evolution(B_field, orbit_cphio, orbit_CA, flyby_n, field_type):
     plt.legend()
 
     # plot radial distance of juice wrt callisto
-    radial.plot(ax=ax, label="distance", color="k", secondary_y=True)
-    ax.right_ax.set_ylabel("Radial distance [R_C]")
-    plt.legend(loc="lower right")
+    # radial.plot(ax=ax, label="distance", color="k", secondary_y=True)
+    # ax.right_ax.set_ylabel("Radial distance [R_C]")
+    # plt.legend(loc="lower right")
 
-    # add a vertical line at CA
-    ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+    # # add a vertical line at CA
+    # ax.axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
 
-    ax.tick_params(axis='both', direction='in',top = True, right = True, which='major')
+    ax.tick_params(axis='both', direction='in',top = True, right = True, which='both')
     ax.yaxis.set_minor_locator(AutoMinorLocator()) 
     #ax.xaxis.set_minor_locator(AutoMinorLocator())
 
+    ax.grid(color='xkcd:dark blue',alpha =0.2)
+
     # Format the time on the x-axis to include minutes
-    ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+    #ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
 
     ax.set_ylabel("B-field [nT]")
     ax.set_title(field_type + " field during Flyby %s" % (flyby_n))
