@@ -199,8 +199,8 @@ surface_layer = 80e3 #m
 frequency = 2*np.pi /(10.1*3600)
 
 # vary ocean depth
-ocean_depth = np.linspace(0, R_C-surface_layer, 10)
-conductivity = 5 # S/m
+ocean_depth = np.linspace(0, R_C-surface_layer, 50)
+conductivity = 0.3 # S/m
 
 # set colour map
 cmap = plt.colormaps.get_cmap('winter').resampled(len(ocean_depth))
@@ -209,7 +209,7 @@ colors = cmap(np.arange(0, cmap.N))
 
 for i in range(0, len(ocean_depth)):
 
-    B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, conductivity, frequency, R_C, R_C - surface_layer, R_C -surface_layer - ocean_depth[i])
+    B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, conductivity, frequency, ocean_depth[i], surface_layer)
 
     B_total = B_external + B_sheet + B_induced
     B_mag_total = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
@@ -228,16 +228,16 @@ for i in range(0, len(ocean_depth)):
 
 # vary ocean conductivity
 ocean_depth = 150e3 # m
-ocean_conductivity = [1,2,3,4,5,6] # S/m
+ocean_conductivity = np.linspace(0.1, 10, 20) # S/m
 
 # set colour map
-cmap = plt.colormaps.get_cmap('winter').resampled(len(ocean_conductivity))
+cmap = plt.colormaps.get_cmap('summer').resampled(len(ocean_conductivity))
 colors = cmap(np.arange(0, cmap.N)) 
 
 
 for i in range(0, len(ocean_conductivity)):
 
-    B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, ocean_conductivity[i], frequency, R_C, R_C - surface_layer, R_C -surface_layer - ocean_depth)
+    B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, ocean_conductivity[i], frequency, ocean_depth, surface_layer)
 
     B_total = B_external + B_sheet + B_induced
     B_mag_total = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
@@ -248,10 +248,10 @@ for i in range(0, len(ocean_conductivity)):
     Bz_total = pd.Series(dict(zip(time_model, B_total[:, 2])))
     Bmag_total = pd.Series(dict(zip(time_model, B_mag_total)))
 
-    Bx_total.plot(ax=ax[0, 0], label=str(ocean_conductivity[i]), color=colors[i])
-    By_total.plot(ax=ax[1, 0], label=str(ocean_conductivity[i]), color=colors[i])
-    Bz_total.plot(ax=ax[2, 0], label=str(ocean_conductivity[i]), color=colors[i])
-    Bmag_total.plot(ax=ax[3, 0], label=str(ocean_conductivity[i]), color=colors[i])
+    Bx_total.plot(ax=ax[0, 1], label=str(ocean_conductivity[i]), color=colors[i])
+    By_total.plot(ax=ax[1, 1], label=str(ocean_conductivity[i]), color=colors[i])
+    Bz_total.plot(ax=ax[2, 1], label=str(ocean_conductivity[i]), color=colors[i])
+    Bmag_total.plot(ax=ax[3, 1], label=str(ocean_conductivity[i]), color=colors[i])
 
 
 ax[0, 0].set_title("Varying Ocean depth")

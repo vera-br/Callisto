@@ -5,6 +5,8 @@ from scipy import constants
 import scipy.special as sps
 from maths import *
 
+from Aeiphi import *
+
 mu0 = constants.mu_0
 pi = constants.pi
 
@@ -32,7 +34,7 @@ def ae_iphi(sigma, omega, rm, r0, r1):
     return np.real(amp * (R * J_52 - J_min_52) / (R * J_12 - J_min_12))
 
 
-def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
+def B_induced_finite_conductivity(orbit, B_external, sigma, omega, ocean_depth, surface_layer): # Rm, R0, R1):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -46,8 +48,10 @@ def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
     for more info see (Zimmer et al) https://www.sciencedirect.com/science/article/pii/S001910350096456X
     """
     orbit = orbit.transpose()
+    Rm = R_C
 
-    A = ae_iphi(sigma, omega, Rm, R0, R1)
+    #A = ae_iphi(sigma, omega, Rm, R0, R1)
+    A = Aeiphi(ocean_depth, surface_layer, sigma, omega)
 
     Bind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
@@ -62,7 +66,7 @@ def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
         Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
         Bind_evolution.append(Bind)
 
-    return np.array(Bind_evolution)
+    return np.array(np.real(Bind_evolution))
 
 
 def B_induced_infinite(orbit, B_external, Rm, R0):
