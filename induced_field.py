@@ -119,49 +119,51 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
         dF2 = sps.spherical_in(l, rk, derivative=True)
         return F1, F2, dF1, dF2
 
-    # k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
-    # k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
+    k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
+    k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
 
     # Zimmer k
-    k1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[0] / 2)
-    k2 = (1-1j) * np.sqrt(omega * mu0 * conductivities[1] / 2)
+    # k1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[0] / 2)
+    # k2 = (1-1j) * np.sqrt(omega * mu0 * conductivities[1] / 2)
     
     r1 = r[0]
     F11, F21, dF11, dF21 = Fs(l, r1, k1)
     F12, F22, dF12, dF22 = Fs(l, r1, k2)
 
     Djmin1_Cjmin1 = (F12 / F22) * ( ( (dF12 / F12) - (dF11 / F11) ) / ( (dF11 / F11) - (dF22 / F22)) )
-    # print(Djmin1_Cjmin1)
     
     for i in range(1, len(r) - 1):
        
-    #    k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
-    #    k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
+       k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
+       k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
 
        # Zimmer k
-       k_jmin1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[i] / 2)
-       k_j = (1-1j) * np.sqrt(omega * mu0 * conductivities[i + 1] / 2)
+    #    k_jmin1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[i] / 2)
+    #    k_j = (1-1j) * np.sqrt(omega * mu0 * conductivities[i + 1] / 2)
 
        r_jmin1 = r[i]
 
        F11, F21, dF11, dF21 = Fs(l, r_jmin1, k_jmin1)
        F12, F22, dF12, dF22 = Fs(l, r_jmin1, k_j)
 
-       numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
-       denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
+    #    numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
+    #    denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
+    #    Djmin1_Cjmin1 = (F12 / F22) * (numer / denom)
        
-       Djmin1_Cjmin1 = (F12 / F22) * (numer / denom)
-    #    print(Djmin1_Cjmin1)
+       Djmin1_Cjmin1 = F12 / F22 * ((dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))) / ((dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22)))
     
     R = r[-1]
-    # k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
-    k_J = (1-1j) * np.sqrt(omega * mu0 * conductivities[-1] / 2)
+
+    k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
+    # k_J = (1-1j) * np.sqrt(omega * mu0 * conductivities[-1] / 2)
+
     F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
-    numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
-    # print(numer)
-    denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
-    # print(denom)
-    Ae_iphi = numer / denom
+
+    # numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
+    # denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
+    # Ae_iphi = numer / denom
+    Ae_iphi = ((dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )) / ((dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l ))
+    
     # print('|A| = {}'.format(abs(Ae_iphi)))
     # print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
     return Ae_iphi
