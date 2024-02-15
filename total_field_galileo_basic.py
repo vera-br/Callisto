@@ -59,37 +59,20 @@ B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
 
 # induced field parameters
-model = 'ocean and iono'
 
-if model == 'ocean and iono':
-    # Conducting Ocean and Ionosphere
-    r_core = 0.1 * R_C ;   r_ocean = 0.9 * R_C ;   r_surface = R_C    ;   r_iono = 1.042 * R_C
-    sig_core = 1e-9    ;   sig_ocean = 50e-3   ;   sig_surface = 1e-9 ;   sig_iono = 0.5e-3
+r_core = 0.7 * R_C ;   r_ocean = 0.9 * R_C ;   r_surface = R_C
+sig_ocean = 1e0
 
-    radii = [r_core, r_ocean, r_surface, r_iono]
-    conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
-
-elif model == 'ocean only':
-    r_core = 0.1 * R_C ;   r_ocean = 0.7 * R_C ;   r_surface = R_C
-    sig_core = 1e-9    ;   sig_ocean = 1e0    ;   sig_surface = 1e-9
-
-    radii = [r_core, r_ocean, r_surface]
-    conductivities = [sig_core, sig_ocean, sig_surface]
-
-elif model == 'iono only':
-    r_surface = R_C    ;   r_iono = 1.042 * R_C
-    sig_surface = 1e-9 ;   sig_iono = 0.5e-3
-
-    radii = [r_surface, r_iono]
-    conductivities = [sig_surface, sig_iono]
+ocean_depth = r_ocean - r_core
+surface_layer = r_surface - r_ocean
 
 
 # Induced Field calculation
-
-B_induced_poly = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii, Styczinski=True)
-Bmag_induced_model_og = np.sqrt(B_induced_poly[:, 0]**2 + B_induced_poly[:, 1]**2 + B_induced_poly[:, 2]**2)
-B_total_poly = B_poly - B_induced_poly
-B_mag_tot_poly = np.sqrt(B_total_poly[:, 0]**2 + B_total_poly[:, 1]**2 + B_total_poly[:, 2]**2)
+# B_induced_fincon = B_induced_finite_conductivity2(orbit_cphio, B_poly, sig_ocean, J_omega, 0.2*R_C, 0.1*R_C)
+B_induced_fincon = B_induced_infinite(orbit_cphio, B_poly, 0.7*R_C, R_C)
+Bmag_induced_fincon = np.sqrt(B_induced_fincon[:, 0]**2 + B_induced_fincon[:, 1]**2 + B_induced_fincon[:, 2]**2)
+B_total_fincon = B_poly - B_induced_fincon
+B_mag_tot_fincon = np.sqrt(B_total_fincon[:, 0]**2 + B_total_fincon[:, 1]**2 + B_total_fincon[:, 2]**2)
 
 #---------plot-----------
 
@@ -108,12 +91,12 @@ ax[1,1].plot(B_PDS[0], B_mag, label='PDS', color='k', alpha=0.3)
 ax[0,0].plot(B_PDS[0], B_poly[:,0], '--r')
 ax[0,1].plot(B_PDS[0], B_poly[:,1], '--r')
 ax[1,0].plot(B_PDS[0], B_poly[:,2], '--r')
-ax[1,1].plot(B_PDS[0], B_poly_mag, '--r')
+ax[1,1].plot(B_PDS[0], B_poly_mag, '--r', label='External')
 
-ax[0,0].plot(orbit_cphio[0], B_total_poly[:, 0], color='r')
-ax[0,1].plot(orbit_cphio[0], B_total_poly[:, 1], color='r')
-ax[1,0].plot(orbit_cphio[0], B_total_poly[:, 2], color='r')
-ax[1,1].plot(orbit_cphio[0], B_mag_tot_poly, label='Poly.', color='r')
+ax[0,0].plot(orbit_cphio[0], B_total_fincon[:, 0], color='r')
+ax[0,1].plot(orbit_cphio[0], B_total_fincon[:, 1], color='r')
+ax[1,0].plot(orbit_cphio[0], B_total_fincon[:, 2], color='r')
+ax[1,1].plot(orbit_cphio[0], B_mag_tot_fincon, label='Total', color='r')
 
 ax[0,0].set_title('$B_x$')
 ax[0,1].set_title('$B_y$')
@@ -127,11 +110,7 @@ ax[1,1].set_xlim(min(B_PDS[0]), max(B_PDS[0]))
 
 ax[1,1].legend(framealpha=1, fancybox=True)
 
-if model == 'ocean and iono':
-    fig.suptitle('$r_{} = {:.1f}-{:.1f} R_C,  r_{} = 1-{:.3f} R_C$ \n $\sigma_{} = {:2.0e} Sm^{}, \sigma_{} = {:2.0e} Sm^{}$'.format('{ocean}', r_core / R_C, r_ocean / R_C, '{iono}', r_iono / R_C, '{ocean}', sig_ocean, '{-1}', '{iono}', sig_iono, '{-1}'))
-elif model == 'ocean only':
-    fig.suptitle('$r_{} = {:.1f}-{:.1f} R_C, \sigma_{} = {:2.0e} Sm^{}$'.format('{ocean}', r_core / R_C, r_ocean / R_C, '{ocean}', sig_ocean, '{-1}'))
-elif model == 'iono only':
-    fig.suptitle('$r_{} = 1-{:.3f} R_C, \sigma_{} = {:2.0e} Sm^{}$'.format('{iono}', r_iono / R_C, '{iono}', sig_iono, '{-1}'))
+
+fig.suptitle('$r_{} = {:.1f}-{:.1f} R_C, \sigma_{} = {:2.0e} Sm^{}$'.format('{ocean}', r_core / R_C, r_ocean / R_C, '{ocean}', sig_ocean, '{-1}'))
 plt.show()
 
