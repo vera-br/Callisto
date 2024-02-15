@@ -51,7 +51,7 @@ def B_induced_finite_conductivity(orbit, B_external, sigma, omega, ocean_depth, 
     Rm = R_C
 
     #A = ae_iphi(sigma, omega, Rm, R0, R1)
-    A = Aeiphi(ocean_depth, surface_layer, sigma, omega)
+    A = -Aeiphi(ocean_depth, surface_layer, sigma, omega)
 
     Bind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
@@ -80,7 +80,7 @@ def B_induced_infinite(orbit, B_external, Rm, R0):
     """
     orbit = orbit.transpose()
 
-    A = -((R0 / Rm) ** 3)
+    A = ((R0 / Rm) ** 3)
 
     B_ind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
@@ -179,3 +179,4 @@ def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductiv
         i +=1
 
     return np.array(Bind_evolution)
+

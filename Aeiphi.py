@@ -53,44 +53,44 @@ def Aeiphi(ocean_depth, surface_layer, sigma, omega):
 
 #-------------testing---------------
 
-thickness = np.linspace(0, R_moon-surface_layer, 1000)
-conductivities = np.linspace(0, 0.8, 1000)
+# thickness = np.linspace(0, R_moon-surface_layer, 1000)
+# conductivities = np.linspace(0, 0.8, 1000)
 
-CONDUCTIVITY, DEPTH =  np.meshgrid(conductivities, thickness)
+# CONDUCTIVITY, DEPTH =  np.meshgrid(conductivities, thickness)
 
-sigma_norm = CONDUCTIVITY / sigma_m
-depth_norm = DEPTH / R_C
+# sigma_norm = CONDUCTIVITY / sigma_m
+# depth_norm = DEPTH / R_C
 
-Ae_iphi = Aeiphi(DEPTH, surface_layer, CONDUCTIVITY, J_omega)
+# Ae_iphi = Aeiphi(DEPTH, surface_layer, CONDUCTIVITY, J_omega)
 
-# fig, ax = plt.subplots(1)
+# # fig, ax = plt.subplots(1)
 
-# ax.plot(thickness * 1e-3, -np.real(Ae_iphi))
+# # ax.plot(thickness * 1e-3, -np.real(Ae_iphi))
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 
-ax.set_xlim(0.1, 250)
-ax.set_ylim(0.001, 1)
+# ax.set_xlim(0.1, 250)
+# ax.set_ylim(0.001, 1)
 
-plt.xscale('log')
-plt.yscale('log')
+# plt.xscale('log')
+# plt.yscale('log')
 
-# specify label location
-manual_loc = [(1.8, 0.1), (4.5, 0.07), (9, 0.05), (17, 0.04), (28, 0.033), (43, 0.03), (62, 0.025), (106, 0.02), (160, 0.02)]
+# # specify label location
+# manual_loc = [(1.8, 0.1), (4.5, 0.07), (9, 0.05), (17, 0.04), (28, 0.033), (43, 0.03), (62, 0.025), (106, 0.02), (160, 0.02)]
 
-cs = ax.contour(sigma_norm, depth_norm, np.abs(Ae_iphi), levels=np.linspace(0.1,0.9,9))
-ax.clabel(cs, inline=True, fontsize=10, manual=manual_loc)
+# cs = ax.contour(sigma_norm, depth_norm, np.abs(Ae_iphi), levels=np.linspace(0.1,0.9,9))
+# ax.clabel(cs, inline=True, fontsize=10, manual=manual_loc)
 
-ax.invert_yaxis()
+# ax.invert_yaxis()
 
-ax.set_xlabel("Normalised Ocean Conductivity")
-ax.set_ylabel("Normalised Ocean Thickness")
+# ax.set_xlabel("Normalised Ocean Conductivity")
+# ax.set_ylabel("Normalised Ocean Thickness")
 
-ax.set_title("|Ae^iphi|")
+# ax.set_title("|Ae^iphi|")
 
-ax.tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.grid(color='xkcd:dark blue',alpha =0.2)
+# ax.tick_params(axis='both', direction='in',top = True, right = True, which='both')
+# ax.yaxis.set_minor_locator(AutoMinorLocator())
+# ax.grid(color='xkcd:dark blue',alpha =0.2)
 
-plt.show()
+# plt.show()
 

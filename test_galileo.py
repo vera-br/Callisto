@@ -75,7 +75,6 @@ B_external = Bext_Community(orbit_SIII)
 # current sheet
 B_sheet = B_sheet_khurana2(orbit_cal_JSO, orbit_SIII_mag)
 
-
 B_full_ext = B_external + B_sheet
 
 
@@ -112,150 +111,75 @@ Bmag_full_ext = pd.Series(dict(zip(time_model, B_mag_full_ext)))
 
 #---------plotting-----------
 
-fig, ax = plt.subplots(4, 2, figsize=(12,5))
+fig, ax = plt.subplots(4, 1, figsize=(8,5), sharex=True)
 
 # plot Galileo data and total external field
 
-Bx_Gal.plot(ax=ax[0, 0], label="Data", color="grey")
-By_Gal.plot(ax=ax[1, 0], label="Data", color="grey")
-Bz_Gal.plot(ax=ax[2, 0], label="Data", color="grey")
-Bmag_Gal.plot(ax=ax[3, 0], label="Data", color="grey")
+Bx_Gal.plot(ax=ax[0], color="grey")
+By_Gal.plot(ax=ax[1], color="grey")
+Bz_Gal.plot(ax=ax[2], color="grey")
+Bmag_Gal.plot(ax=ax[3], color="grey")
 
-Bx_Gal.plot(ax=ax[0, 1], label="Data", color="grey")
-By_Gal.plot(ax=ax[1, 1], label="Data", color="grey")
-Bz_Gal.plot(ax=ax[2, 1], label="Data", color="grey")
-Bmag_Gal.plot(ax=ax[3, 1], label="Data", color="grey")
+Bx_full_ext.plot(ax=ax[0], label="External Field", color="deeppink")
+By_full_ext.plot(ax=ax[1], label="External Field", color="deeppink")
+Bz_full_ext.plot(ax=ax[2], label="External Field", color="deeppink")
+Bmag_full_ext.plot(ax=ax[3], label="External Field", color="deeppink")
 
-Bx_full_ext.plot(ax=ax[0, 0], label="External Field", color="deeppink")
-By_full_ext.plot(ax=ax[1, 0], label="External Field", color="deeppink")
-Bz_full_ext.plot(ax=ax[2, 0], label="External Field", color="deeppink")
-Bmag_full_ext.plot(ax=ax[3, 0], label="External Field", color="deeppink")
-
-Bx_full_ext.plot(ax=ax[0, 1], label="External Field", color="deeppink")
-By_full_ext.plot(ax=ax[1, 1], label="External Field", color="deeppink")
-Bz_full_ext.plot(ax=ax[2, 1], label="External Field", color="deeppink")
-Bmag_full_ext.plot(ax=ax[3, 1], label="External Field", color="deeppink")
 
 # add a vertical line at CA
-ax[0, 0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-ax[1, 0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-ax[2, 0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-ax[3, 0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-
-ax[0, 1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-ax[1, 1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-ax[2, 1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
-ax[3, 1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+ax[0].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+ax[1].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+ax[2].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
+ax[3].axvline(x=time_CA, color='dimgrey', linestyle=":", zorder=0)
 
 # set axes labels
-ax[0, 0].set_ylabel("Bx (nT)")
-ax[1, 0].set_ylabel("By (nT)")
-ax[2, 0].set_ylabel("Bz (nT)")
-ax[3, 0].set_ylabel("|B| (nT)")
-
-ax[0, 1].set_ylabel("Bx (nT)")
-ax[1, 1].set_ylabel("By (nT)")
-ax[2, 1].set_ylabel("Bz (nT)")
-ax[3, 1].set_ylabel("|B| (nT)")
+ax[0].set_ylabel("Bx (nT)")
+ax[1].set_ylabel("By (nT)")
+ax[2].set_ylabel("Bz (nT)")
+ax[3].set_ylabel("|B| (nT)")
 
 # set axes ticks
-ax[0, 0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax[1, 0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax[2, 0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax[3, 0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+ax[0].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+ax[1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+ax[2].tick_params(axis='both', direction='in',top = True, right = True, which='both')
+ax[3].tick_params(axis='both', direction='in',top = True, right = True, which='both')
 
-ax[0, 1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax[1, 1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax[2, 1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-ax[3, 1].tick_params(axis='both', direction='in',top = True, right = True, which='both')
-
-ax[0, 0].yaxis.set_minor_locator(AutoMinorLocator())
-ax[1, 0].yaxis.set_minor_locator(AutoMinorLocator())
-ax[2, 0].yaxis.set_minor_locator(AutoMinorLocator())
-ax[3, 0].yaxis.set_minor_locator(AutoMinorLocator())
-
-ax[0, 1].yaxis.set_minor_locator(AutoMinorLocator())
-ax[1, 1].yaxis.set_minor_locator(AutoMinorLocator())
-ax[2, 1].yaxis.set_minor_locator(AutoMinorLocator())
-ax[3, 1].yaxis.set_minor_locator(AutoMinorLocator())
+ax[0].yaxis.set_minor_locator(AutoMinorLocator())
+ax[1].yaxis.set_minor_locator(AutoMinorLocator())
+ax[2].yaxis.set_minor_locator(AutoMinorLocator())
+ax[3].yaxis.set_minor_locator(AutoMinorLocator())
 
 # set grid
-ax[0, 0].grid(color='xkcd:dark blue',alpha =0.2)
-ax[1, 0].grid(color='xkcd:dark blue',alpha =0.2)
-ax[2, 0].grid(color='xkcd:dark blue',alpha =0.2)
-ax[3, 0].grid(color='xkcd:dark blue',alpha =0.2)
-
-ax[0, 1].grid(color='xkcd:dark blue',alpha =0.2)
-ax[1, 1].grid(color='xkcd:dark blue',alpha =0.2)
-ax[2, 1].grid(color='xkcd:dark blue',alpha =0.2)
-ax[3, 1].grid(color='xkcd:dark blue',alpha =0.2)
-
+ax[0].grid(color='xkcd:dark blue',alpha =0.2)
+ax[1].grid(color='xkcd:dark blue',alpha =0.2)
+ax[2].grid(color='xkcd:dark blue',alpha =0.2)
+ax[3].grid(color='xkcd:dark blue',alpha =0.2)
 
 
 #-------------induced field-----------------
 
-# define constants for induction model
+# define ice shell thickness
 surface_layer = 80e3 #m
-frequency = 2*np.pi /(10.1*3600)
 
-# vary ocean depth
-ocean_depth = np.linspace(0, R_C-surface_layer, 50)
-conductivity = 0.3 # S/m
+B_induced = B_induced_infinite(orbit_cphio, B_external, R_C, R_C - surface_layer)
 
-# set colour map
-cmap = plt.colormaps.get_cmap('winter').resampled(len(ocean_depth))
-colors = cmap(np.arange(0, cmap.N)) 
+B_total = B_external + B_sheet + B_induced
+B_mag_total = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
 
+# combine into series for easy time series formatting
+Bx_total = pd.Series(dict(zip(time_model, B_total[:, 0])))
+By_total = pd.Series(dict(zip(time_model, B_total[:, 1])))
+Bz_total = pd.Series(dict(zip(time_model, B_total[:, 2])))
+Bmag_total = pd.Series(dict(zip(time_model, B_mag_total)))
 
-for i in range(0, len(ocean_depth)):
-
-    B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, conductivity, frequency, ocean_depth[i], surface_layer)
-
-    B_total = B_external + B_sheet + B_induced
-    B_mag_total = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
-
-    # combine into series for easy time series formatting
-    Bx_total = pd.Series(dict(zip(time_model, B_total[:, 0])))
-    By_total = pd.Series(dict(zip(time_model, B_total[:, 1])))
-    Bz_total = pd.Series(dict(zip(time_model, B_total[:, 2])))
-    Bmag_total = pd.Series(dict(zip(time_model, B_mag_total)))
-
-    Bx_total.plot(ax=ax[0, 0], label=str(ocean_depth[i]), color=colors[i])
-    By_total.plot(ax=ax[1, 0], label=str(ocean_depth[i]), color=colors[i])
-    Bz_total.plot(ax=ax[2, 0], label=str(ocean_depth[i]), color=colors[i])
-    Bmag_total.plot(ax=ax[3, 0], label=str(ocean_depth[i]), color=colors[i])
+Bx_total.plot(ax=ax[0], label="Superconductor")
+By_total.plot(ax=ax[1], label="Superconductor")
+Bz_total.plot(ax=ax[2], label="Superconductor")
+Bmag_total.plot(ax=ax[3], label="Superconductor")
 
 
-# vary ocean conductivity
-ocean_depth = 150e3 # m
-ocean_conductivity = np.linspace(0.1, 10, 20) # S/m
 
-# set colour map
-cmap = plt.colormaps.get_cmap('summer').resampled(len(ocean_conductivity))
-colors = cmap(np.arange(0, cmap.N)) 
-
-
-for i in range(0, len(ocean_conductivity)):
-
-    B_induced = B_induced_finite_conductivity(orbit_cphio, B_external, ocean_conductivity[i], frequency, ocean_depth, surface_layer)
-
-    B_total = B_external + B_sheet + B_induced
-    B_mag_total = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
-
-    # combine into series for easy time series formatting
-    Bx_total = pd.Series(dict(zip(time_model, B_total[:, 0])))
-    By_total = pd.Series(dict(zip(time_model, B_total[:, 1])))
-    Bz_total = pd.Series(dict(zip(time_model, B_total[:, 2])))
-    Bmag_total = pd.Series(dict(zip(time_model, B_mag_total)))
-
-    Bx_total.plot(ax=ax[0, 1], label=str(ocean_conductivity[i]), color=colors[i])
-    By_total.plot(ax=ax[1, 1], label=str(ocean_conductivity[i]), color=colors[i])
-    Bz_total.plot(ax=ax[2, 1], label=str(ocean_conductivity[i]), color=colors[i])
-    Bmag_total.plot(ax=ax[3, 1], label=str(ocean_conductivity[i]), color=colors[i])
-
-
-ax[0, 0].set_title("Varying Ocean depth")
-ax[0, 1].set_title("Varying Ocean conductivity")
+ax[3].legend(loc="upper right", framealpha=1)
 
 plt.tight_layout()
 plt.show()
