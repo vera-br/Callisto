@@ -33,10 +33,7 @@ for i in range(np.shape(abs_A)[0]):
         Aeiphi = Aeiphi_Styczinski(conductivities, rs, 1, 2*np.pi /(10.1*3600))
         abs_A[i,j] = np.abs(Aeiphi)
         real_A[i,j] = Aeiphi.real
-        if Aeiphi.imag == 0:
-            phi_A[i,j] = -np.arctan(Aeiphi.real / 1e-9) * 180 / np.pi
-        else:
-            phi_A[i,j] = -np.arctan(Aeiphi.real / Aeiphi.imag) * 180 / np.pi
+        phi_A[i,j] = -np.arctan(Aeiphi.imag / Aeiphi.real) * 180 / np.pi
 
 
 norm_sig = sig_ocean_grid / sigma_m

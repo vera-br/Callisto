@@ -2,100 +2,121 @@ from induced_field import *
 from field_functions import *
 import matplotlib.pyplot as plt
 
-r_core = 0.1    ; r_surface = 1      ; r_iono = 1.042
-sig_core = 1e-9 ; sig_surface = 1e-9 ; sig_iono = [0.1e-3, 0.5e-3, 1e-3, 5e-3] ; sig_iono_i = 0.5e-3
+r_core = 0.1    ; r_surface = 1   ; r_iono = 1.042 
+sig_core = 1e-9 ; sig_iono = 0.5e-3
 
+sigma_m = 2 / (mu0 * J_omega * R_C*R_C)
 
-r_ocean = np.linspace(0.1, 0.99, 100)
-sig_ocean = np.linspace( 1e-3, 50e-3, 100)
+# conducting ocean and ionosphere
+# r_ocean = np.linspace(r_core, 0.95, 100)
+# sig_ocean = np.logspace(-1, 4, 100) * sigma_m
 
-r_grid, sig_grid = np.meshgrid(r_ocean, sig_ocean)
+# sig_ocean_grid, r_ocean_grid = np.meshgrid(sig_ocean, r_ocean)
+# r_cores = r_core * np.ones_like(sig_ocean_grid)
+# r_surfaces = r_surface * np.ones_like(sig_ocean_grid)
+# r_ionos = r_iono * np.ones_like(sig_ocean_grid)
+# sig_cores = sig_core * np.ones_like(sig_ocean_grid)
+# sig_surfaces = sig_core * np.ones_like(sig_ocean_grid)
+# sig_ionos = sig_iono * np.ones_like(sig_ocean_grid)
 
-r_cores = r_core * np.ones_like(r_grid)
-r_surfaces = r_surface * np.ones_like(r_grid)
-r_ionos = r_iono * np.ones_like(r_grid)
-sig_cores = sig_core * np.ones_like(r_grid)
-sig_surfaces = sig_surface * np.ones_like(r_grid)
+# abs_A = np.empty_like(sig_ocean_grid)
+# real_A = np.empty_like(sig_ocean_grid)
+# phi_A = np.empty_like(sig_ocean_grid)
+# for i in range(np.shape(abs_A)[0]):
+#     for j in range(np.shape(abs_A)[1]):
+#         conductivities = [sig_core, sig_ocean_grid[i,j], sig_core, sig_iono]
+#         rs = np.array([r_core, r_ocean_grid[i,j], r_surface, r_iono]) * R_C
+#         Aeiphi = Aeiphi_Styczinski(conductivities, rs, 1, 2*np.pi /(10.1*3600))
+#         abs_A[i,j] = np.abs(Aeiphi)
+#         real_A[i,j] = Aeiphi.real
+#         phi_A[i,j] = -np.arctan(Aeiphi.imag / Aeiphi.real) * 180 / np.pi
 
-sig_ionos = sig_iono_i * np.ones_like(r_grid)
+# conducting ocean only
+# r_ocean = np.linspace(r_core, 0.95, 100)
+# sig_ocean = np.logspace(-1, 4, 100) * sigma_m
+# sig_ocean_grid, r_ocean_grid = np.meshgrid(sig_ocean, r_ocean)
 
-conductivities = [sig_cores, sig_grid, sig_surfaces, sig_ionos]
-rs = np.array([r_cores, r_grid, r_surfaces, r_ionos]) * R_C
+# abs_A = np.empty_like(sig_ocean_grid)
+# real_A = np.empty_like(sig_ocean_grid)
+# phi_A = np.empty_like(sig_ocean_grid)
+# for i in range(np.shape(abs_A)[0]):
+#     for j in range(np.shape(abs_A)[1]):
+#         conductivities = [sig_core, sig_ocean_grid[i,j], sig_core]
+#         rs = np.array([r_core, r_ocean_grid[i,j], r_surface]) * R_C
+#         Aeiphi = Aeiphi_Styczinski(conductivities, rs, 1, 2*np.pi /(10.1*3600))
+#         abs_A[i,j] = np.abs(Aeiphi)
+#         real_A[i,j] = Aeiphi.real
+#         phi_A[i,j] = -np.arctan(Aeiphi.imag / Aeiphi.real) * 180 / np.pi
 
-Aeiphi = ae_iphi_multilayer(conductivities, rs, 1, 2*np.pi /(10.1*3600))
-abs_A = np.abs(Aeiphi)
-real_A = Aeiphi.real
-phi_A = np.arctan(Aeiphi.real / Aeiphi.imag) * 180 / np.pi
+# ionosphere only
+r_iono = np.linspace(r_surface, 1.2, 100)
+sig_iono = np.logspace(-1, 4, 100) * sigma_m
+sig_iono_grid, r_iono_grid = np.meshgrid(sig_iono, r_iono)
 
-cons_no_ocean = [sig_cores, sig_ionos]
-rs_no_ocean = np.array([r_surfaces, r_ionos]) * R_C
+abs_A = np.empty_like(sig_iono_grid)
+real_A = np.empty_like(sig_iono_grid)
+phi_A = np.empty_like(sig_iono_grid)
+for i in range(np.shape(abs_A)[0]):
+    for j in range(np.shape(abs_A)[1]):
+        conductivities = [sig_core, sig_iono_grid[i,j]]
+        rs = np.array([r_surface, r_iono_grid[i,j]]) * R_C
+        Aeiphi = Aeiphi_Styczinski(conductivities, rs, 1, 2*np.pi /(10.1*3600))
+        abs_A[i,j] = np.abs(Aeiphi)
+        real_A[i,j] = Aeiphi.real
+        phi_A[i,j] = -np.arctan(Aeiphi.imag / Aeiphi.real) * 180 / np.pi
 
-Aeiphi_no_ocean = ae_iphi_multilayer(cons_no_ocean, rs_no_ocean, 1, 2*np.pi /(10.1*3600))
-abs_A_no_ocean = np.abs(Aeiphi_no_ocean)
-real_A_no_ocean = Aeiphi_no_ocean.real
-phi_A_no_ocean = np.arctan(Aeiphi_no_ocean.real / Aeiphi_no_ocean.imag) * 180 / np.pi
+norm_sig = sig_iono_grid / sigma_m
+
+levels = np.linspace(0,1,11)
+levels_real = np.linspace(-1,1, 11)
 
 fig, ax = plt.subplots(1,3)
-color1 = ax[0].contourf(r_grid, sig_grid, abs_A)
+color1 = ax[0].contourf(norm_sig, r_iono_grid, abs_A, levels)
 fig.colorbar(color1)
-color2 = ax[1].contourf(r_grid, sig_grid, phi_A)
+color2 = ax[1].contourf(norm_sig, r_iono_grid, phi_A)
 fig.colorbar(color2)
-color3 = ax[2].contourf(r_grid, sig_grid, real_A)
+color3 = ax[2].contourf(norm_sig, r_iono_grid, real_A, levels_real)
 fig.colorbar(color3)
 
-ax[0].set_xlabel('Ocean radius [$R_C$]')
-ax[0].set_ylabel('Ocean conductivity [$Sm^-1$]')
+ax[0].set_xlabel('Normalised Conductivity $\sigma / \sigma_m$')
+ax[0].set_ylabel('Iono. Outer Radius $[R_C]$')
 ax[0].set_title('$|Ae^{i\phi}|$')
+ax[0].set_xscale('log')
 
-ax[1].set_xlabel('Ocean radius [$R_C$]')
-ax[1].set_ylabel('Ocean conductivity [$Sm^-1$]')
+ax[1].set_xlabel('Normalised Conductivity $\sigma / \sigma_m$')
+ax[1].set_ylabel('Iono. Outer Radius $[R_C]$')
 ax[1].set_title('$\phi$')
+ax[1].set_xscale('log')
 
-ax[2].set_xlabel('Ocean radius [$R_C$]')
-ax[2].set_ylabel('Ocean conductivity [$Sm^-1$]')
+ax[2].set_xlabel('Normalised Conductivity $\sigma / \sigma_m$')
+ax[2].set_ylabel('Iono. Outer Radius $[R_C]$')
 ax[2].set_title('$Re(Ae^{i\phi})$')
+ax[2].set_xscale('log')
 
-fig.suptitle('$r_{}$ = {:.1f} $R_C$, $r_{}$ = 1-{:.3f} $R_C$ \n  $\sigma_{}$ = {:2.0e} $Sm^-1$'.format('{ocean}', r_core, '{iono}', r_iono, '{iono}', sig_iono_i))
+fig, ax = plt.subplots(1,3)
+color1 = ax[0].contourf(norm_sig, r_iono_grid, abs_A)
+fig.colorbar(color1)
+color2 = ax[1].contourf(norm_sig, r_iono_grid, phi_A)
+fig.colorbar(color2)
+color3 = ax[2].contourf(norm_sig, r_iono_grid, real_A)
+fig.colorbar(color3)
+
+ax[0].set_xlabel('Normalised Conductivity $\sigma / \sigma_m$')
+ax[0].set_ylabel('Iono. Outer Radius $[R_C]$')
+ax[0].set_title('$|Ae^{i\phi}|$')
+ax[0].set_xscale('log')
+
+ax[1].set_xlabel('Normalised Conductivity $\sigma / \sigma_m$')
+ax[1].set_ylabel('Iono. Outer Radius $[R_C]$')
+ax[1].set_title('$\phi$')
+ax[1].set_xscale('log')
+
+ax[2].set_xlabel('Normalised Conductivity $\sigma / \sigma_m$')
+ax[2].set_ylabel('Iono. Outer Radius $[R_C]$')
+ax[2].set_title('$Re(Ae^{i\phi})$')
+ax[2].set_xscale('log')
+
+
+#fig.suptitle('$r_{}$ = {:.1f} $R_C$, $r_{}$ = 1-{:.3f} $R_C$ \n  $\sigma_{}$ = {:2.0e} $Sm^-1$'.format('{ocean}', r_core, '{iono}', r_iono, '{iono}', sig_iono_i))
 plt.show()
 
-# for sig_iono_i in sig_iono:
-#     sig_ionos = sig_iono_i * np.ones_like(r_grid)
-
-#     conductivities = [sig_cores, sig_grid, sig_surfaces, sig_ionos]
-#     rs = np.array([r_cores, r_grid, r_surfaces, r_ionos]) * R_C
-
-#     Aeiphi = ae_iphi_multilayer(conductivities, rs, 1, 2*np.pi /(10.1*3600))
-#     abs_A = np.abs(Aeiphi)
-#     real_A = Aeiphi.real
-#     phi_A = np.arctan(Aeiphi.real / Aeiphi.imag) * 180 / np.pi
-
-#     cons_no_ocean = [sig_cores, sig_ionos]
-#     rs_no_ocean = np.array([r_surfaces, r_ionos]) * R_C
-
-#     Aeiphi_no_ocean = ae_iphi_multilayer(cons_no_ocean, rs_no_ocean, 1, 2*np.pi /(10.1*3600))
-#     abs_A_no_ocean = np.abs(Aeiphi_no_ocean)
-#     real_A_no_ocean = Aeiphi_no_ocean.real
-#     phi_A_no_ocean = np.arctan(Aeiphi_no_ocean.real / Aeiphi_no_ocean.imag) * 180 / np.pi
-
-#     fig, ax = plt.subplots(1,3)
-#     color1 = ax[0].contourf(r_grid, sig_grid, abs_A - abs_A_no_ocean)
-#     fig.colorbar(color1)
-#     color2 = ax[1].contourf(r_grid, sig_grid, phi_A - phi_A_no_ocean)
-#     fig.colorbar(color2)
-#     color3 = ax[2].contourf(r_grid, sig_grid, real_A - real_A_no_ocean)
-#     fig.colorbar(color3)
-
-#     ax[0].set_xlabel('Ocean radius [$R_C$]')
-#     ax[0].set_ylabel('Ocean conductivity [$Sm^-1$]')
-#     ax[0].set_title('$\Delta|Ae^{i\phi}|$')
-
-#     ax[1].set_xlabel('Ocean radius [$R_C$]')
-#     ax[1].set_ylabel('Ocean conductivity [$Sm^-1$]')
-#     ax[1].set_title('$\Delta\phi$')
-
-#     ax[2].set_xlabel('Ocean radius [$R_C$]')
-#     ax[2].set_ylabel('Ocean conductivity [$Sm^-1$]')
-#     ax[2].set_title('$\Delta Re(Ae^{i\phi})$')
-
-#     fig.suptitle('$r_{}$ = {:.1f} $R_C$, $r_{}$ = 1-{:.3f} $R_C$ \n  $\sigma_{}$ = {:2.0e} $Sm^-1$'.format('{ocean}', r_core, '{iono}', r_iono, '{iono}', sig_iono_i))
-#     plt.show()

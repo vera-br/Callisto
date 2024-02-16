@@ -254,11 +254,15 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n, derivatives=True)
         del_l = -(jul + djul / (1j * k1 * r1)) / (yul + dyul / (1j * k1 * r1))
         print('Layer 1: kr >> n')
+        if 1 / k1.imag < r1 * 1e-2 or 1 / k1.imag > r1 * 1e2:
+            print('Approx. Invalid')
 
     elif np.abs(k1 * r1) < n / cutoff_factor:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
         del_l = -(jul / yul)
         print('Layer 1: kr << n')
+        if 1 / k1.imag < r1 * 1e-2 or 1 / k1.imag > r1 * 1e2:
+            print('Approx. Invalid')
 
     else:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
@@ -280,6 +284,8 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
             juu, djuu, yuu, dyuu = get_spherical_harmonics(ku * ru, n)
             del_l = -(juu + djuu / (1j * kj * rj)) / (yuu + dyuu / (1j * kj * rj))
             print('Layer {}: kr >> n'.format(i+1))
+            if 1 / ku.imag < (ru - rl) * 1e-2 or 1 / ku.imag > (ru - rl) * 1e2:
+                print('Approx. Invalid')
         
         elif np.abs(kj * rj) < n /cutoff_factor:
             rl = rs[i-1]
@@ -293,6 +299,8 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
             AL = -(jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
             del_l = -(jn1uu - AL * jn_1uu * (rl / ru)**(2 * n + 1)) / (yn1uu - AL * yn_1uu * (rl / ru)**(2 * n + 1))
             print('Layer {}: kr << n'.format(i+1))
+            if 1 / ku.imag < (ru - rl) * 1e-2 or 1 / ku.imag > (ru - rl) * 1e2:
+                print('Approx. Invalid')
 
         else:
             jul, djul, yul, dyul = get_spherical_harmonics(ku * rl, n + 1, derivatives=True)
@@ -308,17 +316,22 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
     kJ = np.sqrt(1j * omega * mu0 * conductivities[-1])
     rJ = rs[-1]
 
+    rl = rs[-2]
+
     if np.abs(kJ * rJ) > n * cutoff_factor:
         Ae = 1
-        print('Layer {}: kr >> n'.format(i+1))
+        print('Layer {}: kr >> n'.format(i))
+        if 1 / kJ.imag < (rJ - rl) * 1e-2 or 1 / kJ.imag > (rJ - rl) * 1e2:
+                print('Approx. Invalid')
 
     elif np.abs(kJ * rJ) < n / cutoff_factor:
-        rl = rs[-2]
         kl = np.sqrt(1j * omega * mu0 * conductivities[-2])
         jn1ll, yn1ll = get_spherical_harmonics(kl * rl, n + 1)
         jn_1ll, yn_1ll = get_spherical_harmonics(kl * rl, n - 1)
         Ae = (rl / rJ)**(2 * n + 1) * (jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
-        print('Layer {}: kr << n'.format(i+1))
+        print('Layer {}: kr << n'.format(i))
+        if 1 / kJ.imag < (rJ - rl) * 1e-2 or 1 / kJ.imag > (rJ - rl) * 1e2:
+                print('Approx. Invalid')
     
     else:
         jn1R, yn1R = get_spherical_harmonics(kJ * rJ, n + 1)
