@@ -4,7 +4,7 @@ import numpy as np
 from scipy import constants
 import scipy.special as sps
 from maths import *
-
+from field_functions import *
 from Aeiphi import *
 
 mu0 = constants.mu_0
@@ -34,7 +34,7 @@ def ae_iphi(sigma, omega, rm, r0, r1):
     return np.real(amp * (R * J_52 - J_min_52) / (R * J_12 - J_min_12))
 
 
-def B_induced_finite_conductivity(orbit, B_external, sigma, omega, ocean_depth, surface_layer): # Rm, R0, R1):
+def B_induced_finite_conductivity(orbit, B_external, sigma, omega, Rm, R0, R1):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -48,10 +48,8 @@ def B_induced_finite_conductivity(orbit, B_external, sigma, omega, ocean_depth, 
     for more info see (Zimmer et al) https://www.sciencedirect.com/science/article/pii/S001910350096456X
     """
     orbit = orbit.transpose()
-    Rm = R_C
 
-    #A = ae_iphi(sigma, omega, Rm, R0, R1)
-    A = -Aeiphi(ocean_depth, surface_layer, sigma, omega)
+    A = ae_iphi(sigma, omega, Rm, R0, R1)
 
     Bind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
@@ -66,7 +64,39 @@ def B_induced_finite_conductivity(orbit, B_external, sigma, omega, ocean_depth, 
         Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
         Bind_evolution.append(Bind)
 
-    return np.array(np.real(Bind_evolution))
+    return np.array(Bind_evolution)
+
+def B_induced_finite_conductivity2(orbit, B_external, ocean_sigma, omega, ocean_depth, surface_layer):
+    """
+    Calculate the induced magnetic field with finite conductivity
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
+    :param sigma: conductivity in S
+    :param omega: angular frequency of inducing field in
+    :param rm: object radius in m
+    :param r0: conducting layer outer radius in m
+    :param r1: conducting layer inner radius in m
+    :return: time evolution array of Bx, By, Bz in nT
+    for more info see (Zimmer et al) https://www.sciencedirect.com/science/article/pii/S001910350096456X
+    """
+    orbit = orbit.transpose()
+
+    A = Aeiphi(ocean_depth, surface_layer, ocean_sigma, omega)
+
+    Bind_evolution = []
+    for B_ext, vector in zip(B_external, orbit):
+
+        position = vector[1:4] 
+
+        M = -(2 * pi / mu0) * A * B_ext * (R_C**3)
+
+        rmag = np.linalg.norm(position)
+        rdotM_r = np.dot(position, M) * position
+
+        Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
+        Bind_evolution.append(Bind)
+
+    return np.array(Bind_evolution)
 
 
 def B_induced_infinite(orbit, B_external, Rm, R0):
@@ -80,14 +110,14 @@ def B_induced_infinite(orbit, B_external, Rm, R0):
     """
     orbit = orbit.transpose()
 
-    A = ((R0 / Rm) ** 3)
+    A = -((R0 / Rm) ** 3)
 
     B_ind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
 
         pos = vector[1:4] 
 
-        M = -(2 * pi / mu0) * A * 2 * B_ext * (Rm**3)
+        M = -(2 * pi / mu0) * A * B_ext * (Rm**3)
 
         rmag = np.linalg.norm(pos)
         rdotM_r = np.dot(pos, M) * pos
@@ -101,21 +131,33 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     '''
     Calculates Ae^iphi for a given l and omega based on the approach given by Seufert et al. (2011)
     '''
+    # def Fs(l, r, k):
+    #     rk = r * k
+    #     sqrt = np.sqrt(pi / (2 * rk))
+    #     I_v = sps.iv(l + 0.5, rk)
+    #     dI_v = sps.ivp(l + 0.5, rk)
+    #     K_v = sps.kv(l + 0.5, rk)
+    #     dK_v = sps.kvp(l + 0.5, rk)
+    #     F1 = sqrt * I_v
+    #     F2 = sqrt * K_v
+    #     dF1 = -0.5 * F1 / r + sqrt * dI_v
+    #     dF2 = -0.5 * F2 / r + sqrt * dK_v
+    #     return F1, F2, dF1, dF2
+    
     def Fs(l, r, k):
         rk = r * k
-        sqrt = np.sqrt(pi / (2 * rk))
-        I_v = sps.iv(l + 0.5, rk)
-        dI_v = sps.ivp(l + 0.5, rk)
-        K_v = sps.kv(l + 0.5, rk)
-        dK_v = sps.kvp(l + 0.5, rk)
-        F1 = sqrt * I_v
-        F2 = sqrt * K_v
-        dF1 = -0.5 * F1 / r + sqrt * dI_v
-        dF2 = -0.5 * F2 / r + sqrt * dK_v
+        F1 = sps.spherical_in(l, rk)
+        F2 = sps.spherical_kn(l, rk)
+        dF1 = sps.spherical_in(l, rk, derivative=True)
+        dF2 = sps.spherical_in(l, rk, derivative=True)
         return F1, F2, dF1, dF2
 
     k1 = np.sqrt(-1j * omega * mu0 * conductivities[0])
     k2 = np.sqrt(-1j * omega * mu0 * conductivities[1])
+
+    # Zimmer k
+    # k1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[0] / 2)
+    # k2 = (1-1j) * np.sqrt(omega * mu0 * conductivities[1] / 2)
     
     r1 = r[0]
     F11, F21, dF11, dF21 = Fs(l, r1, k1)
@@ -127,26 +169,39 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
        
        k_jmin1 = np.sqrt(-1j * omega * mu0 * conductivities[i])
        k_j = np.sqrt(-1j * omega * mu0 * conductivities[i + 1])
+
+       # Zimmer k
+    #    k_jmin1 = (1-1j) * np.sqrt(omega * mu0 * conductivities[i] / 2)
+    #    k_j = (1-1j) * np.sqrt(omega * mu0 * conductivities[i + 1] / 2)
+
        r_jmin1 = r[i]
 
        F11, F21, dF11, dF21 = Fs(l, r_jmin1, k_jmin1)
        F12, F22, dF12, dF22 = Fs(l, r_jmin1, k_j)
 
-       numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
-       denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
-       Djmin1_Cjmin1 = (F12 / F22) * (numer / denom)
+    #    numer = (dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))
+    #    denom = (dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22))
+    #    Djmin1_Cjmin1 = (F12 / F22) * (numer / denom)
+       
+       Djmin1_Cjmin1 = F12 / F22 * ((dF12 / F12) - (dF11 / F11) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF12 / F12) - (dF21 / F21))) / ((dF11 / F11) - (dF22 / F22) + Djmin1_Cjmin1 * (F21 / F11) * ( (dF21 / F21) - (dF22 / F22)))
     
     R = r[-1]
-    k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
-    F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
-    numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
-    denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
 
-    Ae_iphi = numer / denom
-    print('Ae^iphi = ' + str(Ae_iphi))
+    k_J = np.sqrt(-1j * omega * mu0 * conductivities[-1])
+    # k_J = (1-1j) * np.sqrt(omega * mu0 * conductivities[-1] / 2)
+
+    F1J, F2J, dF1J, dF2J = Fs(l, R, k_J)
+
+    # numer = (dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )
+    # denom = (dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l )
+    # Ae_iphi = numer / denom
+    Ae_iphi = ((dF1J / F1J) - (l + 1) + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) - (l + 1) )) / ((dF1J / F1J) + l + Djmin1_Cjmin1 * (F2J / F1J) * ( (dF2J / F2J) + l ))
+    
+    # print('|A| = {}'.format(abs(Ae_iphi)))
+    # print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
     return Ae_iphi
 
-def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductivities, radii):
+def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivities, radii, Styczinski=False):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -156,27 +211,132 @@ def B_induced_finite_conductivity_multilayer(orbit, B_external, omega, conductiv
     :param radii: array of radii of the layers in m
     :return: time evolution array of Bx, By, Bz in nT
     """
+    orbit = O.copy()
     orbit = orbit.transpose()
-
-    A = ae_iphi_multilayer(conductivities, radii, 1, omega).real
-
-    i= 1
+    if Styczinski == True:
+        A = Aeiphi_Styczinski(conductivities, radii, 1, omega)
+    else:
+        A = ae_iphi_multilayer(conductivities, radii, 1, omega)
 
     Bind_evolution = []
     for B_ext, vector in zip(B_external, orbit):
 
-        vector[1] = 2410*1e3 + 200*1e3
-        vector[2] = np.pi/8183
-        vector[3] = 2*np.pi/8183 * i
-        position =  vector[1:4]
+        position = vector[1:4]
         M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
 
         rmag = np.linalg.norm(position)
         rdotM_r = np.dot(position, M) * position
 
         Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
+        Bind = Bind.real
         Bind_evolution.append(Bind)
-        i +=1
 
     return np.array(Bind_evolution)
+
+def Aeiphi_Styczinski(conductivities, rs, n, omega):
+    def get_spherical_harmonics(kr, n, derivatives=False):
+        jn = sps.spherical_jn(n, kr)
+        yn = sps.spherical_yn(n, kr)
+        if derivatives == True:
+            d_jn = sps.spherical_jn(n, kr, derivative=True)
+            d_yn = sps.spherical_yn(n, kr, derivative=True)
+            return jn, d_jn, yn, d_yn
+        return jn, yn
+
+    # inner boundary
+    k1 = np.sqrt(1j * omega * mu0 * conductivities[0])
+    r1 = rs[0]
+    k2 = np.sqrt(1j * omega * mu0 * conductivities[1])
+
+    cutoff_factor = 50
+    
+    if np.abs(k1 * r1) > n * cutoff_factor:
+        jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n, derivatives=True)
+        del_l = -(jul + djul / (1j * k1 * r1)) / (yul + dyul / (1j * k1 * r1))
+        print('Layer 1: kr >> n')
+        if 1 / k1.imag < r1 * 1e-2 or 1 / k1.imag > r1 * 1e2:
+            print('Approx. Invalid')
+
+    elif np.abs(k1 * r1) < n / cutoff_factor:
+        jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
+        del_l = -(jul / yul)
+        print('Layer 1: kr << n')
+        if 1 / k1.imag < r1 * 1e-2 or 1 / k1.imag > r1 * 1e2:
+            print('Approx. Invalid')
+
+    else:
+        jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
+        jll, djll = get_spherical_harmonics(k1 * r1, n + 1)
+        delta_ul = jul * djll - jll * djul
+        beta_ul = jll * dyul - yul * djll
+        del_l = delta_ul / beta_ul
+
+    i = 2
+    for i in range(1, len(rs) - 1):
+        kj = np.sqrt(1j * omega * mu0 * conductivities[i])
+        rj = np.sqrt(1j * omega * mu0 * conductivities[i])
+        
+        if np.abs(kj * rj) > n * cutoff_factor:
+            rl = rs[i-1]
+            ru = rs[i]
+            kl = np.sqrt(1j * omega * mu0 * conductivities[i-1])
+            ku = np.sqrt(1j * omega * mu0 * conductivities[i+1])
+            juu, djuu, yuu, dyuu = get_spherical_harmonics(ku * ru, n)
+            del_l = -(juu + djuu / (1j * kj * rj)) / (yuu + dyuu / (1j * kj * rj))
+            print('Layer {}: kr >> n'.format(i+1))
+            if 1 / ku.imag < (ru - rl) * 1e-2 or 1 / ku.imag > (ru - rl) * 1e2:
+                print('Approx. Invalid')
+        
+        elif np.abs(kj * rj) < n /cutoff_factor:
+            rl = rs[i-1]
+            ru = rs[i]
+            kl = np.sqrt(1j * omega * mu0 * conductivities[i-1])
+            ku = np.sqrt(1j * omega * mu0 * conductivities[i+1])
+            jn1uu, yn1uu = get_spherical_harmonics(ku * ru, n + 1)
+            jn_1uu, yn_1uu = get_spherical_harmonics(ku * ru, n - 1)
+            jn1ll, yn1ll = get_spherical_harmonics(kl * rl, n + 1)
+            jn_1ll, yn_1ll = get_spherical_harmonics(kl * rl, n - 1)
+            AL = -(jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
+            del_l = -(jn1uu - AL * jn_1uu * (rl / ru)**(2 * n + 1)) / (yn1uu - AL * yn_1uu * (rl / ru)**(2 * n + 1))
+            print('Layer {}: kr << n'.format(i+1))
+            if 1 / ku.imag < (ru - rl) * 1e-2 or 1 / ku.imag > (ru - rl) * 1e2:
+                print('Approx. Invalid')
+
+        else:
+            jul, djul, yul, dyul = get_spherical_harmonics(ku * rl, n + 1, derivatives=True)
+            jll, djll, yll, dyll = get_spherical_harmonics(kl * rl, n + 1, derivatives=True)
+
+            beta_ul = jll * dyul - yul * djll
+            gamma_ul = yll * dyul - yul * dyll
+            delta_ul = jul * djll - jll * djul
+            epsi_ul = jul * dyll - yll * djul
+            
+            del_l = (delta_ul + del_l * epsi_ul) / (beta_ul + del_l * gamma_ul)
+
+    kJ = np.sqrt(1j * omega * mu0 * conductivities[-1])
+    rJ = rs[-1]
+
+    rl = rs[-2]
+
+    if np.abs(kJ * rJ) > n * cutoff_factor:
+        Ae = 1
+        print('Layer {}: kr >> n'.format(i))
+        if 1 / kJ.imag < (rJ - rl) * 1e-2 or 1 / kJ.imag > (rJ - rl) * 1e2:
+                print('Approx. Invalid')
+
+    elif np.abs(kJ * rJ) < n / cutoff_factor:
+        kl = np.sqrt(1j * omega * mu0 * conductivities[-2])
+        jn1ll, yn1ll = get_spherical_harmonics(kl * rl, n + 1)
+        jn_1ll, yn_1ll = get_spherical_harmonics(kl * rl, n - 1)
+        Ae = (rl / rJ)**(2 * n + 1) * (jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
+        print('Layer {}: kr << n'.format(i))
+        if 1 / kJ.imag < (rJ - rl) * 1e-2 or 1 / kJ.imag > (rJ - rl) * 1e2:
+                print('Approx. Invalid')
+    
+    else:
+        jn1R, yn1R = get_spherical_harmonics(kJ * rJ, n + 1)
+        jn_1R, yn_1R = get_spherical_harmonics(kJ * rJ, n - 1)
+        Ae = -(jn1R + del_l * yn1R) / (jn_1R + del_l * yn_1R)
+
+    return Ae
 

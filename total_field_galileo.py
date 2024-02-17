@@ -6,6 +6,7 @@ from trajectories.trajectory_analysis import *
 from plot_scripts.plot_field_components import *
 from induced_field import *
 from field_functions import *
+#from constants import *
 
 # load data
 galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
@@ -58,7 +59,7 @@ B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
 
 # induced field parameters
-model = 'ocean only'
+model = 'ocean and iono'
 
 if model == 'ocean and iono':
     # Conducting Ocean and Ionosphere
@@ -70,7 +71,7 @@ if model == 'ocean and iono':
 
 elif model == 'ocean only':
     r_core = 0.1 * R_C ;   r_ocean = 0.7 * R_C ;   r_surface = R_C
-    sig_core = 1e-9    ;   sig_ocean = 5e1      ;   sig_surface = 1e-9
+    sig_core = 1e-9    ;   sig_ocean = 1e0    ;   sig_surface = 1e-9
 
     radii = [r_core, r_ocean, r_surface]
     conductivities = [sig_core, sig_ocean, sig_surface]
@@ -84,13 +85,11 @@ elif model == 'iono only':
 
 
 # Induced Field calculation
-#Aeiphi = ae_iphi_multilayer(conductivities, radii, 1, 2*np.pi /(10.1*3600))
-#print(Aeiphi)
-B_induced_poly = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii)
-Bmag_induced_model_og = np.sqrt(B_induced_poly[:, 0]**2 + B_induced_poly[:, 1]**2 + B_induced_poly[:, 2]**2)
-B_total_poly = B_poly + B_induced_poly
-B_mag_tot_poly = np.sqrt(B_total_poly[:, 0]**2 + B_total_poly[:, 1]**2 + B_total_poly[:, 2]**2)
 
+B_induced_poly = B_induced_finite_conductivity_multilayer(orbit_cphio, B_poly, 2*np.pi /(10.1*3600), conductivities, radii, Styczinski=True)
+Bmag_induced_model_og = np.sqrt(B_induced_poly[:, 0]**2 + B_induced_poly[:, 1]**2 + B_induced_poly[:, 2]**2)
+B_total_poly = B_poly - B_induced_poly
+B_mag_tot_poly = np.sqrt(B_total_poly[:, 0]**2 + B_total_poly[:, 1]**2 + B_total_poly[:, 2]**2)
 
 #---------plot-----------
 
