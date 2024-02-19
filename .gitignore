@@ -6,8 +6,14 @@
 /mice/**
 *.png
 /spice_data/callisto_wrt_jupiter_SIII_mag_longperiod1.csv
-/.venv/**
+/venv/**
 /GLL/**
 /generic_kernels/**
 presentation_test.py
+pyvenv.cfg
 /media/**
+/Scripts/**
+/Lib/**
+/.vscode/**
+/Scripts/**
+/callenv/**

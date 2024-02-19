@@ -9,7 +9,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import matplotlib.patches as patches
-import warnings
+#import warnings
 #from mayavi import mlab
 
 #import mayavi

@@ -160,8 +160,10 @@ ax[3].grid(color='xkcd:dark blue',alpha =0.2)
 
 # define ice shell thickness
 surface_layer = 80e3 #m
+conductivities=[4,1]
+radii=[R_C, R_C-100e3, R_C-200e3]
 
-B_induced = B_induced_infinite(orbit_cphio, B_external, R_C, R_C - surface_layer)
+B_induced = B_induced_finite_conductivity_multilayer(orbit_cphio, B_external, J_omega, conductivities, radii)
 
 B_total = B_external + B_sheet + B_induced
 B_mag_total = np.sqrt(B_total[:,0]**2 + B_total[:,1]**2 + B_total[:,2]**2)
