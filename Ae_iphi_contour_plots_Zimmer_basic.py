@@ -9,8 +9,8 @@ sigma_m = 2 / (mu0 * 2*np.pi /(10.1*3600) * R_C*R_C)
 
 ocean_depth = np.linspace(0.05, r_ocean, 100) * R_C
 r_core = np.ones_like(ocean_depth) * r_ocean * R_C - ocean_depth
-sig_ocean = np.linspace(0.0001, 10, 1000)
-#sig_ocean = np.logspace(-3, 1, 100)
+#sig_ocean = np.linspace(0.0001, 10, 1000)
+sig_ocean = np.logspace(-3, 1, 100)
 
 sig_ocean_grid, ocean_depth_grid = np.meshgrid(sig_ocean, ocean_depth)
 surface_layer = (r_surface - r_ocean) * np.ones_like(sig_ocean_grid) * R_C
@@ -33,41 +33,43 @@ color3 = ax[2].contourf(sig_ocean_grid, ocean_depth_grid / R_C, real_A, levels_r
 fig.colorbar(color3)
 
 ax[0].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
-ax[0].set_ylabel('Ocean Thickness $[R_C]$')
-ax[0].set_title('$|Ae^{i\phi}|$')
-#ax[0].set_xscale('log')
-
 ax[1].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
-ax[1].set_ylabel('Ocean Thickness $[R_C]$')
-ax[1].set_title('$\phi$')
-#ax[1].set_xscale('log')
-
 ax[2].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
-ax[2].set_ylabel('Ocean Thickness $[R_C]$')
-ax[2].set_title('$Re(Ae^{i\phi})$')
-#ax[2].set_xscale('log')
 
-fig, ax = plt.subplots(1,3)
-color1 = ax[0].contourf(sig_ocean_grid, ocean_depth_grid / R_C, abs_A)
-fig.colorbar(color1)
-color2 = ax[1].contourf(sig_ocean_grid, ocean_depth_grid / R_C, phi_A)
-fig.colorbar(color2)
-color3 = ax[2].contourf(sig_ocean_grid, ocean_depth_grid / R_C, real_A)
-fig.colorbar(color3)
-
-ax[0].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
 ax[0].set_ylabel('Ocean Thickness $[R_C]$')
-ax[0].set_title('$|Ae^{i\phi}|$')
-#ax[0].set_xscale('log')
-
-ax[1].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
 ax[1].set_ylabel('Ocean Thickness $[R_C]$')
-ax[1].set_title('$\phi$')
-#ax[1].set_xscale('log')
-
-ax[2].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
 ax[2].set_ylabel('Ocean Thickness $[R_C]$')
+
+ax[0].set_title('$|Ae^{i\phi}|$')
+ax[1].set_title('$\phi$')
 ax[2].set_title('$Re(Ae^{i\phi})$')
+
+ax[1].set_xscale('log')
+ax[0].set_xscale('log')
+ax[2].set_xscale('log')
+
+# fig, ax = plt.subplots(1,3)
+# color1 = ax[0].contourf(sig_ocean_grid, ocean_depth_grid / R_C, abs_A)
+# fig.colorbar(color1)
+# color2 = ax[1].contourf(sig_ocean_grid, ocean_depth_grid / R_C, phi_A)
+# fig.colorbar(color2)
+# color3 = ax[2].contourf(sig_ocean_grid, ocean_depth_grid / R_C, real_A)
+# fig.colorbar(color3)
+
+# ax[0].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
+# ax[1].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
+# ax[2].set_xlabel('Conductivity $\sigma$ $[Sm^{-1}]$')
+
+# ax[0].set_ylabel('Ocean Thickness $[R_C]$')
+# ax[1].set_ylabel('Ocean Thickness $[R_C]$')
+# ax[2].set_ylabel('Ocean Thickness $[R_C]$')
+
+# ax[0].set_title('$|Ae^{i\phi}|$')
+# ax[1].set_title('$\phi$')
+# ax[2].set_title('$Re(Ae^{i\phi})$')
+
+#ax[1].set_xscale('log')
+#ax[0].set_xscale('log')
 #ax[2].set_xscale('log')
 
 

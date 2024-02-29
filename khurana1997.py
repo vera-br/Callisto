@@ -1,10 +1,11 @@
 import numpy as np
 from trajectories.trajectory_analysis import cartesian_to_spherical
 from field_functions import *
+from types import *
 
 R_J = 71492 * 1e3
 
-def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
+def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII, constants=None):
     O_JSO = orbit_JSO.copy()
     O_SIII_mag = orbit_SIII_mag.copy()
     O_SIII = orbit_SIII.copy()
@@ -19,20 +20,25 @@ def B_sheet_khurana(orbit_JSO, orbit_SIII_mag, orbit_SIII):
     psi = O_SIII_mag[6]
     theta_mag = O_SIII_mag[5]
 
-    # fit constants from Khurana (1997)
-    x0 = -33.5 #* R_J
-    rho0 = 33.2 #* R_J
-    v0 = 37.4 #* R_J hr^-1
     omega_J = 2 * np.pi / 10.1 # hr
 
-    C1 = 80.3 ; C2 = 690.4 ; C3 = 101.3 ; C4 = -1.7
-    a1 = 2.49 ; a2 = 1.80 ; a3 = 2.64
-    r01 = 38.0 #* R_J
-    rho02 = 2.14 #* R_J
-    rho03 = 12.5 #* R_J 
-    D1 = 2.01 #* R_J 
-    D2 = 13.27 #* R_J
-    p = 6.26e-3 ; q = 0.35 
+    # fit constants from Khurana (1997)
+    if type(constants) == NoneType:
+        x0 = -33.5 #* R_J
+        rho0 = 33.2 #* R_J
+        v0 = 37.4 #* R_J hr^-1
+        
+
+        C1 = 80.3 ; C2 = 690.4 ; C3 = 101.3 ; C4 = -1.7
+        a1 = 2.49 ; a2 = 1.80 ; a3 = 2.64
+        r01 = 38.0 #* R_J
+        rho02 = 2.14 #* R_J
+        rho03 = 12.5 #* R_J 
+        D1 = 2.01 #* R_J 
+        D2 = 13.27 #* R_J
+        p = 6.26e-3 ; q = 0.35
+    else:
+        x0, rho0, v0, C1, C2, C3, C4, a1, a2, a3, r01, rho02, rho03, D1, D2, p, q = constants 
     
     delta = np.pi - omega_J * rho0 / v0 * np.log(np.cosh(rho / rho0))
     
