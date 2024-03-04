@@ -39,7 +39,7 @@ B_jupiter = Bext_Community(orbit_SIII)
 B_sheet = B_sheet_khurana2(orbit_JSO, orbit_SIII_mag)
 B_induced = B_induced_infinite(orbit_cphio, B_jupiter + B_sheet, R_C, R_C-80e3)
 
-B_total = B_jupiter + B_sheet #+ B_induced
+B_total = B_jupiter + B_sheet + B_induced
 
 
 plot_time_evolution(B_total, orbit_cphio, orbit_CA, flyby_n, "External")
