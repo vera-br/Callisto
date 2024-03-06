@@ -76,6 +76,8 @@ B_mag_tot_fincon = np.sqrt(B_total_fincon[:, 0]**2 + B_total_fincon[:, 1]**2 + B
 
 #---------plot-----------
 
+print(B_PDS[0])
+
 fig, ax = plt.subplots(2, 2)
 ax[0,0].plot(B_PDS[0], Bx_smooth, label='PDS', color='k')
 ax[0,1].plot(B_PDS[0], By_smooth, label='PDS', color='k')

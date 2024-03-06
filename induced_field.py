@@ -201,7 +201,7 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     # print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
     return Ae_iphi
 
-def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivities, radii, Styczinski=False):
+def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivities, radii, Styczinski=False, aeiphi=None):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -212,20 +212,94 @@ def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivitie
     :return: time evolution array of Bx, By, Bz in nT
     """
     orbit = O.copy()
+    t = orbit[0]
     orbit = orbit.transpose()
-    if Styczinski == True:
-        A = Aeiphi_Styczinski(conductivities, radii, 1, omega)
+    if aeiphi != None:
+        A = aeiphi
+    elif Styczinski !=False:
+        if Styczinski == True:
+            A = Aeiphi_Styczinski(conductivities, radii, 1, omega)
+        elif Styczinski == 'many':
+            A = Aeiphi_Styczinski_many(conductivities, radii, 1, omega)
     else:
         A = ae_iphi_multilayer(conductivities, radii, 1, omega)
     
-    print('Aeiphi = {}'.format(A))
+    phi = -np.arctan(A.imag/A.real)
+    t_phi = phi / omega
+    t_interval = t[1] - t[0]
+    n_intervals = int(np.round(t_phi / t_interval))
 
     B_ext = B_external.copy()
-    # B_ext[:,2] = 0
+    B_ext = np.roll(B_ext, n_intervals, axis=0)
 
     # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
     _M = M = -(2 * pi / mu0) * A * (R_C**3)
-    print('M = {}'.format(_M))
+    # print('M = {}'.format(_M))
+
+    Bind_evolution = []
+    for B_ext, vector in zip(B_ext, orbit):
+
+        position = vector[1:4]
+        # M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
+        M = B_ext * _M
+
+        rmag = np.linalg.norm(position)
+        rdotM_r = np.dot(position, M) * position
+
+        Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
+        Bind = Bind.real
+        Bind_evolution.append(Bind)
+
+    return np.array(Bind_evolution)
+
+def B_induced_finite_conductivity_multilayer_G(O, B_external, t_longperiod, omega, conductivities, radii, Styczinski=False, aeiphi=None):
+    """
+    Calculate the induced magnetic field with finite conductivity
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
+    :param omega: angular frequency of inducing field in
+    :param conductivities: array of conductivities of the layers in S
+    :param radii: array of radii of the layers in m
+    :return: time evolution array of Bx, By, Bz in nT
+    """
+    orbit = O.copy()
+    t_red = orbit[0]
+    t = t_longperiod
+    orbit = orbit.transpose()
+    if aeiphi != None:
+        A = aeiphi
+    elif Styczinski !=False:
+        if Styczinski == True:
+            A = Aeiphi_Styczinski(conductivities, radii, 1, omega)
+        elif Styczinski == 'many':
+            A = Aeiphi_Styczinski_many(conductivities, radii, 1, omega)
+    else:
+        A = ae_iphi_multilayer(conductivities, radii, 1, omega)
+    
+    phi = -np.arctan(A.imag/A.real)
+    print(A.real)
+    t_phi = phi / omega
+    t_interval = t[1] - t[0]
+    n_intervals = int(np.round(t_phi / t_interval))
+    print(n_intervals)
+
+    B_ext = B_external.copy()
+    B_ext = np.roll(B_ext, n_intervals, axis=0)
+    tB_ext = np.c_[t_longperiod, B_ext]
+    tB_ext = tB_ext.transpose()
+
+    tB_reduced = []
+    for i in range(len(t_red)):
+        index = find_nearest_index(tB_ext[0], t_red[i])
+        tB_i = tB_ext[:, int(index)]
+        tB_reduced.append(tB_i)
+    tB_reduced = np.transpose(tB_reduced)
+    B_reduced = tB_reduced[1:]
+    B_ext = B_reduced.transpose()
+
+    # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
+    _M = M = -(2 * pi / mu0) * A * (R_C**3)
+    # print('M = {}'.format(_M))
 
     Bind_evolution = []
     for B_ext, vector in zip(B_ext, orbit):
@@ -258,21 +332,25 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
     r1 = rs[0]
     k2 = np.sqrt(1j * omega * mu0 * conductivities[1])
 
-    cutoff_factor = 50
+    cutoff_factor = 100
     
     if np.abs(k1 * r1) > n * cutoff_factor:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n, derivatives=True)
         del_l = -(jul + djul / (1j * k1 * r1)) / (yul + dyul / (1j * k1 * r1))
         print('Layer 1: kr >> n')
-        if 1 / k1.imag < r1 * 1e-2 or 1 / k1.imag > r1 * 1e2:
-            print('Approx. Invalid')
+        if 1 / k1.imag < r1 * 1e-2:
+            print('Approx. Invalid - 1/Im(k) = {} << layer thickness = {}'.format(1/k1.imag, r1))
+        elif 1 / k1.imag > r1 * 1e2:
+            print('Approx. Invalid - 1/Im(k) = {} >> layer thickness = {}'.format(1/k1.imag, r1))
 
     elif np.abs(k1 * r1) < n / cutoff_factor:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
         del_l = -(jul / yul)
         print('Layer 1: kr << n')
-        if 1 / k1.imag < r1 * 1e-2 or 1 / k1.imag > r1 * 1e2:
-            print('Approx. Invalid')
+        if 1 / k1.imag < r1 * 1e-2:
+            print('Approx. Invalid - 1/Im(k) = {} << layer thickness = {}'.format(1/k1.imag, r1))
+        elif 1 / k1.imag > r1 * 1e2:
+            print('Approx. Invalid - 1/Im(k) = {} >> layer thickness = {}'.format(1/k1.imag, r1))
 
     else:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
@@ -281,7 +359,6 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
         beta_ul = jll * dyul - yul * djll
         del_l = delta_ul / beta_ul
 
-    i = 2
     for i in range(1, len(rs) - 1):
         kj = np.sqrt(1j * omega * mu0 * conductivities[i])
         rj = np.sqrt(1j * omega * mu0 * conductivities[i])
@@ -294,8 +371,10 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
             juu, djuu, yuu, dyuu = get_spherical_harmonics(ku * ru, n)
             del_l = -(juu + djuu / (1j * kj * rj)) / (yuu + dyuu / (1j * kj * rj))
             print('Layer {}: kr >> n'.format(i+1))
-            if 1 / ku.imag < (ru - rl) * 1e-2 or 1 / ku.imag > (ru - rl) * 1e2:
-                print('Approx. Invalid')
+            if 1 / ku.imag < (ru - rl) * 1e-2:
+                print('Approx. Invalid - 1/Im(k) = {} << layer thickness = {}'.format(1/ku.imag, ru-rl))
+            elif 1 / ku.imag > (ru - rl) * 1e2:
+                print('Approx. Invalid - 1/Im(k) = {} >> layer thickness = {}'.format(1/ku.imag, ru-rl))
         
         elif np.abs(kj * rj) < n /cutoff_factor:
             rl = rs[i-1]
@@ -309,8 +388,10 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
             AL = -(jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
             del_l = -(jn1uu - AL * jn_1uu * (rl / ru)**(2 * n + 1)) / (yn1uu - AL * yn_1uu * (rl / ru)**(2 * n + 1))
             print('Layer {}: kr << n'.format(i+1))
-            if 1 / ku.imag < (ru - rl) * 1e-2 or 1 / ku.imag > (ru - rl) * 1e2:
-                print('Approx. Invalid')
+            if 1 / ku.imag < (ru - rl) * 1e-2:
+                print('Approx. Invalid - 1/Im(k) = {} << layer thickness = {}'.format(1/ku.imag, ru-rl))
+            elif 1 / ku.imag > (ru - rl) * 1e2:
+                print('Approx. Invalid - 1/Im(k) = {} >> layer thickness = {}'.format(1/ku.imag, ru-rl))
 
         else:
             jul, djul, yul, dyul = get_spherical_harmonics(ku * rl, n + 1, derivatives=True)
@@ -331,8 +412,10 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
     if np.abs(kJ * rJ) > n * cutoff_factor:
         Ae = 1
         print('Layer {}: kr >> n'.format(i))
-        if 1 / kJ.imag < (rJ - rl) * 1e-2 or 1 / kJ.imag > (rJ - rl) * 1e2:
-                print('Approx. Invalid')
+        if 1 / ku.imag < (ru - rl) * 1e-2:
+            print('Approx. Invalid - 1/Im(k) = {} << layer thickness = {}'.format(1/ku.imag, ru-rl))
+        elif 1 / ku.imag > (ru - rl) * 1e2:
+            print('Approx. Invalid - 1/Im(k) = {} >> layer thickness = {}'.format(1/ku.imag, ru-rl))
 
     elif np.abs(kJ * rJ) < n / cutoff_factor:
         kl = np.sqrt(1j * omega * mu0 * conductivities[-2])
@@ -340,8 +423,10 @@ def Aeiphi_Styczinski(conductivities, rs, n, omega):
         jn_1ll, yn_1ll = get_spherical_harmonics(kl * rl, n - 1)
         Ae = (rl / rJ)**(2 * n + 1) * (jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
         print('Layer {}: kr << n'.format(i))
-        if 1 / kJ.imag < (rJ - rl) * 1e-2 or 1 / kJ.imag > (rJ - rl) * 1e2:
-                print('Approx. Invalid')
+        if 1 / ku.imag < (ru - rl) * 1e-2:
+            print('Approx. Invalid - 1/Im(k) = {} << layer thickness = {}'.format(1/ku.imag, ru-rl))
+        elif 1 / ku.imag > (ru - rl) * 1e2:
+            print('Approx. Invalid - 1/Im(k) = {} >> layer thickness = {}'.format(1/ku.imag, ru-rl))
     
     else:
         jn1R, yn1R = get_spherical_harmonics(kJ * rJ, n + 1)
@@ -365,7 +450,7 @@ def Aeiphi_Styczinski_many(conductivities, rs, n, omega):
     r1 = rs[0]
     k2 = np.sqrt(1j * omega * mu0 * conductivities[1])
 
-    cutoff_factor = 50
+    cutoff_factor = 100
     
     if np.abs(k1 * r1) > n * cutoff_factor:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n, derivatives=True)
@@ -439,7 +524,44 @@ def Aeiphi_Styczinski_many(conductivities, rs, n, omega):
 
     return -Ae
     
+def B_induced_aeiphi_minimiser(O, B_external, A):
+    """
+    Calculate the induced magnetic field with finite conductivity
+    :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
+    :param Bext_vectors: array of external field vectors Bx, By, Bz in nT
+    :param omega: angular frequency of inducing field in
+    :param conductivities: array of conductivities of the layers in S
+    :param radii: array of radii of the layers in m
+    :return: time evolution array of Bx, By, Bz in nT
+    """
+    orbit = O.copy()
+    orbit = orbit.transpose()
+    
+    
+    print('Aeiphi = {}'.format(A))
 
+    B_ext = B_external.copy()
+    # B_ext[:,2] = 0
+
+    # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
+    _M = M = -(2 * pi / mu0) * A * (R_C**3)
+    # print('M = {}'.format(_M))
+
+    Bind_evolution = []
+    for B_ext, vector in zip(B_ext, orbit):
+
+        position = vector[1:4]
+        # M = -(2 * pi / mu0) * A * B_ext * (radii[-1]**3)
+        M = B_ext * _M
+
+        rmag = np.linalg.norm(position)
+        rdotM_r = np.dot(position, M) * position
+
+        Bind = (mu0 / (4 * pi)) * (3 * rdotM_r - (rmag**2) * M) / (rmag**5)
+        Bind = Bind.real
+        Bind_evolution.append(Bind)
+
+    return np.array(Bind_evolution)
 
         
 

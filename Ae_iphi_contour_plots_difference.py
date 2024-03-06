@@ -6,39 +6,46 @@ import matplotlib.pyplot as plt
 r_core = 0.1 ; r_ocean = 0.9 ; r_surface = 1   ; r_iono = 1.042 
 sig_non_conducting = 1e-9 ; sig_ocean = 3 ; sig_iono = 0.5e-3
 
-delta_plot_type = 'conductivity vs conductivity'
+delta_plot_type = 'conductivity vs radius'
 conductivity_x = 'Ocean'
 conductivity_y = 'Ionosphere'
 r_x = 'Ocean'
-r_y = 'Ionosphere'
+r_y = 'Ocean'
+
+lspace_n = 10
+
+sig_oceans = np.logspace(-3, 2, lspace_n)
+sig_ionos = np.logspace(-5, -1, lspace_n)
+rs_oceans = np.linspace(r_core, 1, lspace_n)
+rs_ionos = np.linspace(1, 1.2, lspace_n)
 
 if delta_plot_type == 'conductivity vs radius':
     if conductivity_x == 'Ionosphere':
-        sig_x = np.logspace(-5, -1, 100)
+        sig_x = sig_ionos
     if conductivity_x == 'Ocean':
-        sig_x = np.logspace(-3, 1, 100)
+        sig_x = sig_oceans
     if r_y == 'Ionosphere':
-        rs_y = np.linspace(1, 1.2, 100)
+        rs_y = rs_ionos
     if r_y == 'Ocean':
-        rs_y = np.linspace(0.1, 1, 100)
+        rs_y = rs_oceans
     x_grid, y_grid = np.meshgrid(sig_x, rs_y)
 
 if delta_plot_type == 'conductivity vs conductivity':
     if conductivity_x == 'Ionosphere':
-        sig_x = np.logspace(-5, -1, 100)
-        sig_y = np.logspace(-3, 1, 100)
+        sig_x = sig_ionos
+        sig_y = sig_oceans
     if conductivity_x == 'Ocean':
-        sig_x = np.logspace(-3, 1, 100)
-        sig_y = np.logspace(-5, -1, 100)
+        sig_x = sig_oceans
+        sig_y = sig_ionos
     x_grid, y_grid = np.meshgrid(sig_x, sig_y)
 
 if delta_plot_type == 'radius vs radius':
     if r_x == 'Ionosphere':
-        rs_x = np.linspace(1, 1.2, 100)
-        rs_y = np.linspace(0.1, 1, 100)
+        rs_x = rs_ionos
+        rs_y = rs_oceans
     if r_x == 'Ocean':
-        rs_x = np.linspace(0.1, 1, 100)
-        rs_y = np.linspace(1, 1.2, 100)
+        rs_x = rs_oceans
+        rs_y = rs_ionos
     x_grid, y_grid = np.meshgrid(rs_x, rs_y)
 
 
@@ -86,7 +93,7 @@ for i in range(np.shape(abs_A)[0]):
                 radii = np.array([r_core, x_grid[i,j], r_surface, y_grid[i,j]]) * R_C
                 radii_ocean = np.array([r_core, x_grid[i,j], r_surface]) * R_C
 
-        Aeiphi_both = Aeiphi_Styczinski_many(conductivities, radii, 1, 2*np.pi /(10.1*3600))
+        Aeiphi_both = Aeiphi_Styczinski_many(conductivities, radii, 2, 4*np.pi /(10.1*3600))
         abs_A[i,j] = np.abs(Aeiphi_both)
         real_A[i,j] = Aeiphi_both.real
         phi_A[i,j] = -np.arctan(Aeiphi_both.imag / Aeiphi_both.real) * 180 / np.pi
@@ -98,24 +105,31 @@ for i in range(np.shape(abs_A)[0]):
 
 # conducting ocean only
 
-delta_abs_A = (abs_A - abs_A_ocean) / abs_A
-delta_real_A = (real_A - real_A_ocean) / real_A
+delta_abs_A = (abs_A - abs_A_ocean) # / abs_A
+delta_real_A = (real_A - real_A_ocean) # / real_A
+
+delta_abs_A_norm = delta_abs_A / abs_A_ocean
+delta_real_A_norm = delta_real_A / real_A_ocean
+
 delta_phi_A = phi_A - phi_A_ocean
 
 levels_abs_A = np.linspace(0, 1, 11)
 levels_phi = np.linspace(-95, 95, 20)
 levels_real_A = np.linspace(-1.1, 1.1, 12)
 
-fig, ax = plt.subplots(2,3, layout='constrained')
+fig, ax = plt.subplots(2,4, layout='constrained')
 
-ax[0,0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='seismic')
-ax[1,0].contourf(x_grid, y_grid, real_A, levels_real_A, cmap='seismic')
+ax[0,0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='seismic', extend='both')
+ax[1,0].contourf(x_grid, y_grid, real_A, levels_real_A, cmap='seismic', extend='both')
 
-ax[0,1].contourf(x_grid, y_grid, abs_A_ocean, levels_real_A, cmap='seismic')
-ax[1,1].contourf(x_grid, y_grid, real_A_ocean, levels_real_A, cmap='seismic')
+ax[0,1].contourf(x_grid, y_grid, abs_A_ocean, levels_real_A, cmap='seismic', extend='both')
+ax[1,1].contourf(x_grid, y_grid, real_A_ocean, levels_real_A, cmap='seismic', extend='both')
 
-ax[0,2].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic')
-colorbar = ax[1,2].contourf(x_grid, y_grid, delta_real_A, levels_real_A, cmap='seismic', extend='both')
+ax[0,2].contourf(x_grid, y_grid, delta_abs_A_norm, levels_real_A, cmap='seismic', extend='both')
+ax[1,2].contourf(x_grid, y_grid, delta_real_A_norm, levels_real_A, cmap='seismic', extend='both')
+
+ax[0,3].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
+colorbar = ax[1,3].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
 
 fig.colorbar(colorbar, ax=ax.ravel().tolist(), ticks=[-1, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1])
 

@@ -131,62 +131,62 @@ hour = 3600;
 
 for i = 1:length(closest_approach_times)
     
-    measurement_interval = 0.5; % seconds
+    measurement_interval = 0.25; % seconds
     date_CA = closest_approach_times(i);
     date_CA_i = convertStringsToChars(date_CA);
     et_CA = cspice_str2et(date_CA_i);
-    et_0 = et_CA - 2 * hour;
-    et_R = et_0:measurement_interval:(et_0 + 4 * hour);
+    et_0 = et_CA - 5.5 * hour;
+    et_R = et_0:measurement_interval:(et_0 + 11 * hour);
     
     % position relative to Callisto
-    sun_callisto_cphio = cspice_spkezr('10', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
+    % sun_callisto_cphio = cspice_spkezr('10', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '504');
     
     % position relative to Jupiter
-    callisto_jupiter_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
+    %callisto_jupiter_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '599');
     callisto_jupiter_SIII = cspice_spkezr('504', et_R, 'JUPITER_SYSTEM3RH_2009', 'NONE', '599');
-    callisto_jupiter_SIII_1965 = cspice_spkezr('504', et_R, 'JUPITER_SYSTEM3RH_1965', 'NONE', '599');
+    %callisto_jupiter_SIII_1965 = cspice_spkezr('504', et_R, 'JUPITER_SYSTEM3RH_1965', 'NONE', '599');
 
-    callisto_jupiter_IAU_JUPITER = cspice_spkezr('504', et_R, 'IAU_JUPITER', 'NONE', '599');
-    callisto_jupiter_MAG_VIP4 = cspice_spkezr('504', et_R, 'JUPITER_MAG_VIP4', 'NONE', '599');
+    %callisto_jupiter_IAU_JUPITER = cspice_spkezr('504', et_R, 'IAU_JUPITER', 'NONE', '599');
+    %callisto_jupiter_MAG_VIP4 = cspice_spkezr('504', et_R, 'JUPITER_MAG_VIP4', 'NONE', '599');
 
     % position relative to Jupiter - Magnetodisc
     callisto_jupiter_SIII_mag = cspice_spkezr('504', et_R, 'JUICE_JUPITER_MAG_S3RH2009', 'NONE', '599');
-    callisto_jupiter_SIII_1965_mag = cspice_spkezr('504', et_R, 'JUICE_JUPITER_MAG_S3RH1965', 'NONE', '599');
+    %callisto_jupiter_SIII_1965_mag = cspice_spkezr('504', et_R, 'JUICE_JUPITER_MAG_S3RH1965', 'NONE', '599');
     
     % position relative to Jupiter - Magnetosphere
     callisto_jupiter_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '599');
-    callisto_sun_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '10');
+    %callisto_sun_jupsunorb = cspice_spkezr('504', et_R, 'JUPITER_SUN_ORB', 'NONE', '10');
     
     % position relative to Sun
-    callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
-    jupiter_sun_cphio = cspice_spkezr('599', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
+    %callisto_sun_cphio = cspice_spkezr('504', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
+    %jupiter_sun_cphio = cspice_spkezr('599', et_R, 'JUICE_CALLISTO_PHI_ORB', 'NONE', '10');
 
     %juice_sun_IAU_SUN = cspice_spkezr('-28', et_R, 'IAU_SUN', 'NONE', '10');
     %callisto_sun_IAU_SUN = cspice_spkezr('504', et_R, 'IAU_SUN', 'NONE', '10');
     %jupiter_sun_IAU_SUN = cspice_spkezr('599', et_R, 'IAU_SUN', 'NONE', '10');
 
     % position relative to Callisto
-    writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G',string(i),'.csv'));
+    %writematrix([sun_callisto_cphio;et_R], append('spice_data/sun_wrt_callisto_cphio_G',string(i),'.csv'));
     
     % position relative to Jupiter
-    writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII_1965;et_R], append('spice_data/callisto_wrt_jupiter_SIII1965_G',string(i),'.csv'));
+    %writematrix([callisto_jupiter_cphio;et_R], append('spice_data/callisto_wrt_jupiter_cphio_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII;et_R], append('spice_data/callisto_wrt_jupiter_SIII_fullcycle_G',string(i),'.csv'));
+    %writematrix([callisto_jupiter_SIII_1965;et_R], append('spice_data/callisto_wrt_jupiter_SIII1965_G',string(i),'.csv'));
 
-    writematrix([callisto_jupiter_IAU_JUPITER;et_R], append('spice_data/callisto_wrt_jupiter_IAU_JUPITER_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_MAG_VIP4;et_R], append('spice_data/callisto_wrt_jupiter_MAG_VIP4_G',string(i),'.csv'));
+    %writematrix([callisto_jupiter_IAU_JUPITER;et_R], append('spice_data/callisto_wrt_jupiter_IAU_JUPITER_G',string(i),'.csv'));
+    %writematrix([callisto_jupiter_MAG_VIP4;et_R], append('spice_data/callisto_wrt_jupiter_MAG_VIP4_G',string(i),'.csv'));
 
     % position relative to Jupiter - Magnetodisc
-    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_G',string(i),'.csv'));
-    writematrix([callisto_jupiter_SIII_1965_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_1965_mag_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_SIII_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_mag_fullcycle_G',string(i),'.csv'));
+    %writematrix([callisto_jupiter_SIII_1965_mag;et_R], append('spice_data/callisto_wrt_jupiter_SIII_1965_mag_G',string(i),'.csv'));
 
     % position relative to Jupiter - magnetosphere
-    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_G',string(i),'.csv'));
-    writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_G',string(i),'.csv'));
+    writematrix([callisto_jupiter_jupsunorb;et_R], append('spice_data/callisto_wrt_jupiter_jupsunorb_fullcycle_G',string(i),'.csv'));
+    %writematrix([callisto_sun_jupsunorb;et_R], append('spice_data/callisto_wrt_sun_jupsunorb_G',string(i),'.csv'));
 
     % position relative to Sun
-    writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'.csv'));
-    writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G',string(i),'.csv'));
+    %writematrix([callisto_sun_cphio;et_R], append('spice_data/callisto_wrt_sun_cphio_G',string(i),'.csv'));
+    %writematrix([jupiter_sun_cphio;et_R], append('spice_data/jupiter_wrt_sun_cphio_G',string(i),'.csv'));
     %writematrix([callisto_sun_IAU_SUN;et_R], append('spice_data/callisto_wrt_sun_IAU_SUN_G',string(i),'.csv'));
     %writematrix([jupiter_sun_IAU_SUN;et_R], append('spice_data/jupiter_wrt_sun_IAU_SUN_G',string(i),'.csv'));
 

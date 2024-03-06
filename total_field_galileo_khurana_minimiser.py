@@ -22,14 +22,16 @@ callisto_jupiter_SIII_mag = find_nearest_trajectories_G('callisto', 'jupiter', '
 callisto_jupiter_JSO = find_nearest_trajectories_G('callisto', 'jupiter', 'jupsunorb')
 
 # specify orbit
-flyby_n = 2
+
 B_polys = []
+B_polys_mean = []
+B_polys_max = []
 B_externals = []
 orbit_cal_JSOs = []
 orbit_SIII_mags = [] 
 orbit_cal_SIIIs = []
 
-for i in range(2):
+for flyby_n in [1,2]:
     orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
     orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
     orbit_SIII_mag = galileo_wrt_jupiter_SIII_mag["orbit%s" % (flyby_n)]
@@ -58,12 +60,22 @@ for i in range(2):
         polys.append(p)
 
     B_poly = []
+    B_poly_means = []
+    B_poly_maxs = []
     for p in polys:
         Bi_poly = p(orbit_cphio[0])
+        Bi_poly_mean = np.mean(Bi_poly) * np.ones_like(Bi_poly)
+        Bi_poly_max = max(Bi_poly_mean - Bi_poly) * np.ones_like(Bi_poly)
+        B_poly_means.append(Bi_poly_mean)
+        B_poly_maxs.append(Bi_poly_max)
         B_poly.append(Bi_poly)
     B_poly = np.transpose(B_poly)
+    B_poly_mean = np.transpose(B_poly_means)
+    B_poly_max = np.transpose(B_poly_maxs)
     B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
     B_polys.append(B_poly)
+    B_polys_mean.append(B_poly_mean)
+    B_polys_max.append(B_poly_max)
 
     B_external = Bext_Community(orbit_SIII)
     B_externals.append(B_external)
@@ -85,26 +97,29 @@ bounds_factor = 0.5
 bnds = ((1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor), (1-bounds_factor, 1+bounds_factor))
 params = np.ones_like(const_)
 
-def khur_min_func(params, orbit_cal_JSO, orbit_SIII_mag, orbit_cal_SIII, B_background, B_external):
+def khur_min_func(params, orbit_cal_JSO, orbit_SIII_mag, orbit_cal_SIII, B_background, B_background_mean, B_background_max, B_external):
     params = np.multiply(params, const_)
     measure = 0
     for i in range(2):
         B_sheet = B_sheet_khurana(orbit_cal_JSO[i], orbit_SIII_mag[i], orbit_cal_SIII[i], constants=params)
         B_background_calc = B_sheet + B_external[i]
+        
+        B_background_norm = (np.array(B_background[i]) - np.array(B_background_mean[i])) / np.array(B_background_max[i])
+        B_background_calc_norm = (np.array(B_background_calc) - np.array(B_background_mean[i])) / np.array(B_background_max[i])
 
         try:
-            measure += (root_mean_squared_error(B_background[i], B_background_calc))**2
+            measure += (root_mean_squared_error(B_background_norm, B_background_calc_norm))**2
             # measure = 1 - r2_score(B_background, B_background_calc)
         except:
-            B_background_calc = np.nan_to_num(B_background_calc, nan=1e30)
-            measure += (root_mean_squared_error(B_background[i], B_background_calc))**2
+            B_background_calc = np.nan_to_num(B_background_calc_norm, nan=1e30)
+            measure += (root_mean_squared_error(B_background_norm, B_background_calc_norm))**2
             # measure = 1 - r2_score(B_background, B_background_calc)
     return np.sqrt(measure)
 # rmse = mean_squared_error(y_test, y_pred, squared = False)
 # r2 = r2_score(y_test, y_pred)
 
 from scipy.optimize import minimize
-khur_minimised = minimize(khur_min_func, params, args=(orbit_cal_JSOs, orbit_SIII_mags, orbit_cal_SIIIs, B_polys, B_externals), bounds=bnds, method='Nelder-Mead')
+khur_minimised = minimize(khur_min_func, params, args=(orbit_cal_JSOs, orbit_SIII_mags, orbit_cal_SIIIs, B_polys, B_polys_mean, B_polys_max, B_externals), bounds=bnds, method='Nelder-Mead')
 constants_min = khur_minimised.x
 print(constants_min)
 constants_min = constants_min * const_
