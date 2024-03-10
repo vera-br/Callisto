@@ -129,7 +129,7 @@ ax_r2.yaxis.set_minor_locator(AutoMinorLocator())
 
 #---------select flybys-----------
 
-flybys = [16, 17, 19] # [3, 4, 6, 7, 10, 13, 16, 17, 19]
+flybys = [4, 7, 17] # closest: [4, 6, 7, 13, 16, 17] all 9: [3, 4, 6, 7, 10, 13, 16, 17, 19]
 
 surface_layer = 80e3 #m
 conductivities=[0.1, 4, 0.1, 1]
