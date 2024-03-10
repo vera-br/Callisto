@@ -201,7 +201,7 @@ def ae_iphi_multilayer(conductivities, r, l, omega):
     # print('phi = {}'.format(np.arctan(Ae_iphi.imag / Ae_iphi.real) * 180 / np.pi))
     return Ae_iphi
 
-def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivities, radii, Styczinski=False, aeiphi=None):
+def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivities, radii, Styczinski=False, aeiphi=None, shifted=False):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -224,16 +224,19 @@ def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivitie
     else:
         A = ae_iphi_multilayer(conductivities, radii, 1, omega)
     
-    phi = -np.arctan(A.imag/A.real)
-    t_phi = phi / omega
-    t_interval = t[1] - t[0]
-    n_intervals = int(np.round(t_phi / t_interval))
-
     B_ext = B_external.copy()
-    B_ext = np.roll(B_ext, n_intervals, axis=0)
+    B_ext[:,2] = 0
+    if shifted == True:
+        phi = -np.arctan(A.imag/A.real)
+        t_phi = phi / omega
+        t_interval = t[1] - t[0]
+        n_intervals = int(np.round(t_phi / t_interval))
+        B_ext = np.roll(B_ext, n_intervals, axis=0)
 
+    _M = M = -(2 * pi / mu0) * A.real * (R_C**3)
+    
     # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
-    _M = M = -(2 * pi / mu0) * A * (R_C**3)
+    
     # print('M = {}'.format(_M))
 
     Bind_evolution = []
@@ -252,7 +255,7 @@ def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivitie
 
     return np.array(Bind_evolution)
 
-def B_induced_finite_conductivity_multilayer_G(O, B_external, t_longperiod, omega, conductivities, radii, Styczinski=False, aeiphi=None):
+def B_induced_finite_conductivity_multilayer_G(O, B_external, omega, conductivities, radii, Styczinski=False, aeiphi=None, shifted=False, t_longperiod=None):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -263,8 +266,10 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, t_longperiod, omeg
     :return: time evolution array of Bx, By, Bz in nT
     """
     orbit = O.copy()
+    B_ext = B_external.copy()
+    B_ext[:,2] = 0
     t_red = orbit[0]
-    t = t_longperiod
+    
     orbit = orbit.transpose()
     if aeiphi != None:
         A = aeiphi
@@ -276,29 +281,35 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, t_longperiod, omeg
     else:
         A = ae_iphi_multilayer(conductivities, radii, 1, omega)
     
-    phi = -np.arctan(A.imag/A.real)
-    print(A.real)
-    t_phi = phi / omega
-    t_interval = t[1] - t[0]
-    n_intervals = int(np.round(t_phi / t_interval))
-    print(n_intervals)
+    if np.any(t_longperiod) != None:
+        t = t_longperiod
+        if shifted == True:
+            # print(A)
+            phi = -np.angle(A)
+            # print(phi)
+            # print(omega)
+            t_phi = phi / omega
+            # print(t_phi)
+            t_interval = t[1] - t[0]
+            # print(t_interval)
+            n_intervals = int(np.round(t_phi / t_interval))
 
-    B_ext = B_external.copy()
-    B_ext = np.roll(B_ext, n_intervals, axis=0)
-    tB_ext = np.c_[t_longperiod, B_ext]
-    tB_ext = tB_ext.transpose()
+            B_ext = np.roll(B_ext, n_intervals, axis=0)
 
-    tB_reduced = []
-    for i in range(len(t_red)):
-        index = find_nearest_index(tB_ext[0], t_red[i])
-        tB_i = tB_ext[:, int(index)]
-        tB_reduced.append(tB_i)
-    tB_reduced = np.transpose(tB_reduced)
-    B_reduced = tB_reduced[1:]
-    B_ext = B_reduced.transpose()
+        tB_ext = np.c_[t_longperiod, B_ext]
+        tB_ext = tB_ext.transpose()
+
+        tB_reduced = []
+        for i in range(len(t_red)):
+            index = find_nearest_index(tB_ext[0], t_red[i])
+            tB_i = tB_ext[:, int(index)]
+            tB_reduced.append(tB_i)
+        tB_reduced = np.transpose(tB_reduced)
+        B_reduced = tB_reduced[1:]
+        B_ext = B_reduced.transpose()
 
     # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
-    _M = M = -(2 * pi / mu0) * A * (R_C**3)
+    _M = M = -(2 * pi / mu0) * A.real * (R_C**3)
     # print('M = {}'.format(_M))
 
     Bind_evolution = []

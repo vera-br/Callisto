@@ -72,12 +72,12 @@ def find_nearest_index(array, value):
     idx = np.searchsorted(array, value, side="left")
     return idx
 
-def find_nearest_trajectories_G(target, reference_point, frame):
+def find_nearest_trajectories_G(target, reference_point, frame, folder=False):
     '''
     finds trajectory from spice data with timestamps closest to those of the Galileo pds data
     '''
-    Galileo, _ = get_pds_data()
-    trajectories = get_spice_data(target, reference_point, frame, 'G')
+    Galileo, _ = get_pds_data(folder=folder)
+    trajectories = get_spice_data(target, reference_point, frame, 'G', folder=folder)
     closest_trajectories = {}
     for i in range(0,7):
         G_vector = Galileo['orbit%s' % (i+1)]
@@ -92,13 +92,16 @@ def find_nearest_trajectories_G(target, reference_point, frame):
 
 # loading data from spice kernels
 
-def get_spice_data(target, reference_point, frame, mission):
+def get_spice_data(target, reference_point, frame, mission, folder=False):
     '''
     Load spice data and return dictionary of 7d arrays storing values for t, x, y, z, r, theta, phi
     mission = "J" (juice) or "G" (galileo)
     '''
     # define file names
-    data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
+    if folder != False:
+        data_path = "../spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
+    else:
+        data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
     data_path_all = []
 
     #create array with all file names
@@ -137,13 +140,16 @@ def get_spice_data(target, reference_point, frame, mission):
 
     return orbits_all
 
-def get_spice_data_longperiod(target, reference_point, frame, mission):
+def get_spice_data_longperiod(target, reference_point, frame, mission, folder=False):
     '''
     Load spice data and return dictionary of 7d arrays storing values for t, x, y, z, r, theta, phi
     mission = "J" (juice) or "G" (galileo)
     '''
     # define file names
-    data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
+    if folder != False:
+        data_path = "../spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
+    else:
+        data_path = "./spice_data/" + target + "_wrt_" + reference_point + "_" + frame + "_" + mission
     data_path_all = []
 
     #create array with all file names
@@ -182,14 +188,16 @@ def get_spice_data_longperiod(target, reference_point, frame, mission):
 
     return orbits_all
 
-def get_pds_data():
+def get_pds_data(folder=False):
     '''
     Load PDS data and return two dictionaries with 7d (t, x, y, z, r, theta, phi) and 5d arrays (t, Bx, By, Bz, |B|)
     '''
     orbits_all = {}
     bfield_all = {}
-
-    data_path = "./galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
+    if folder != False:
+        data_path = "../galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
+    else:
+        data_path = "./galileo-mag-jup-calibrated/galileo_wrt_callisto_cphio_G"
     data_path_all = []
 
     #create array with all file names
@@ -265,7 +273,7 @@ juice_cal_cphio_CA = 0
 
 gal_cal_cphio_CA = 0
 
-def get_closest_approach_data(target, reference_point, frame, mission):
+def get_closest_approach_data(target, reference_point, frame, mission, folder=False):
     '''
     returns dictionary of closest approaches
     '''
@@ -278,7 +286,7 @@ def get_closest_approach_data(target, reference_point, frame, mission):
             juice_cal_cphio_CA = {}
 
             # gets full orbit info. for juice_callisto_cphio
-            orbits_all_jcalcphio = get_spice_data('juice', 'callisto', 'cphio', 'J')
+            orbits_all_jcalcphio = get_spice_data('juice', 'callisto', 'cphio', 'J', folder=folder)
 
             i = 1
             for orbit, vector in orbits_all_jcalcphio.items():
@@ -290,7 +298,7 @@ def get_closest_approach_data(target, reference_point, frame, mission):
         if target == 'juice' and reference_point == 'callisto' and frame == 'cphio':
             return juice_cal_cphio_CA
         
-        orbits_all_i = get_spice_data(target, reference_point, frame, mission)
+        orbits_all_i = get_spice_data(target, reference_point, frame, mission, folder=folder)
         closest_approach_vectors_i = {}
 
         i = 1
@@ -312,7 +320,7 @@ def get_closest_approach_data(target, reference_point, frame, mission):
             gal_cal_cphio_CA = {}
 
             # gets full orbit info. for galileo_callisto_cphio
-            orbits_all_galcalcphio, _gal_B = get_pds_data()
+            orbits_all_galcalcphio, _gal_B = get_pds_data(folder=folder)
 
             i = 1
             for orbit, vector in orbits_all_galcalcphio.items():
@@ -324,7 +332,7 @@ def get_closest_approach_data(target, reference_point, frame, mission):
         if target == 'galileo':
             return gal_cal_cphio_CA
         
-        orbits_all_i = get_spice_data(target, reference_point, frame, mission)
+        orbits_all_i = get_spice_data(target, reference_point, frame, mission, folder=folder)
         closest_approach_vectors_i = {}
 
         i = 1

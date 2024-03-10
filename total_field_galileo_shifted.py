@@ -25,7 +25,7 @@ callisto_jupiter_SIII_mag_longperiod = get_spice_data('callisto', 'jupiter', 'SI
 callisto_jupiter_JSO_longperiod = get_spice_data('callisto', 'jupiter', 'jupsunorb_fullcycle', 'G')
 
 # specify orbit
-flyby_n = 2
+flyby_n = 1
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -44,6 +44,12 @@ B_PDS = B_PDSs['bfield%s' % (flyby_n)]
 B_mag = np.sqrt(B_PDS[1]**2 + B_PDS[2]**2 + B_PDS[3]**2)
 
 time = orbit_cphio[0]
+
+J2000 = datetime(2000,1,1,12) # difference between J2000 and UTC
+
+
+# time = [Timestamp((J2000 + timedelta(seconds=timestamp)).strftime('%Y-%m-%d %H:%M:%S')) for timestamp in time]
+
 
 
 #----------smoothed B measurements for plotting-------------------------
@@ -72,38 +78,6 @@ B_poly = np.transpose(B_poly)
 B_poly_mag = np.sqrt(B_poly[:, 0]**2 + B_poly[:, 1]**2 + B_poly[:, 2]**2)
 
 
-# induced field parameters
-model = 'ocean and iono'
-
-if model == 'ocean and iono':
-    # Conducting Ocean and Ionosphere
-    r_core = 0.7 * R_C ;   r_ocean = 0.95 * R_C ;   r_surface = R_C    ;   r_iono = 1.042 * R_C
-    sig_core = 1e-9    ;   sig_ocean = 3   ;   sig_surface = 1e-9 ;   sig_iono = 0.5e-3
-
-    radii = [r_core, r_ocean, r_surface, r_iono]
-    conductivities = [sig_core, sig_ocean, sig_surface, sig_iono]
-
-elif model == 'ocean only':
-    r_core = 0.7 * R_C ;   r_ocean = 0.999 * R_C ;   r_surface = R_C
-    sig_core = 1e-9    ;   sig_ocean = 1e0    ;   sig_surface = 1e-9
-
-    radii = [r_core, r_ocean, r_surface]
-    conductivities = [sig_core, sig_ocean, sig_surface]
-
-elif model == 'surface ocean':
-    r_core = 0.7 * R_C ;   r_ocean = R_C
-    sig_core = 1e-9    ;   sig_ocean = 1e0
-
-    radii = [r_core, r_ocean]
-    conductivities = [sig_core, sig_ocean]
-
-elif model == 'iono only':
-    r_surface = R_C    ;   r_iono = 1.042 * R_C
-    sig_surface = 1e-9 ;   sig_iono = 0.5e-3
-
-    radii = [r_surface, r_iono]
-    conductivities = [sig_surface, sig_iono]
-
 
 
 B_sheet = B_sheet_khurana(orbit_cal_JSO, orbit_SIII_mag, orbit_cal_SIII)
@@ -118,45 +92,37 @@ B_external_cal = Bext_Community(orbit_cal_SIII_LP)
 B_full_ext_cal = B_external_cal + B_sheet_cal
 t_longperiod = orbit_cal_SIII_LP[0]
 
-B_induced_poly = B_induced_finite_conductivity_multilayer_G(orbit_cphio, B_full_ext_cal, t_longperiod,  2*np.pi /(10.1*3600), conductivities, radii, Styczinski=True)
-Bmag_induced_model_og = np.sqrt(B_induced_poly[:, 0]**2 + B_induced_poly[:, 1]**2 + B_induced_poly[:, 2]**2)
-B_total_poly = B_poly + B_induced_poly
-B_mag_tot_poly = np.sqrt(B_total_poly[:, 0]**2 + B_total_poly[:, 1]**2 + B_total_poly[:, 2]**2)
+conductivities, radii = [], []
 
-#---------plot-----------
-# plt.style.use('dark_background')
+real_A = 0.85
+phis = np.linspace(0, np.pi/6, 4)
+t_longperiod = orbit_cal_JSO_LP[0]
 
-# fig, ax = plt.subplots(3, 1, sharex=True, figsize=(8.3, 7.7), dpi=300, constrained_layout=True)
-fig, ax = plt.subplots(3, 1, sharex=True, constrained_layout=True)
+fig, ax = plt.subplots(3, 1, layout='constrained')
 
-# ax[0].plot(time, Bx_smooth, label='PDS', color='k')
-# ax[1].plot(time, By_smooth, label='PDS', color='k')
-# ax[2].plot(time, Bz_smooth, label='PDS', color='k')
-
-# ax[0].plot(time, B_PDS[1], label='PDS', color='k', alpha=0.3)
-# ax[1].plot(time, B_PDS[2], label='PDS', color='k', alpha=0.3)
-# ax[2].plot(time, B_PDS[3], label='PDS', color='k', alpha=0.3)
-
+colour = 'k'
+ax[0].plot(t_longperiod, B_full_ext_cal[:,0], color='k', linestyle=':', label='Full Ext. Cal.')
+ax[1].plot(t_longperiod, B_full_ext_cal[:,1], color='k', linestyle=':')
+ax[2].plot(t_longperiod, B_full_ext_cal[:,2], color='k', linestyle=':')
 ax[0].plot(time, B_PDS[1], label='Data', color='k', linewidth=0.7, alpha=0.7)
 ax[1].plot(time, B_PDS[2], label='PDS', color='k', linewidth=0.7, alpha=0.7)
 ax[2].plot(time, B_PDS[3], label='PDS', color='k', linewidth=0.7, alpha=0.7)
-
-colour = '#785ef0'
-ax[0].plot(time, B_poly[:,0], color=colour, linestyle='--', label='No Induction Model')
+ax[0].plot(time, B_poly[:,0], color=colour, linestyle='--', label='Full Ext.')
 ax[1].plot(time, B_poly[:,1], color=colour, linestyle='--')
 ax[2].plot(time, B_poly[:,2], color=colour, linestyle='--')
 
-#-----------
+colors = ['k', 'r', 'b', 'g']
+for phi, color in zip(phis, colors):
+    aeiphi = real_A * np.exp(-1j * phi)
+    B_induced_model_shifted = B_induced_finite_conductivity_multilayer_G(orbit_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi, shifted=True, t_longperiod=t_longperiod)
+    
+    B_total_shifted = B_poly + B_induced_model_shifted
 
-colour3 = '#785ef0'
-ax[0].plot(time, B_full_ext[:,0], color=colour3, linestyle='-', label='OG. Khur.')
-ax[1].plot(time, B_full_ext[:,1], color=colour3, linestyle='-')
-ax[2].plot(time, B_full_ext[:,2], color=colour3, linestyle='-')
-#----------
+    ax[0].plot(time, B_total_shifted[:, 0], color=color, label='$\phi = {}\xb0$'.format(int(np.ceil(phi * 180 / np.pi))))
+    ax[1].plot(time, B_total_shifted[:, 1], color=color)
+    ax[2].plot(time, B_total_shifted[:, 2], color=color)
 
-ax[0].plot(time, B_total_poly[:, 0], color=colour, label = 'Induction Model')
-ax[1].plot(time, B_total_poly[:, 1], color=colour)
-ax[2].plot(time, B_total_poly[:, 2], color=colour)
+
 
 ax[0].set_ylabel('$B_x$ [nT]', fontsize=16)
 ax[1].set_ylabel('$B_y$ [nT]', fontsize=16)
@@ -178,9 +144,10 @@ ax[0].set_xlim(min(time), max(time))
 ax[1].set_xlim(min(time), max(time))
 ax[2].set_xlim(min(time), max(time))
 
-# ax[0].legend(framealpha=1, fancybox=True, fontsize=14)
+ax[0].legend(framealpha=1, fancybox=True, loc='upper right')
 
-fig.suptitle('Flyby C9', fontsize=16)
+titles = ['blah', 'C3', 'C9']
+fig.suptitle('Flyby {}'.format(titles[flyby_n]))
 # fig.tight_layout()
 # plt.savefig('galileo.png', facecolor=('b', 0))
 plt.show()

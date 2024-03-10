@@ -49,23 +49,18 @@ consts = np.multiply(const_scale, const_)
 
 B_external_cal = Bext_Community(orbit_cal_SIII)
 B_sheet_cal = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII)
-B_sheet_cal_min = B_sheet_khurana(orbit_cal_JSO, orbit_cal_SIII_mag, orbit_cal_SIII, constants=consts)
+
 B_full_ext_cal = B_external_cal + B_sheet_cal
-B_full_ext_cal_min = B_external_cal + B_sheet_cal_min
+
 
 fig, ax = plt.subplots(3,1)
-ax[0].plot(orbit_cal_SIII[0], B_full_ext_cal[:,0], 'r')
-ax[0].plot(orbit_cal_SIII[0], B_full_ext_cal_min[:,0], 'b')
+ax[0].plot(orbit_cal_SIII[6] * 180/np.pi, B_full_ext_cal[:,0], 'or')
+ax[1].plot(orbit_cal_SIII[6] * 180/np.pi, B_full_ext_cal[:,1], 'or')
+ax[2].plot(orbit_cal_SIII[6] * 180/np.pi, B_full_ext_cal[:,2], 'or')
 
-ax[1].plot(orbit_cal_SIII[0], B_full_ext_cal[:,1], 'r')
-ax[1].plot(orbit_cal_SIII[0], B_full_ext_cal_min[:,1], 'b')
-
-ax[2].plot(orbit_cal_SIII[0], B_full_ext_cal[:,2], 'r')
-ax[2].plot(orbit_cal_SIII[0], B_full_ext_cal_min[:,2], 'b')
 plt.show()
 
 ts = np.mean([orbit_cal_SIII[0][i+1] - orbit_cal_SIII[0][i] for i in range(len(orbit_cal_SIII[0]) - 1)])
-print(ts)
 sr = 1 / ts
 t = orbit_cal_SIII[0]
 
