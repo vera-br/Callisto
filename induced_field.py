@@ -227,13 +227,13 @@ def B_induced_finite_conductivity_multilayer(O, B_external, omega, conductivitie
     B_ext = B_external.copy()
     B_ext[:,2] = 0
     if shifted == True:
-        phi = -np.arctan(A.imag/A.real)
+        phi = -np.angle(A)
         t_phi = phi / omega
         t_interval = t[1] - t[0]
         n_intervals = int(np.round(t_phi / t_interval))
         B_ext = np.roll(B_ext, n_intervals, axis=0)
 
-    _M = M = -(2 * pi / mu0) * A.real * (R_C**3)
+    _M = M = -(2 * pi / mu0) * abs(A) * (R_C**3)
     
     # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
     
@@ -267,7 +267,10 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, omega, conductivit
     """
     orbit = O.copy()
     B_ext = B_external.copy()
-    B_ext[:,2] = 0
+    if shifted == True:
+        B_ext[:,2] = B_ext[:,2] - np.mean(B_ext[:,2].ravel())
+    else:
+        B_ext[:,2] = 0
     t_red = orbit[0]
     
     orbit = orbit.transpose()
@@ -292,8 +295,12 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, omega, conductivit
             # print(t_phi)
             t_interval = t[1] - t[0]
             # print(t_interval)
-            n_intervals = int(np.round(t_phi / t_interval))
-
+            try:
+                n_intervals = int(np.round(t_phi / t_interval))
+                factor = 1
+            except:
+                n_intervals = 0
+                factor = 0
             B_ext = np.roll(B_ext, n_intervals, axis=0)
 
         tB_ext = np.c_[t_longperiod, B_ext]
@@ -309,7 +316,7 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, omega, conductivit
         B_ext = B_reduced.transpose()
 
     # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
-    _M = M = -(2 * pi / mu0) * A.real * (R_C**3)
+    _M = M = -(2 * pi / mu0) * abs(A) * (R_C**3)
     # print('M = {}'.format(_M))
 
     Bind_evolution = []
@@ -326,7 +333,7 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, omega, conductivit
         Bind = Bind.real
         Bind_evolution.append(Bind)
 
-    return np.array(Bind_evolution)
+    return np.array(Bind_evolution) * factor
 
 def Aeiphi_Styczinski(conductivities, rs, n, omega):
     def get_spherical_harmonics(kr, n, derivatives=False):
@@ -483,19 +490,15 @@ def Aeiphi_Styczinski_many(conductivities, rs, n, omega):
         kj = np.sqrt(1j * omega * mu0 * conductivities[i])
         rj = np.sqrt(1j * omega * mu0 * conductivities[i])
         
+        rl = rs[i-1]
+        ru = rs[i]
+        kl = np.sqrt(1j * omega * mu0 * conductivities[i-1])
+        ku = np.sqrt(1j * omega * mu0 * conductivities[i+1])
         if np.abs(kj * rj) > n * cutoff_factor:
-            rl = rs[i-1]
-            ru = rs[i]
-            kl = np.sqrt(1j * omega * mu0 * conductivities[i-1])
-            ku = np.sqrt(1j * omega * mu0 * conductivities[i+1])
             juu, djuu, yuu, dyuu = get_spherical_harmonics(ku * ru, n)
             del_l = -(juu + djuu / (1j * kj * rj)) / (yuu + dyuu / (1j * kj * rj))
         
         elif np.abs(kj * rj) < n /cutoff_factor:
-            rl = rs[i-1]
-            ru = rs[i]
-            kl = np.sqrt(1j * omega * mu0 * conductivities[i-1])
-            ku = np.sqrt(1j * omega * mu0 * conductivities[i+1])
             jn1uu, yn1uu = get_spherical_harmonics(ku * ru, n + 1)
             jn_1uu, yn_1uu = get_spherical_harmonics(ku * ru, n - 1)
             jn1ll, yn1ll = get_spherical_harmonics(kl * rl, n + 1)
@@ -535,7 +538,7 @@ def Aeiphi_Styczinski_many(conductivities, rs, n, omega):
 
     return -Ae
     
-def B_induced_aeiphi_minimiser(O, B_external, A):
+def B_induced_aeiphi_minimiser(O, B_external, t_longperiod, omega, A):
     """
     Calculate the induced magnetic field with finite conductivity
     :param orbit: array with t (J200), x (m), y(m), z(m), r(m), theta(deg), phi(deg) 
@@ -546,13 +549,37 @@ def B_induced_aeiphi_minimiser(O, B_external, A):
     :return: time evolution array of Bx, By, Bz in nT
     """
     orbit = O.copy()
+    t_red = orbit[0]
     orbit = orbit.transpose()
-    
+    B_ext = B_external
+
     
     print('Aeiphi = {}'.format(A))
 
-    B_ext = B_external.copy()
-    # B_ext[:,2] = 0
+    t = t_longperiod
+    
+    # print(A)
+    phi = -np.angle(A)
+    # print(phi)
+    # print(omega)
+    t_phi = phi / omega
+    # print(t_phi)
+    t_interval = t[1] - t[0]
+    # print(t_interval)
+    n_intervals = int(np.round(t_phi / t_interval))
+    B_ext = np.roll(B_ext, n_intervals, axis=0)
+
+    tB_ext = np.c_[t_longperiod, B_ext]
+    tB_ext = tB_ext.transpose()
+
+    tB_reduced = []
+    for i in range(len(t_red)):
+        index = find_nearest_index(tB_ext[0], t_red[i])
+        tB_i = tB_ext[:, int(index)]
+        tB_reduced.append(tB_i)
+    tB_reduced = np.transpose(tB_reduced)
+    B_reduced = tB_reduced[1:]
+    B_ext = B_reduced.transpose()
 
     # _M = M = -(2 * pi / mu0) * A * (radii[-1]**3)
     _M = M = -(2 * pi / mu0) * A * (R_C**3)

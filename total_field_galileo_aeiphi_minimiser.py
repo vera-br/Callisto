@@ -14,6 +14,9 @@ from sklearn.metrics import root_mean_squared_error, r2_score
 # load data
 galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
 galileo_wrt_callisto_cphio_CA = get_closest_approach_data("galileo", "callisto", "cphio", "G")
+callisto_jupiter_SIII_longperiod = get_spice_data('callisto', 'jupiter', 'SIII_fullcycle', 'G')
+callisto_jupiter_SIII_mag_longperiod = get_spice_data('callisto', 'jupiter', 'SIII_mag_fullcycle', 'G')
+callisto_jupiter_JSO_longperiod = get_spice_data('callisto', 'jupiter', 'jupsunorb_fullcycle', 'G')
 
 
 # specify orbit
@@ -26,6 +29,10 @@ orbit_cphios = []
 for flyby_n in [1,2]:
     orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
     orbit_CA = galileo_wrt_callisto_cphio_CA["CA_orbit%s" % (flyby_n)]
+    orbit_cal_SIII_LP = callisto_jupiter_SIII_longperiod["orbit%s" % (flyby_n)]
+    orbit_cal_SIII_mag_LP = callisto_jupiter_SIII_mag_longperiod["orbit%s" % (flyby_n)]
+    orbit_cal_JSO_LP = callisto_jupiter_JSO_longperiod["orbit%s" % (flyby_n)]
+    t_longperiod = orbit_cal_SIII_LP[0]
 
     B_PDS = B_PDSs['bfield%s' % (flyby_n)]
     print(np.shape(B_PDS))
@@ -62,18 +69,19 @@ for flyby_n in [1,2]:
     B_polys.append(B_poly)
     B_PDSss.append(np.transpose(B_PDS[1:4]))
 
+    B_external = B_sheet_khurana(orbit_cal_JSO_LP, orbit_cal_SIII_mag_LP, orbit_cal_SIII_LP)
+    B_externals.append(B_external)
 # print(np.shape(B_PDSss))
 # print(np.shape(B_polys))
 
 
+t_longperiod = orbit_cal_SIII_LP[0]
 
-
-def aeiphi_min_func(A, orbit_cphio, B_background, B_PDS):
-
+def aeiphi_min_func(A, orbit_cphio, B_background, B_poly, B_PDS):
     measure = 0
     for i in range(2):
-        B_induced = B_induced_aeiphi_minimiser(orbit_cphio[i], B_background[i], A)
-        B_total_calc = B_background[i] + B_induced
+        B_induced = B_induced_aeiphi_minimiser(orbit_cphio[i], B_background[i], t_longperiod, J_omega, A)
+        B_total_calc = B_poly[i] + B_induced
         
         # B_background_norm = (np.array(B_background) - np.array(B_background_mean)) / np.array(B_background_max)
         # B_background_calc_norm = (np.array(B_background_calc) - np.array(B_background_mean[i])) / np.array(B_background_max[i])
@@ -90,7 +98,7 @@ def aeiphi_min_func(A, orbit_cphio, B_background, B_PDS):
 # r2 = r2_score(y_test, y_pred)
 
 from scipy.optimize import minimize
-aeiphi_minimised = minimize(aeiphi_min_func, 0.7, args=(orbit_cphios, B_polys, B_PDSss), method='Nelder-Mead')
+aeiphi_minimised = minimize(aeiphi_min_func, 0.8, args=(orbit_cphios, B_externals, B_polys, B_PDSss), method='Nelder-Mead')
 A = aeiphi_minimised.x
 
 flyby_n = 2
@@ -120,7 +128,7 @@ for p in polys:
     B_poly.append(Bi_poly)
 B_poly = np.transpose(B_poly)
 
-B_induced = B_induced_aeiphi_minimiser(orbit_cphio, B_poly, A)
+B_induced = B_induced_aeiphi_minimiser(orbit_cphio, B_externals[flyby_n - 1], t_longperiod, J_omega, A)
 B_total_calc = B_poly + B_induced
 
 #---------plot-----------

@@ -7,7 +7,7 @@ from jupiter_field import *
 
 # default values
 
-lspace_n = 10
+lspace_n = 20
 
 flyby_n = 2
 galileo_wrt_callisto_cphio, B_PDSs = get_pds_data()
@@ -85,43 +85,58 @@ for i in range(np.shape(rsq_err)[0]):
 
 # conducting ocean only
 
-norm_rsq_err = (rsq_err - rsq_err.min()) / rsq_err.min()
+norm_rsq_err = (rsq_err - rsq_err.min()) / rsq_err.min() * 100
 # norm_rsq_err = rsq_err
 
 phi_grid = phi_grid * 180 / np.pi
 levels_abs_A = np.linspace(0, 2, 11)
 levels_r2 = np.linspace(0, 1, 51)
-levels_rsq = np.linspace(0, 1, 51)
+levels_rsq = np.linspace(0, 100, 21)
 levels_real_A = np.linspace(0, 1, 21)
 
-fig, ax = plt.subplots(1, 3)
+# fig, ax = plt.subplots(1, 3)
 
 
-# fig.colorbar(cbar0, ticks=np.linspace(0,1,6))
-cbar1 = ax[0].contourf(A_grid, phi_grid, real_A, levels_real_A, cmap='Reds')
-fig.colorbar(cbar1, ax=ax[0], ticks=np.linspace(0,1,6))
-cs1 = ax[0].contour(A_grid, phi_grid, real_A, levels_real_A, colors='k')
+# # fig.colorbar(cbar0, ticks=np.linspace(0,1,6))
+# cbar1 = ax[0].contourf(A_grid, phi_grid, real_A, levels_real_A, cmap='Reds')
+# fig.colorbar(cbar1, ax=ax[0], ticks=np.linspace(0,1,6))
+# cs1 = ax[0].contour(A_grid, phi_grid, real_A, levels_real_A, colors='k')
 
-cbar2 = ax[1].contourf(A_grid, phi_grid, norm_rsq_err, levels_real_A, cmap='Reds_r', extend='max')
-fig.colorbar(cbar2, ticks=np.linspace(0,1,6))
-cs2 = ax[1].contour(A_grid, phi_grid, norm_rsq_err, levels_real_A, colors='k')
+# cbar2 = ax[1].contourf(A_grid, phi_grid, norm_rsq_err, levels_real_A, cmap='Reds_r', extend='max')
+# fig.colorbar(cbar2, ticks=np.linspace(0,1,6))
+# cs2 = ax[1].contour(A_grid, phi_grid, norm_rsq_err, levels_real_A, colors='k')
 
-cbar3 = ax[2].contourf(A_grid, phi_grid, r2_grid, levels_real_A, cmap='Reds', extend='min')
-fig.colorbar(cbar3)
-cs3 = ax[2].contour(A_grid, phi_grid, r2_grid, levels_real_A, colors='k')
+# cbar3 = ax[2].contourf(A_grid, phi_grid, r2_grid, levels_real_A, cmap='Reds', extend='min')
+# fig.colorbar(cbar3)
+# cs3 = ax[2].contour(A_grid, phi_grid, r2_grid, levels_real_A, colors='k')
 
-ax[0].set_title('$Re(Ae^{-i\phi})$')
-ax[1].set_title('Normalised RMSE')
-ax[2].set_title('$R^2$')
+# ax[0].set_title('$Re(Ae^{-i\phi})$')
+# ax[1].set_title('Normalised RMSE')
+# ax[2].set_title('$R^2$')
 
 
-for ax_i in ax:
-    ax_i.set_xlabel('$|Ae^{-i\phi}|$')
-    ax_i.set_ylabel('$\phi$')
+# for ax_i in ax:
+#     ax_i.set_xlabel('$|Ae^{-i\phi}|$')
+#     ax_i.set_ylabel('$\phi$')
 
-ax[0].clabel(cs1,manual=True)
-ax[1].clabel(cs2,manual=True)
-ax[2].clabel(cs3,manual=True)
+# ax[0].clabel(cs1,manual=True)
+# ax[1].clabel(cs2,manual=True)
+# ax[2].clabel(cs3,manual=True)
 
+# plt.show()
+
+def fmt(x):
+    x = x*100
+    s = f"{x:.0f}"
+    return f"+{s}%"
+
+fig, ax = plt.subplots(1,1, layout='constrained')
+cbar2 = ax.contourf(A_grid, phi_grid, norm_rsq_err, levels_rsq, cmap='Reds_r', extend='max')
+cbar = fig.colorbar(cbar2, ticks=np.linspace(0,100,11), label='$\Delta$RMSE (%)')
+cbar.ax.set_yticklabels(['+{:.0f}%'.format(x) for x in np.linspace(0,100,11)])
+
+ax.set_xlabel('$|Ae^{-i\phi}|$')
+ax.set_ylabel('$\phi$')
 plt.show()
+
 

@@ -32,7 +32,7 @@ callisto_jupiter_JSO = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
 # for closest approach altitude and SIII_mag z - C9 ~ 17, C3 ~ 19
 # 7 = max above, 13 = max below, 11 = closest to 0
 # 5 - z = 1.5, 15 - z = -1.5, 6 - z = 2.7, 3 - z = -2.8
-flyby_n = 16
+flyby_n = 4
 
 orbit_juice_cphio = juice_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_juice_SIII = juice_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -65,7 +65,8 @@ phis = np.linspace(0, np.pi/6, 4)
 
 fig, ax = plt.subplots(3, 2)
 
-colors = ['k', 'r', 'b', 'g']
+colors = ['k', '#648fff', '#dc267f', '#fe6100']
+linestyles = ['-', '--', '-.', ':']
 for phi, color in zip(phis, colors):
     aeiphi = real_A * np.exp(-1j * phi)
     # B_induced_model = B_induced_finite_conductivity_multilayer(orbit_juice_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi)

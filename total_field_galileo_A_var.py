@@ -26,7 +26,7 @@ callisto_jupiter_SIII_mag_longperiod = get_spice_data('callisto', 'jupiter', 'SI
 callisto_jupiter_JSO_longperiod = get_spice_data('callisto', 'jupiter', 'jupsunorb_fullcycle', 'G')
 
 # specify orbit
-flyby_n = 1
+flyby_n = 2
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -97,54 +97,39 @@ t_longperiod = orbit_cal_SIII_LP[0]
 
 conductivities, radii = [], []
 
-real_A = 0.8
-phis = np.linspace(0, np.pi/2, 4)
+real_A = 0.85
+phi = 0
+real_As = np.linspace(0.25, 1, 4)
+phis = np.linspace(0, np.pi/6, 4)
 t_longperiod = orbit_cal_JSO_LP[0]
 t_LP = (orbit_cal_JSO_LP[0] - orbit_CA[0]) / 60
 
-fig, ax = plt.subplots(3, 2, layout='constrained')
+fig, ax = plt.subplots(3, 1, layout='constrained')
 
-colour = 'k'
-ax[0,0].plot(t_LP, B_full_ext_cal[:,0], color='k', linestyle=':', label='Full Ext. Cal.')
-ax[1,0].plot(t_LP, B_full_ext_cal[:,1], color='k', linestyle=':')
-ax[2,0].plot(t_LP, B_full_ext_cal[:,2], color='k', linestyle=':')
-# ax[0].fill_between(t_longperiod, B_full_ext_cal[:,0], B_full_ext_cal[:,0] + 3)
-# ax[1].fill_between(t_longperiod, B_full_ext_cal[:,1], B_full_ext_cal[:,1] + 3)
-# ax[2].fill_between(t_longperiod, B_full_ext_cal[:,2], B_full_ext_cal[:,2] + 3)
+ax[0].plot(time, B_PDS[1], label='Data', color='k', linewidth=0.7, alpha=0.7)
+ax[1].plot(time, B_PDS[2], label='PDS', color='k', linewidth=0.7, alpha=0.7)
+ax[2].plot(time, B_PDS[3], label='PDS', color='k', linewidth=0.7, alpha=0.7)
 
-ax[0,0].plot(time, B_PDS[1], label='Data', color='k', linewidth=0.7, alpha=0.7)
-ax[1,0].plot(time, B_PDS[2], label='PDS', color='k', linewidth=0.7, alpha=0.7)
-ax[2,0].plot(time, B_PDS[3], label='PDS', color='k', linewidth=0.7, alpha=0.7)
+ax[0].plot(time, B_poly[:,0], color='k', linestyle='--', label='Polynomial')
+ax[1].plot(time, B_poly[:,1], color='k', linestyle='--')
+ax[2].plot(time, B_poly[:,2], color='k', linestyle='--')
 
-ax[0,1].plot(time, B_PDS[1], label='Data', color='k', linewidth=0.7, alpha=0.7)
-ax[1,1].plot(time, B_PDS[2], label='PDS', color='k', linewidth=0.7, alpha=0.7)
-ax[2,1].plot(time, B_PDS[3], label='PDS', color='k', linewidth=0.7, alpha=0.7)
-
-ax[0,1].plot(time, B_poly[:,0], color=colour, linestyle='--', label='Polynomial')
-ax[1,1].plot(time, B_poly[:,1], color=colour, linestyle='--')
-ax[2,1].plot(time, B_poly[:,2], color=colour, linestyle='--')
-
-colors = ['k', '#648fff', '#dc267f', '#fe6100']
-for phi, color in zip(phis, colors):
+colors = ['#ffb000', '#648fff', '#dc267f', '#fe6100']
+for real_A, color in zip(real_As, colors):
     aeiphi = real_A * np.exp(-1j * phi)
     B_induced_model_shifted = B_induced_finite_conductivity_multilayer_G(orbit_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi, shifted=True, t_longperiod=t_longperiod)
     
     B_total_shifted = B_poly + B_induced_model_shifted
 
-    phi_t = 10.18 * 60 / 360 * np.ceil(phi * 180 / np.pi)
-    ax[0,0].axvline(-phi_t, color=color, linestyle='--', alpha=0.6)
-    ax[1,0].axvline(-phi_t, color=color, linestyle='--', alpha=0.6)
-    ax[2,0].axvline(-phi_t, color=color, linestyle='--', alpha=0.6)
-
-    ax[0,1].plot(time, B_total_shifted[:, 0], color=color, label='$\phi = {}\xb0$'.format(int(np.ceil(phi * 180 / np.pi))))
-    ax[1,1].plot(time, B_total_shifted[:, 1], color=color)
-    ax[2,1].plot(time, B_total_shifted[:, 2], color=color)
+    ax[0].plot(time, B_total_shifted[:, 0], color=color, label='|A| = {}'.format(real_A))
+    ax[1].plot(time, B_total_shifted[:, 1], color=color)
+    ax[2].plot(time, B_total_shifted[:, 2], color=color)
 
 
 
-ax[0,0].set_ylabel('$B_x$ [nT]')
-ax[1,0].set_ylabel('$B_y$ [nT]')
-ax[2,0].set_ylabel('$B_z$ [nT]')
+ax[0].set_ylabel('$B_x$ [nT]')
+ax[1].set_ylabel('$B_y$ [nT]')
+ax[2].set_ylabel('$B_z$ [nT]')
 
 # ax[0,1].set_ylabel('$B_x$ [nT]')
 # ax[1,1].set_ylabel('$B_y$ [nT]')
@@ -158,20 +143,14 @@ for ax_i in ax.ravel():
     ax_i.tick_params(axis='both', direction='in', top=True, right=True, which='both')
     ax_i.yaxis.set_minor_locator(AutoMinorLocator())
 
-for ax_i  in ax[:,0]:
-    ax_i.set_xlim(-300,300)
-for ax_i  in ax[:,1]:
+for ax_i  in ax:
     ax_i.set_xlim(min(time), max(time))
 
 
-ax[0,1].legend(framealpha=1, fancybox=True, loc='upper right')
+ax[0].legend(framealpha=1, fancybox=True, loc='upper right')
 
 titles = ['blah', 'C3', 'C9']
 fig.suptitle('Flyby {}'.format(titles[flyby_n]))
-
-mark_inset(ax[0,0], ax[0,1], loc1=2, loc2=3, linestyle='-', alpha=0.5)
-mark_inset(ax[1,0], ax[1,1], loc1=2, loc2=3, linestyle='-', alpha=0.5)
-mark_inset(ax[2,0], ax[2,1], loc1=2, loc2=3, linestyle='-', alpha=0.5)
 
 plt.show()
 
