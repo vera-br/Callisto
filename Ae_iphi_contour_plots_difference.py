@@ -117,19 +117,19 @@ levels_abs_A = np.linspace(0, 1, 11)
 levels_phi = np.linspace(-95, 95, 20)
 levels_real_A = np.linspace(-1.1, 1.1, 12)
 
-fig, ax = plt.subplots(2,4, layout='constrained')
+fig, ax = plt.subplots(1,4, figsize=(12,3), layout='constrained', sharey=True)
 
-ax[0,0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='seismic', extend='both')
-ax[1,0].contourf(x_grid, y_grid, real_A, levels_real_A, cmap='seismic', extend='both')
+ax[0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='seismic', extend='both')
+# ax[1,0].contourf(x_grid, y_grid, phi_A, levels_real_A, cmap='seismic', extend='both')
 
-ax[0,1].contourf(x_grid, y_grid, abs_A_ocean, levels_real_A, cmap='seismic', extend='both')
-ax[1,1].contourf(x_grid, y_grid, real_A_ocean, levels_real_A, cmap='seismic', extend='both')
+ax[1].contourf(x_grid, y_grid, abs_A_ocean, levels_real_A, cmap='seismic', extend='both')
+# ax[1,1].contourf(x_grid, y_grid, phi_A_ocean, levels_real_A, cmap='seismic', extend='both')
 
-ax[0,2].contourf(x_grid, y_grid, delta_abs_A_norm, levels_real_A, cmap='seismic', extend='both')
-ax[1,2].contourf(x_grid, y_grid, delta_real_A_norm, levels_real_A, cmap='seismic', extend='both')
+ax[3].contourf(x_grid, y_grid, delta_abs_A_norm, levels_real_A, cmap='seismic', extend='both')
+# ax[1,2].contourf(x_grid, y_grid, delta_phi_A, levels_real_A, cmap='seismic', extend='both')
 
-ax[0,3].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
-colorbar = ax[1,3].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
+colorbar = ax[2].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
+# colorbar = ax[1,3].contourf(x_grid, y_grid, delta_phi_A, levels_real_A, cmap='seismic', extend='both')
 
 fig.colorbar(colorbar, ax=ax.ravel().tolist(), ticks=[-1, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1])
 
@@ -140,59 +140,73 @@ ax2[1].contourf(x_grid, y_grid, phi_A_ocean, levels_phi, cmap='hsv')
 colorbar_phi = ax2[2].contourf(x_grid, y_grid, delta_phi_A, levels_phi, cmap='hsv', extend='both')
 fig2.colorbar(colorbar_phi, ax=ax2.ravel().tolist(), ticks=[-90, -60, -30, 0, 30, 60, 90])
 
-ax[0,0].set_title('Ocean and Iono - $|Ae^{i\phi}|$')
-ax[1,0].set_title('Ocean and Iono - $Re(Ae^{i\phi})$')
-ax[0,1].set_title('Ocean Only - $|Ae^{i\phi}|$')
-ax[1,1].set_title('Ocean Only - $Re(Ae^{i\phi})$')
-ax[1,2].set_title('$\Delta Re(Ae^{i\phi})$ (%)')
-ax[0,2].set_title('$\Delta |Ae^{i\phi}|$ (%)')
+ax[0].set_title('4-layer Model - $|Ae^{i\phi}|$')
+# ax[1,0].set_title('Ocean and Iono - $Re(Ae^{i\phi})$')
+ax[1].set_title('3-layer Model - $|Ae^{i\phi}|$')
+# ax[1,1].set_title('Ocean Only - $Re(Ae^{i\phi})$')
+# ax[1,2].set_title('$\Delta Re(Ae^{i\phi})$ (%)')
+ax[3].set_title('$\Delta |Ae^{i\phi}|$ (%)')
+ax[2].set_title('$\Delta |Ae^{i\phi}|$')
 
 ax2[0].set_title('Ocean and Iono - $\phi$')
 ax2[1].set_title('Ocean Only - $\phi$')
 ax2[2].set_title('$\Delta \phi$')
 
-if delta_plot_type == 'conductivity vs radius':
-    for ax_i in ax.ravel():
-        ax_i.set_xscale('log')
-        ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
-    for ax_i in ax[1]:
-        ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
-    for ax_i in ax2:
-        ax_i.set_xscale('log')
-        ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
-        ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+ax[0].set_xscale('log')
+ax[1].set_xscale('log')
+ax[2].set_xscale('log')
+ax[3].set_xscale('log')
 
-if delta_plot_type == 'conductivity vs conductivity':
-    for ax_i in ax.ravel():
-        ax_i.set_xscale('log')
-        ax_i.set_yscale('log')
-        ax_i.set_ylabel('{} Conductivity $\sigma$'.format(conductivity_y))
-    for ax_i in ax[1]:
-        ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
-    for ax_i in ax2:
-        ax_i.set_xscale('log')
-        ax_i.set_yscale('log')
-        ax_i.set_ylabel('{} Conductivity $\sigma$'.format(conductivity_y))
-        ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+ax[0].set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+ax[0].set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+ax[1].set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+ax[2].set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+ax[3].set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
 
-if delta_plot_type == 'radius vs radius':
-    for ax_i in ax.ravel():
-        ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
-    for ax_i in ax[1]:
-        ax_i.set_xlabel('{} Outer Radius $[R_C]$'.format(r_x))
-    for ax_i in ax2:
-        ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
-        ax_i.set_xlabel('{} Outer Radius $[R_C]$'.format(r_x))
 
-if delta_plot_type == 'conductivity vs radius':
-    fig.suptitle('{} Conductivity vs {} Outer Radius'.format(conductivity_x, r_y))
-    fig2.suptitle('{} Conductivity vs {} Outer Radius'.format(conductivity_x, r_y))
-if delta_plot_type == 'conductivity vs conductivity':
-    fig.suptitle('{} Conductivity vs {} Conductivity'.format(conductivity_x, conductivity_y))
-    fig2.suptitle('{} Conductivity vs {} Conductivity'.format(conductivity_x, conductivity_y))
-if delta_plot_type == 'radius vs radius':
-    fig.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
-    fig2.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
+# if delta_plot_type == 'conductivity vs radius':
+#     for ax_i in ax.ravel():
+#         ax_i.set_xscale('log')
+#         ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+#     for ax_i in ax[1]:
+#         ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+#     for ax_i in ax2:
+#         ax_i.set_xscale('log')
+#         ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+#         ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+
+# if delta_plot_type == 'conductivity vs conductivity':
+#     for ax_i in ax.ravel():
+#         ax_i.set_xscale('log')
+#         ax_i.set_yscale('log')
+#         ax_i.set_ylabel('{} Conductivity $\sigma$'.format(conductivity_y))
+#     for ax_i in ax[1]:
+#         ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+#     for ax_i in ax2:
+#         ax_i.set_xscale('log')
+#         ax_i.set_yscale('log')
+#         ax_i.set_ylabel('{} Conductivity $\sigma$'.format(conductivity_y))
+#         ax_i.set_xlabel('{} Conductivity $\sigma$'.format(conductivity_x))
+
+# if delta_plot_type == 'radius vs radius':
+#     for ax_i in ax.ravel():
+#         ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+#     for ax_i in ax[1]:
+#         ax_i.set_xlabel('{} Outer Radius $[R_C]$'.format(r_x))
+#     for ax_i in ax2:
+#         ax_i.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+#         ax_i.set_xlabel('{} Outer Radius $[R_C]$'.format(r_x))
+
+# if delta_plot_type == 'conductivity vs radius':
+#     fig.suptitle('{} Conductivity vs {} Outer Radius'.format(conductivity_x, r_y))
+#     fig2.suptitle('{} Conductivity vs {} Outer Radius'.format(conductivity_x, r_y))
+# if delta_plot_type == 'conductivity vs conductivity':
+#     fig.suptitle('{} Conductivity vs {} Conductivity'.format(conductivity_x, conductivity_y))
+#     fig2.suptitle('{} Conductivity vs {} Conductivity'.format(conductivity_x, conductivity_y))
+# if delta_plot_type == 'radius vs radius':
+#     fig.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
+#     fig2.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
+
 
 plt.show()
 
