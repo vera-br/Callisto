@@ -26,7 +26,7 @@ callisto_jupiter_SIII_mag_longperiod = get_spice_data('callisto', 'jupiter', 'SI
 callisto_jupiter_JSO_longperiod = get_spice_data('callisto', 'jupiter', 'jupsunorb_fullcycle', 'G')
 
 # specify orbit
-flyby_n = 1
+flyby_n = 2
 
 orbit_cphio = galileo_wrt_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_SIII = galileo_wrt_jupiter_SIII["orbit%s" % (flyby_n)]

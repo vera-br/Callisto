@@ -169,7 +169,18 @@ levels_real_A = np.linspace(0, 1, 11)
 levels_real_A_contour = np.linspace(0, 1, 11)
 
 levels_phi = np.linspace(0, 90, 19)
-levels_phi_contour = np.linspace(-95, 95, 10)
+levels_phi_contour = np.linspace(0, 90, 10)
+
+def fmt(x):
+    x = x*100
+    s = f"{x:.0f}"
+    return f"+{s}%"
+
+def fmt_phi(x):
+    s = f"{x:.0f}"
+    return f"{s}\xb0"
+
+
 
 fig, ax = plt.subplots(1, 2, layout='constrained')
 
@@ -215,13 +226,109 @@ if delta_plot_type == 'conductivity vs conductivity':
 if delta_plot_type == 'radius vs radius':
     fig.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
 
-def fmt(x):
-    x = x*100
-    s = f"{x:.0f}"
-    return f"+{s}%"
 
 plt.clabel(cs0, cs0.levels, manual=True, fmt=fmt)
 plt.clabel(cs1, cs1.levels, manual=True, fmt=fmt)
 
 plt.show()
 
+fig, ax = plt.subplots(1,1, layout='constrained')
+
+cbar0 = ax.contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='Reds')
+cs_phi = ax.contour(x_grid, y_grid, phi_grid, levels_phi_contour, colors='k', linestyles='dotted')
+cs_rsq = ax.contour(x_grid, y_grid, norm_rsq_err, levels_rsq_contour, colors='k')
+fig.colorbar(cbar0, ticks=np.linspace(0,1,6), label='$|A|$')
+
+if delta_plot_type == 'conductivity vs radius':
+
+        ax.set_xscale('log')
+        ax.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+        ax.set_xlabel('{} Conductivity $\sigma$ $[Sm^{}]$'.format(conductivity_x, -1))
+
+
+if delta_plot_type == 'conductivity vs conductivity':
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_ylabel('{} Conductivity $\sigma$ $[Sm^{}]$'.format(conductivity_y))
+        ax.set_xlabel('{} Conductivity $\sigma$ $[Sm^{}]$'.format(conductivity_x))
+
+
+if delta_plot_type == 'radius vs radius':
+        ax.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+        ax.set_xlabel('{} Outer Radius $[R_C]$'.format(r_x))
+
+
+if delta_plot_type == 'conductivity vs radius':
+    fig.suptitle('{} Conductivity vs {} Outer Radius'.format(conductivity_x, r_y))
+if delta_plot_type == 'conductivity vs conductivity':
+    fig.suptitle('{} Conductivity vs {} Conductivity'.format(conductivity_x, conductivity_y))
+if delta_plot_type == 'radius vs radius':
+    fig.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
+
+
+
+
+plt.clabel(cs_rsq, cs_rsq.levels, manual=True, fmt=fmt)
+plt.clabel(cs_phi, cs_phi.levels, manual=True, fmt=fmt_phi)
+
+plt.show()
+
+
+fig, ax = plt.subplots(1, 3, layout='constrained')
+
+cbar0 = ax[0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='Reds')
+cs0 = ax[0].contour(x_grid, y_grid, phi_grid, levels_phi_contour, colors='k')
+fig.colorbar(cbar0, ax=ax[0], orientation='horizontal', ticks=np.linspace(0,1,6), label='$|A|$')
+
+cbar2 = ax[1].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='Reds')
+cs1 = ax[1].contour(x_grid, y_grid, norm_rsq_err, levels_rsq_contour, colors='k')
+fig.colorbar(cbar0, ax=ax[1], orientation='horizontal', ticks=np.linspace(0,1,6), label='$|A|$')
+
+cbar3 = ax[2].contourf(x_grid, y_grid, phi_grid, levels_phi, cmap='Reds')
+cs2 = ax[2].contour(x_grid, y_grid, norm_rsq_err, levels_rsq_contour, colors='k')
+fig.colorbar(cbar3, ax=ax[2], orientation='horizontal', ticks=np.linspace(0, 90, 10), label='$\phi$')
+
+# ax[0].set_title('$|Ae^{-i\phi}|$')
+# ax[1].set_title('$Re(Ae^{-i\phi})$')
+# ax[2].set_title('$\phi$')
+# ax[3].set_title('Normalised RMSE')
+# ax[4].set_title('$R^2$')
+
+if delta_plot_type == 'conductivity vs radius':
+    for ax in ax.ravel():
+        ax.set_xscale('log')
+        ax.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+        ax.set_xlabel('{} Conductivity $\sigma$ $[Sm^{}]$'.format(conductivity_x, -1))
+
+
+if delta_plot_type == 'conductivity vs conductivity':
+    for ax in ax.ravel():
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_ylabel('{} Conductivity $\sigma$ $[Sm^{}]$'.format(conductivity_y))
+        ax.set_xlabel('{} Conductivity $\sigma$ $[Sm^{}]$'.format(conductivity_x))
+
+
+if delta_plot_type == 'radius vs radius':
+    for ax in ax.ravel():
+        ax.set_ylabel('{} Outer Radius $[R_C]$'.format(r_y))
+        ax.set_xlabel('{} Outer Radius $[R_C]$'.format(r_x))
+
+
+if delta_plot_type == 'conductivity vs radius':
+    fig.suptitle('{} Conductivity vs {} Outer Radius'.format(conductivity_x, r_y))
+if delta_plot_type == 'conductivity vs conductivity':
+    fig.suptitle('{} Conductivity vs {} Conductivity'.format(conductivity_x, conductivity_y))
+if delta_plot_type == 'radius vs radius':
+    fig.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
+
+def fmt_phi(x):
+    s = f"{x:.0f}"
+    return f"{s}\xb0"
+
+plt.clabel(cs0, cs0.levels, manual=True, fmt=fmt_phi)
+plt.clabel(cs1, cs1.levels, manual=True, fmt=fmt)
+plt.clabel(cs2, cs2.levels, manual=True, fmt=fmt)
+
+plt.show()

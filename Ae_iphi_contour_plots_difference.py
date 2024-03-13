@@ -3,7 +3,7 @@ from field_functions import *
 import matplotlib.pyplot as plt
 
 # default values
-r_core = 0.1 ; r_ocean = 0.9 ; r_surface = 1   ; r_iono = 1.042 
+r_core = 0.8 ; r_ocean = 0.9 ; r_surface = 1   ; r_iono = 1.042 
 sig_non_conducting = 1e-9 ; sig_ocean = 3 ; sig_iono = 0.5e-3
 
 delta_plot_type = 'conductivity vs radius'
@@ -12,7 +12,7 @@ conductivity_y = 'Ionosphere'
 r_x = 'Ocean'
 r_y = 'Ocean'
 
-lspace_n = 10
+lspace_n = 100
 
 sig_oceans = np.logspace(-3, 2, lspace_n)
 sig_ionos = np.logspace(-5, -1, lspace_n)
@@ -93,15 +93,15 @@ for i in range(np.shape(abs_A)[0]):
                 radii = np.array([r_core, x_grid[i,j], r_surface, y_grid[i,j]]) * R_C
                 radii_ocean = np.array([r_core, x_grid[i,j], r_surface]) * R_C
 
-        Aeiphi_both = Aeiphi_Styczinski_many(conductivities, radii, 2, 4*np.pi /(10.1*3600))
+        Aeiphi_both = Aeiphi_Styczinski_many(conductivities, radii, 1, J_omega)
         abs_A[i,j] = np.abs(Aeiphi_both)
         real_A[i,j] = Aeiphi_both.real
-        phi_A[i,j] = -np.arctan(Aeiphi_both.imag / Aeiphi_both.real) * 180 / np.pi
+        phi_A[i,j] = -np.angle(Aeiphi_both) * 180 / np.pi
 
-        Aeiphi_ocean = Aeiphi_Styczinski_many(conductivities_ocean, radii_ocean, 1, 2*np.pi /(10.1*3600))
+        Aeiphi_ocean = Aeiphi_Styczinski_many(conductivities_ocean, radii_ocean, 1, J_omega)
         abs_A_ocean[i,j] = np.abs(Aeiphi_ocean)
         real_A_ocean[i,j] = Aeiphi_ocean.real
-        phi_A_ocean[i,j] = -np.arctan(Aeiphi_ocean.imag / Aeiphi_ocean.real) * 180 / np.pi
+        phi_A_ocean[i,j] = -np.angle(Aeiphi_ocean) * 180 / np.pi
 
 # conducting ocean only
 
@@ -114,24 +114,27 @@ delta_real_A_norm = delta_real_A / real_A_ocean
 delta_phi_A = phi_A - phi_A_ocean
 
 levels_abs_A = np.linspace(0, 1, 11)
-levels_phi = np.linspace(-95, 95, 20)
+levels_deltaA = np.linspace(-0.5,0, 11)
+levels_phi = np.linspace(0, 90, 11)
+levels_deltaphi = np.linspace(-5,5,11)
 levels_real_A = np.linspace(-1.1, 1.1, 12)
 
-fig, ax = plt.subplots(2,4, layout='constrained')
+fig, ax = plt.subplots(2,3, layout='constrained')
 
-ax[0,0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='seismic', extend='both')
-ax[1,0].contourf(x_grid, y_grid, real_A, levels_real_A, cmap='seismic', extend='both')
+ax[0,0].contourf(x_grid, y_grid, abs_A, levels_abs_A, cmap='Reds')
+colorbar_A = ax[0,1].contourf(x_grid, y_grid, abs_A_ocean, levels_abs_A, cmap='Reds')
+colorbar_deltaA = ax[0,2].contourf(x_grid, y_grid, delta_abs_A, levels_deltaA, cmap='Blues_r')
 
-ax[0,1].contourf(x_grid, y_grid, abs_A_ocean, levels_real_A, cmap='seismic', extend='both')
-ax[1,1].contourf(x_grid, y_grid, real_A_ocean, levels_real_A, cmap='seismic', extend='both')
 
-ax[0,2].contourf(x_grid, y_grid, delta_abs_A_norm, levels_real_A, cmap='seismic', extend='both')
-ax[1,2].contourf(x_grid, y_grid, delta_real_A_norm, levels_real_A, cmap='seismic', extend='both')
+ax[1,0].contourf(x_grid, y_grid, phi_A, levels_phi, cmap='Reds')
+colorbar_phi = ax[1,1].contourf(x_grid, y_grid, phi_A_ocean, levels_phi, cmap='Reds', extend='min')
+colorbar_deltaphi = ax[1,2].contourf(x_grid, y_grid, delta_phi_A, levels_deltaphi, cmap='seismic')
 
-ax[0,3].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
-colorbar = ax[1,3].contourf(x_grid, y_grid, delta_abs_A, levels_real_A, cmap='seismic', extend='both')
 
-fig.colorbar(colorbar, ax=ax.ravel().tolist(), ticks=[-1, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1])
+fig.colorbar(colorbar_A, ax=[ax[0,0], ax[0,1]], ticks = np.linspace(0,1,6))
+fig.colorbar(colorbar_deltaA, ax=ax[0,2], ticks = np.linspace(0,-0.5,6))
+fig.colorbar(colorbar_phi, ax=[ax[1,0], ax[1,1]], ticks = np.linspace(0,90,10))
+fig.colorbar(colorbar_deltaphi, ax=ax[1,2], ticks = np.linspace(-5,5,11))
 
 fig2, ax2 = plt.subplots(1,3, layout='constrained')
 
@@ -141,11 +144,11 @@ colorbar_phi = ax2[2].contourf(x_grid, y_grid, delta_phi_A, levels_phi, cmap='hs
 fig2.colorbar(colorbar_phi, ax=ax2.ravel().tolist(), ticks=[-90, -60, -30, 0, 30, 60, 90])
 
 ax[0,0].set_title('Ocean and Iono - $|Ae^{i\phi}|$')
-ax[1,0].set_title('Ocean and Iono - $Re(Ae^{i\phi})$')
-ax[0,1].set_title('Ocean Only - $|Ae^{i\phi}|$')
-ax[1,1].set_title('Ocean Only - $Re(Ae^{i\phi})$')
-ax[1,2].set_title('$\Delta Re(Ae^{i\phi})$ (%)')
-ax[0,2].set_title('$\Delta |Ae^{i\phi}|$ (%)')
+ax[1,0].set_title('Ocean and Iono - $\phi$')
+ax[0,1].set_title('Ocean Only - $|Ae^{\phi}|$')
+ax[1,1].set_title('Ocean Only - $\phi$')
+ax[1,2].set_title('$\Delta \phi$')
+ax[0,2].set_title('$\Delta |Ae^{i\phi}|$')
 
 ax2[0].set_title('Ocean and Iono - $\phi$')
 ax2[1].set_title('Ocean Only - $\phi$')

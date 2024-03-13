@@ -1,5 +1,6 @@
 # load modules and functions
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 from datetime import datetime
 import pandas as pd
@@ -32,7 +33,7 @@ callisto_jupiter_JSO = get_spice_data('callisto', 'jupiter', 'jupsunorb', 'J')
 # for closest approach altitude and SIII_mag z - C9 ~ 17, C3 ~ 19
 # 7 = max above, 13 = max below, 11 = closest to 0
 # 5 - z = 1.5, 15 - z = -1.5, 6 - z = 2.7, 3 - z = -2.8
-flyby_n = 4
+flyby_n = 13
 
 orbit_juice_cphio = juice_callisto_cphio["orbit%s" % (flyby_n)]
 orbit_juice_SIII = juice_jupiter_SIII["orbit%s" % (flyby_n)]
@@ -44,7 +45,7 @@ orbit_cal_SIII_mag = callisto_jupiter_SIII_mag["orbit%s" % (flyby_n)]
 orbit_cal_JSO = callisto_jupiter_JSO["orbit%s" % (flyby_n)]
 
 time = (orbit_juice_cphio[0] - orbit_juice_CA[0]) / 60
-mask = (time > -45) & (time < 45)
+mask = (time > -30) & (time < 30)
 #---------magnetic fields-----------
 
 # SIII coords
@@ -60,38 +61,39 @@ Bmag_full_ext = np.sqrt(B_full_ext[:, 0]**2 + B_full_ext[:, 1]**2 + B_full_ext[:
 
 conductivities, radii = [], []
 
-real_A = 0.85
+abs_As = np.linspace(0.7,0.9,3)
 phis = np.linspace(0, np.pi/6, 4)
 
-fig, ax = plt.subplots(3, 2)
+fig, ax = plt.subplots(3, 2, sharex='col')
 
-colors = ['k', '#648fff', '#dc267f', '#fe6100']
+colors = ['#648fff', '#dc267f', '#fe6100']
 linestyles = ['-', '--', '-.', ':']
-for phi, color in zip(phis, colors):
-    aeiphi = real_A * np.exp(-1j * phi)
-    # B_induced_model = B_induced_finite_conductivity_multilayer(orbit_juice_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi)
-    B_induced_model_shifted = B_induced_finite_conductivity_multilayer(orbit_juice_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi, shifted=True)
-    # Bmag_induced_model = np.sqrt(B_induced_model[:, 0]**2 + B_induced_model[:, 1]**2 + B_induced_model[:, 2]**2)
-    # B_total = B_full_ext + B_induced_model
-    B_total_shifted = B_full_ext + B_induced_model_shifted
-    # B_mag_tot = np.sqrt(B_total[:, 0]**2 + B_total[:, 1]**2 + B_total[:, 2]**2)
+for abs_A, color in zip(abs_As, colors):
+    for phi, linestyle in zip(phis, linestyles):
+        aeiphi = abs_A * np.exp(-1j * phi)
+        # B_induced_model = B_induced_finite_conductivity_multilayer(orbit_juice_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi)
+        B_induced_model_shifted = B_induced_finite_conductivity_multilayer(orbit_juice_cphio, B_full_ext_cal, 2*np.pi /(10.1*3600), conductivities, radii, aeiphi=aeiphi, shifted=True)
+        # Bmag_induced_model = np.sqrt(B_induced_model[:, 0]**2 + B_induced_model[:, 1]**2 + B_induced_model[:, 2]**2)
+        # B_total = B_full_ext + B_induced_model
+        B_total_shifted = B_full_ext + B_induced_model_shifted
+        # B_mag_tot = np.sqrt(B_total[:, 0]**2 + B_total[:, 1]**2 + B_total[:, 2]**2)
 
-    # ax[0].plot(time, B_total[:, 0], color=color, linestyle='--')
-    # ax[1].plot(time, B_total[:, 1], color=color, linestyle='--')
-    # ax[2].plot(time, B_total[:, 2], linestyle='--')
-    ax[0,0].plot(time, B_total_shifted[:, 0], color=color, label='$\phi = {}\xb0$'.format(int(np.ceil(phi * 180 / np.pi))))
-    ax[1,0].plot(time, B_total_shifted[:, 1], color=color)
-    ax[2,0].plot(time, B_total_shifted[:, 2], color=color)
+        # ax[0].plot(time, B_total[:, 0], color=color, linestyle='--')
+        # ax[1].plot(time, B_total[:, 1], color=color, linestyle='--')
+        # ax[2].plot(time, B_total[:, 2], linestyle='--')
+        ax[0,0].plot(time, B_total_shifted[:, 0], color=color, linestyle=linestyle)
+        ax[1,0].plot(time, B_total_shifted[:, 1], color=color, linestyle=linestyle)
+        ax[2,0].plot(time, B_total_shifted[:, 2], color=color, linestyle=linestyle)
 
-    phi_t = 10.18 * 60 / 360 * np.ceil(phi * 180 / np.pi)
-    ax[0,0].axvline(-phi_t, color=color, linestyle='--', alpha=0.3)
-    ax[1,0].axvline(-phi_t, color=color, linestyle='--', alpha=0.3)
-    ax[2,0].axvline(-phi_t, color=color, linestyle='--', alpha=0.3)
+        phi_t = 10.18 * 60 / 360 * np.ceil(phi * 180 / np.pi)
+        ax[0,0].axvline(-phi_t, color='k', linestyle=linestyle, alpha=0.15)
+        ax[1,0].axvline(-phi_t, color='k', linestyle=linestyle, alpha=0.15)
+        ax[2,0].axvline(-phi_t, color='k', linestyle=linestyle, alpha=0.15)
 
-    ax[0,1].plot(time[mask], B_total_shifted[:, 0][mask], color=color, label='$\phi = {}\xb0$'.format(int(np.ceil(phi * 180 / np.pi))))
-    ax[1,1].plot(time[mask], B_total_shifted[:, 1][mask], color=color)
-    ax[2,1].plot(time[mask], B_total_shifted[:, 2][mask], color=color)
-    
+        ax[0,1].plot(time[mask], B_total_shifted[:, 0][mask], color=color, linestyle=linestyle)
+        ax[1,1].plot(time[mask], B_total_shifted[:, 1][mask], color=color, linestyle=linestyle)
+        ax[2,1].plot(time[mask], B_total_shifted[:, 2][mask], color=color, linestyle=linestyle)
+        
 
 #---------plot-----------
 colour = 'k'
@@ -123,16 +125,28 @@ for ax_i in ax[:,0]:
 # print(time[mask])
 for ax_i in ax[:,1]:
     ax_i.set_xlim(np.min(time[mask]), np.max(time[mask]))
+ax[2,0].set_xlabel('Time to Closest Approach [mins]')
+ax[2,1].set_xlabel('Time to Closest Approach [mins]')
 
 
-ax[0,1].legend(framealpha=1, fancybox=True, loc='upper right')
+# ax[0,1].legend(framealpha=1, fancybox=True, loc='upper right')
 
 mark_inset(ax[0,0], ax[0,1], loc1=2, loc2=3, linestyle='-', alpha=0.5)
 mark_inset(ax[1,0], ax[1,1], loc1=2, loc2=3, linestyle='-', alpha=0.5)
 mark_inset(ax[2,0], ax[2,1], loc1=2, loc2=3, linestyle='-', alpha=0.5)
 
 fig.suptitle('Flyby C{}'.format(flyby_n))
+
+legend_elements = [Line2D([0],[0], linestyle='-', color=colors[0], label='|A| = {}'.format(abs_As[0])),
+                   Line2D([0],[0], linestyle='-', color=colors[1], label='|A| = {}'.format(abs_As[1])),
+                   Line2D([0],[0], linestyle='-', color=colors[2], label='|A| = {}'.format(abs_As[2])),
+                   Line2D([0],[0], linestyle=linestyles[0], color='k', label='$\phi = {}\xb0$'.format(int(np.ceil(phis[0] * 180 / np.pi)))),
+                   Line2D([0],[0], linestyle=linestyles[1], color='k', label='$\phi = {}\xb0$'.format(int(np.ceil(phis[1] * 180 / np.pi)))),
+                   Line2D([0],[0], linestyle=linestyles[2], color='k', label='$\phi = {}\xb0$'.format(int(np.ceil(phis[2] * 180 / np.pi)))),
+                   Line2D([0],[0], linestyle=linestyles[3], color='k', label='$\phi = {}\xb0$'.format(int(np.ceil(phis[3] * 180 / np.pi))))]
+
+fig.legend(handles=legend_elements, loc='lower center', ncol=7)
 plt.show()
 
-
+label='$\phi = {}\xb0$'.format(int(np.ceil(phi * 180 / np.pi)))
 
