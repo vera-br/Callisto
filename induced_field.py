@@ -336,8 +336,6 @@ def B_induced_finite_conductivity_multilayer_G(O, B_external, omega, conductivit
     return np.array(Bind_evolution) * factor
 
 def Aeiphi_Styczinski(conductivities, rs, n, omega):
-    # this one
-    
     def get_spherical_harmonics(kr, n, derivatives=False):
         jn = sps.spherical_jn(n, kr)
         yn = sps.spherical_yn(n, kr)
@@ -559,8 +557,6 @@ def Aeiphi_Styczinski2(conductivities, rs, n, omega):
     return -Ae
 
 def Aeiphi_Styczinski_many2(conductivities, rs, n, omega):
-    # copy of Sty2 w/o print statements
-    
     def get_spherical_harmonics(kr, n, derivatives=False):
         jn = sps.spherical_jn(n, kr)
         yn = sps.spherical_yn(n, kr)
@@ -672,8 +668,6 @@ def Aeiphi_Styczinski_many2(conductivities, rs, n, omega):
     return -Ae
 
 def Aeiphi_Styczinski_many(conductivities, rs, n, omega):
-    # copy of Sty w/o print statements
-    
     def get_spherical_harmonics(kr, n, derivatives=False):
         jn = sps.spherical_jn(n, kr)
         yn = sps.spherical_yn(n, kr)
@@ -759,8 +753,6 @@ def Aeiphi_Styczinski_many(conductivities, rs, n, omega):
     return -Ae
     
 def Aeiphi_Styczinski_many3(conductivities, rs, n, omega):
-    # testing - check this one!
-    
     def get_spherical_harmonics(kr, n, derivatives=False):
         jn = sps.spherical_jn(n, kr)
         yn = sps.spherical_yn(n, kr)
@@ -778,15 +770,14 @@ def Aeiphi_Styczinski_many3(conductivities, rs, n, omega):
     cutoff_factor = 10
     skin_depth_factor = 10
     
-    # S112
     if np.abs(k1 * r1) > n * cutoff_factor:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n, derivatives=True)
         del_l = -(jul + djul / (1j * k1 * r1)) / (yul + dyul / (1j * k1 * r1))
-    # S113
+
     elif np.abs(k1 * r1) < n / cutoff_factor:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
         del_l = -(jul / yul)
-    # S41, S43 + paragraph after
+
     else:
         jul, djul, yul, dyul = get_spherical_harmonics(k2 * r1, n + 1, derivatives=True)
         jll, djll = get_spherical_harmonics(k1 * r1, n + 1)
@@ -802,11 +793,11 @@ def Aeiphi_Styczinski_many3(conductivities, rs, n, omega):
         ru = rs[i]
         kl = np.sqrt(1j * omega * mu0 * conductivities[i-1])
         ku = np.sqrt(1j * omega * mu0 * conductivities[i+1])
-        # S114
+        
         if np.abs(kj * rj) > n * cutoff_factor:
             juu, djuu, yuu, dyuu = get_spherical_harmonics(ku * ru, n, derivatives=True)
             del_l = -(juu + djuu / (1j * kj * rj)) / (yuu + dyuu / (1j * kj * rj))
-        # S115 (+ S120)
+        
         elif np.abs(kj * rj) < n / cutoff_factor:
             jn1uu, yn1uu = get_spherical_harmonics(ku * ru, n + 1)
             jn_1uu, yn_1uu = get_spherical_harmonics(ku * ru, n - 1)
@@ -818,35 +809,34 @@ def Aeiphi_Styczinski_many3(conductivities, rs, n, omega):
         else:
             jul, djul, yul, dyul = get_spherical_harmonics(ku * rl, n + 1, derivatives=True)
             jll, djll, yll, dyll = get_spherical_harmonics(kl * rl, n + 1, derivatives=True)
-            # S41 - S44
+
             beta_ul = jll * dyul - yul * djll
             gamma_ul = yll * dyul - yul * dyll
             delta_ul = jul * djll - jll * djul
             epsi_ul = jul * dyll - yll * djul
-            # S39
+            
             del_l = (delta_ul + del_l * epsi_ul) / (beta_ul + del_l * gamma_ul)
 
     kJ = np.sqrt(1j * omega * mu0 * conductivities[-1])
     rJ = rs[-1]
 
     rl = rs[-2]
-    # S121
+
     if np.abs(kJ * rJ) > n * cutoff_factor:
         Ae = 1
-    # S122
+
     elif np.abs(kJ * rJ) < n / cutoff_factor:
         kl = np.sqrt(1j * omega * mu0 * conductivities[-2])
         jn1ll, yn1ll = get_spherical_harmonics(kl * rl, n + 1)
         jn_1ll, yn_1ll = get_spherical_harmonics(kl * rl, n - 1)
-        # if this is S122 i think the next line is wrong
         Ae = (rl / rJ)**(2 * n + 1) * (jn1ll + del_l * yn1ll) / (jn_1ll + del_l * yn_1ll)
-    # S56
+    
     else:
         jn1R, yn1R = get_spherical_harmonics(kJ * rJ, n + 1)
         jn_1R, yn_1R = get_spherical_harmonics(kJ * rJ, n - 1)
         Ae = -(jn1R + del_l * yn1R) / (jn_1R + del_l * yn_1R)
 
-    return -Ae # not sure where minus is coming from
+    return -Ae
 
 def B_induced_aeiphi_minimiser(O, B_external, t_longperiod, omega, A):
     """

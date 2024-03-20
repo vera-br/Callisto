@@ -10,7 +10,7 @@ plt.style.use('dark_background')
 
 # default values
 r_core = 0.8 ; r_ocean = 0.9 ; r_surface = 1   ; r_iono = 1.042 
-sig_non_conducting = 1e-9 ; sig_ocean = 3 ; sig_iono = 0.5e-5
+sig_non_conducting = 1e-9 ; sig_ocean = 3 ; sig_iono = 1e-3
 
 delta_plot_type = 'conductivity vs radius'
 conductivity_x = 'Ocean'
@@ -19,7 +19,7 @@ r_x = 'Ocean'
 conductivity_y = 'Ionosphere'
 r_y = 'Ocean'
 
-lspace_n = 20
+lspace_n = 30
 
 sig_oceans = np.logspace(-3, 2, lspace_n)
 sig_ionos = np.logspace(-5, -1, lspace_n)
@@ -142,7 +142,7 @@ for i in range(np.shape(rsq_err)[0]):
             if r_x == 'Ocean':
                 radii = np.array([r_core, x_grid[i,j], r_surface, y_grid[i,j]]) * R_C
                
-        aeiphi = Aeiphi_Styczinski_many(conductivities, radii, 1, J_omega)
+        aeiphi = Aeiphi_Styczinski_many3(conductivities, radii, 1, J_omega)
         B_induced = B_induced_finite_conductivity_multilayer_G(orbit_cphio, B_tot_cal, J_omega, conductivities, radii, aeiphi=aeiphi, shifted=True, t_longperiod=t_longperiod)
         rsq = root_mean_squared_error(B_ind, B_induced)
         r2 = r2_score(B_ind, B_induced)
@@ -171,6 +171,7 @@ levels_real_A = np.linspace(0, 1, 11)
 levels_real_A_contour = np.linspace(0, 1, 11)
 
 levels_phi = np.linspace(0, 90, 19)
+levels_phi = np.linspace(-90,90, 19)
 levels_phi_contour = np.linspace(0, 90, 10)
 
 def fmt(x):
@@ -190,9 +191,11 @@ cbar0 = ax[0].contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='Blues')
 cs0 = ax[0].contour(x_grid, y_grid, norm_rsq_err, levels_rsq_contour, colors='k')
 fig.colorbar(cbar0, ax=ax[0], orientation='horizontal', ticks=np.linspace(0,1,6), label='$|A|$')
 
-cbar2 = ax[1].contourf(x_grid, y_grid, phi_grid, levels_phi, cmap='Blues')
+# cbar2 = ax[1].contourf(x_grid, y_grid, phi_grid, levels_phi, cmap='Blues')
+cbar2 = ax[1].contourf(x_grid, y_grid, phi_grid, levels_phi, cmap='seismic')
 cs1 = ax[1].contour(x_grid, y_grid, norm_rsq_err, levels_rsq_contour, colors='k')
-fig.colorbar(cbar2, ax=ax[1], orientation='horizontal', ticks=np.linspace(0, 90, 10), label='$\phi$')
+# fig.colorbar(cbar2, ax=ax[1], orientation='horizontal', ticks=np.linspace(0, 90, 10), label='$\phi$')
+fig.colorbar(cbar2, ax=ax[1], orientation='horizontal', ticks=np.linspace(-90, 90, 19), label='$\phi$')
 
 # ax[0].set_title('$|Ae^{-i\phi}|$')
 # ax[1].set_title('$Re(Ae^{-i\phi})$')
@@ -237,7 +240,7 @@ plt.show()
 fig, ax = plt.subplots(1,1, layout='constrained')
 
 cbar0 = ax.contourf(x_grid, y_grid, abs_A, levels_real_A, cmap='Blues')
-cs_phi = ax.contour(x_grid, y_grid, phi_grid, levels_phi_contour, colors='k', linestyles='dotted')
+# cs_phi = ax.contour(x_grid, y_grid, phi_grid, levels_phi_contour, colors='k', linestyles='dotted')
 cs_rsq = ax.contour(x_grid, y_grid, norm_rsq_err, levels_rsq_contour, colors='k')
 fig.colorbar(cbar0, ticks=np.linspace(0,1,6), label='$|A|$')
 
@@ -269,8 +272,10 @@ if delta_plot_type == 'radius vs radius':
     fig.suptitle('{} Outer Radius vs {} Outer Radius'.format(r_x, r_y))
 
 
-plt.clabel(cs_phi, cs_phi.levels, manual=False, fmt=fmt_phi)
+
+
 plt.clabel(cs_rsq, cs_rsq.levels, manual=True, fmt=fmt)
+# plt.clabel(cs_phi, cs_phi.levels, manual=True, fmt=fmt_phi)
 
 plt.show()
 
@@ -327,8 +332,8 @@ def fmt_phi(x):
     s = f"{x:.0f}"
     return f"{s}\xb0"
 
-plt.clabel(cs0, cs0.levels, manual=False, fmt=fmt_phi)
-plt.clabel(cs1, cs1.levels, manual=False, fmt=fmt)
-plt.clabel(cs2, cs2.levels, manual=False, fmt=fmt)
+plt.clabel(cs0, cs0.levels, manual=True, fmt=fmt_phi)
+plt.clabel(cs1, cs1.levels, manual=True, fmt=fmt)
+plt.clabel(cs2, cs2.levels, manual=True, fmt=fmt)
 
 plt.show()
